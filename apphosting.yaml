@@ -1,5 +1,10 @@
 runtime: nodejs22
 
+runConfig:
+  concurrency: 80
+  minInstances: 0
+  maxInstances: 2
+
 env:
   - variable: VITE_FIREBASE_API_KEY
     value: "AIzaSyB1COW2uZ9YP-sYosaESXgRX1AOs6LVknE"
