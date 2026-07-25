@@ -1,0 +1,698 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-brand-50: #F0FDFA; /* Mint light */
+  --color-brand-100: #CCFBF1;
+  --color-brand-200: #99F6E4;
+  --color-brand-300: #5EEAD4;
+  --color-brand-400: #2DD4BF;
+  --color-brand-500: #14B8A6; /* Vibrant Teal */
+  --color-brand-600: #0D9488; /* Deep Teal */
+  --color-brand-700: #0F766E;
+  --color-brand-800: #115E59;
+  --color-brand-900: #134E4A;
+  --color-brand-950: #042F2E;
+
+  /* Lavender/Violet scale – Customer portal */
+  --color-violet-50: #F5F3FF;
+  --color-violet-100: #EDE9FE;
+  --color-violet-200: #DDD6FE;
+  --color-violet-300: #C4B5FD;
+  --color-violet-400: #A78BFA;
+  --color-violet-500: #8B5CF6;
+  --color-violet-600: #7C3AED;
+  --color-violet-700: #6D28D9;
+  --color-violet-800: #5B21B6;
+  --color-violet-900: #4C1D95;
+  --color-violet-950: #2E1065;
+
+  /* Forest-green scale – Public homepage */
+  --color-forest-50: #F2F7EE;
+  --color-forest-100: #E0EDDA;
+  --color-forest-200: #C0DBB4;
+  --color-forest-300: #93C17D;
+  --color-forest-400: #6AA64F;
+  --color-forest-500: #4D8A33;
+  --color-forest-600: #3A6E24;
+  --color-forest-700: #2D5516;
+  --color-forest-800: #24430F;
+  --color-forest-900: #1C3409;
+  --color-forest-950: #0E1C04;
+
+  /* Warm cream – Public homepage background */
+  --color-cream-50: #FFFDF7;
+  --color-cream-100: #FBF6E9;
+  --color-cream-200: #F5EDD4;
+  --color-cream-300: #ECD9A8;
+  --color-cream-400: #D9BC72;
+
+  --color-coral-500: #F43F5E; /* Warm Coral Secondary */
+  --color-coral-600: #E11D48;
+
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+
+  --color-text-light: #64748B;
+  --font-sans: "Outfit", "SF Pro Display", sans-serif;
+}
+
+@theme inline {
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+:root {
+  --background: 0 0% 98%; /* #FAFAFA */
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 173 80% 40%; /* #0D9488 Teal */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 0 0% 96%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 173 80% 40%;
+  --radius: 1rem; /* Slightly sharper overall look */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground bg-[#FAFAFA]; /* Crisp off-white */
+    font-family: var(--font-sans);
+    overflow-x: hidden; /* Prevent mobile horizontal scroll */
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+}
+
+/* --- Neo-Glassmorphism & Premium Utilities --- */
+
+@layer utilities {
+  .glass {
+    @apply bg-white/75 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+  }
+  
+  .glass-dark {
+    @apply bg-slate-900/85 backdrop-blur-2xl border border-slate-700/60 shadow-[0_12px_40px_0_rgba(0,0,0,0.4)];
+  }
+  
+  .glass-panel {
+    @apply bg-white/90 backdrop-blur-2xl border border-white/70 shadow-[0_16px_48px_-12px_rgba(0,0,0,0.09)];
+  }
+
+  .glass-card {
+    @apply bg-gradient-to-br from-white/95 via-white/80 to-white/60 backdrop-blur-xl border border-white/80 shadow-[0_10px_30px_-5px_rgba(13,148,136,0.08)] transition-all duration-300;
+  }
+  
+  .glow-shadow {
+    box-shadow: 0 10px 40px -10px rgba(13, 148, 136, 0.35);
+  }
+  
+  .glow-shadow-lg {
+    box-shadow: 0 20px 50px -15px rgba(13, 148, 136, 0.45);
+  }
+
+  .glow-shadow-gold {
+    box-shadow: 0 15px 35px -10px rgba(245, 158, 11, 0.4);
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 24px rgba(255,255,255,0.9);
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 via-teal-500 to-emerald-400 font-extrabold;
+  }
+
+  .text-gradient-violet {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 font-extrabold;
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-400 font-extrabold;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:border-brand-300;
+  }
+  
+  /* Cute Paw Background Pattern */
+  .bg-paws {
+    background-image: url('data:image/svg+xml;utf8,<svg width="40" height="40" viewBox="0 0 24 24" fill="%230D9488" fill-opacity="0.06" xmlns="http://www.w3.org/2000/svg"><path d="M12 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-5 4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-5 4c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5z"/></svg>');
+    background-size: 60px;
+  }
+  
+  .btn-primary {
+    @apply bg-purple-600 hover:bg-purple-700 text-white font-black px-6 py-3 rounded-xl shadow-sm transition-all active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-white border-2 border-slate-200 text-slate-700 hover:border-purple-300 hover:text-purple-700 hover:bg-purple-50 font-black px-6 py-3 rounded-xl transition-all active:scale-95 shadow-sm;
+  }
+}
+
+/* Beautiful animated background grid for dashboards */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(13, 148, 136, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(13, 148, 136, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* Custom Sleek Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(13, 148, 136, 0.35);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(13, 148, 136, 0.6);
+}
+
+/* Custom Uiverse Button */
+.button {
+  text-decoration: none;
+  line-height: 1;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 10px 10px 20px rgba(0,0,0,.05);
+  background-color: #fff;
+  color: #121212;
+  border: none;
+  cursor: pointer;
+}
+
+.button-decor {
+  position: absolute;
+  inset: 0;
+  background-color: var(--clr, #4F46E5);
+  transform: translateX(-100%);
+  transition: transform .3s;
+  z-index: 0;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+.button__icon {
+  width: 48px;
+  height: 40px;
+  background-color: var(--clr, #4F46E5);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.button__text {
+  display: inline-block;
+  transition: color .2s;
+  padding: 2px 1.5rem 2px;
+  padding-left: .75rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.button:hover .button__text {
+  color: #fff;
+}
+
+.button:hover .button-decor {
+  transform: translate(0);
+}
+
+/* Custom Uiverse Flip Card */
+.flip-card {
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+  min-height: 254px;
+}
+
+.flip-content {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 500ms;
+  box-shadow: 0px 0px 10px 1px #000000ee;
+  border-radius: 24px;
+}
+
+.flip-front, .flip-back {
+  background-color: #151515;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.flip-back {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.flip-back::before {
+  position: absolute;
+  content: ' ';
+  display: block;
+  width: 160px;
+  height: 160%;
+  background: linear-gradient(90deg, transparent, #ff9966, #ff9966, #ff9966, #ff9966, transparent);
+  animation: rotation_481 5000ms infinite linear;
+}
+
+.flip-back-content {
+  position: absolute;
+  width: 98%;
+  height: 98%;
+  background-color: #151515;
+  border-radius: 24px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+}
+
+.flip-card:hover .flip-content {
+  transform: rotateY(180deg);
+}
+
+@keyframes rotation_481 {
+  0% {
+    transform: rotateZ(0deg);
+  }
+  100% {
+    transform: rotateZ(360deg);
+  }
+}
+
+.flip-front {
+  transform: rotateY(180deg);
+  color: white;
+}
+
+.flip-front .flip-front-content {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.flip-front-content .badge {
+  background-color: #00000055;
+  padding: 4px 12px;
+  border-radius: 12px;
+  backdrop-filter: blur(4px);
+  width: fit-content;
+  font-weight: bold;
+}
+
+.flip-description {
+  box-shadow: 0px 0px 10px 5px #00000088;
+  width: 100%;
+  padding: 16px;
+  background-color: #00000099;
+  backdrop-filter: blur(5px);
+  border-radius: 16px;
+}
+
+.flip-title {
+  font-size: 14px;
+  max-width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.flip-card-footer {
+  color: #ffffff88;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.flip-front .img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.flip-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background-color: #ffbb66;
+  position: absolute;
+  filter: blur(15px);
+  animation: floating 2600ms infinite linear;
+}
+
+#flip-bottom {
+  background-color: #ff8866;
+  left: 50px;
+  top: 0px;
+  width: 150px;
+  height: 150px;
+  animation-delay: -800ms;
+}
+
+#flip-right {
+  background-color: #ff2233;
+  right: -20px;
+  top: -80px;
+  width: 100px;
+  height: 100px;
+  animation-delay: -1800ms;
+}
+
+@keyframes floating {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+/* Custom Uiverse Input for Auth Pages */
+.uiverse-input {
+  width: 100%;
+  padding: 0.875rem;
+  font-size: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  background-color: #f8fafc;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.uiverse-input:focus {
+  border-color: #a855f7;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
+}.uiverse-form-main {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(255, 255, 255);
+  padding: 30px;
+  box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.062);
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+}
+
+.uiverse-form-main::before {
+  position: absolute;
+  content: "";
+  width: 300px;
+  height: 300px;
+  background-color: rgb(209, 193, 255);
+  transform: rotate(45deg);
+  left: -180px;
+  bottom: 30px;
+  z-index: 1;
+  border-radius: 30px;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.082);
+  pointer-events: none;
+}
+
+.uiverse-form-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+/* Uiverse Login Form CSS */
+.form_main {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(255, 255, 255);
+  padding: 30px 30px 30px 30px;
+  box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.062);
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+}
+
+.form_main::before {
+  position: absolute;
+  content: "";
+  width: 300px;
+  height: 300px;
+  background-color: rgb(209, 193, 255);
+  transform: rotate(45deg);
+  left: -180px;
+  bottom: 30px;
+  z-index: 1;
+  border-radius: 30px;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.082);
+}
+
+.form_heading {
+  font-size: 2em;
+  color: #2e2e2e;
+  font-weight: 700;
+  margin: 5px 0 10px 0;
+  z-index: 2;
+}
+
+.form_inputContainer {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.form_inputIcon {
+  position: absolute;
+  left: 3px;
+  color: rgb(173, 173, 173);
+}
+
+.form_inputField {
+  width: 100%;
+  height: 42px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin: 10px 0;
+  color: #1e293b;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-sizing: border-box;
+  padding-left: 36px;
+  transition: all 0.2s ease;
+}
+
+.form_inputField:focus {
+  background-color: #ffffff;
+  outline: none;
+  border-color: #a855f7;
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
+}
+
+.form_inputField::placeholder {
+  color: rgb(80, 80, 80);
+  font-size: 1em;
+  font-weight: 500;
+}
+
+.form_button {
+  z-index: 2;
+  position: relative;
+  width: 100%;
+  border: none;
+  background-color: rgb(162, 104, 255);
+  height: 35px;
+  color: white;
+  font-size: .8em;
+  font-weight: 500;
+  letter-spacing: 1px;
+  margin: 10px 0;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.form_button:hover {
+  background-color: rgb(126, 84, 255);
+}
+
+.form_forgotLink {
+  z-index: 2;
+  font-size: .7em;
+  font-weight: 500;
+  color: rgb(74, 74, 74);
+  text-decoration: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+}
+
+
+.form_main::before { pointer-events: none; }
+
+/* ====================================================
+   MOBILE RESPONSIVENESS ENHANCEMENTS
+   ==================================================== */
+
+/* Touch-friendly tap targets */
+@media (max-width: 768px) {
+  button, a, [role="button"] {
+    min-height: 44px;
+  }
+  
+  /* Partner sidebar mobile overlay */
+  .partner-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+  
+  /* Prevent horizontal scroll */
+  body, html {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* Better table on mobile */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Admin dashboard tabs scroll on mobile */
+  .tabs-scroll {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+  
+  .tabs-scroll::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Cards full width on mobile */
+  .card-grid-mobile {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Glassmorphism for public home cards - ensure video visibility */
+.glass-card {
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.glass-card-solid {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 2px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.6);
+}
+
+/* Status badge colors */
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-confirmed { background: #dbeafe; color: #1e40af; }
+.status-checked_in { background: #d1fae5; color: #065f46; }
+.status-completed { background: #e0e7ff; color: #3730a3; }
+.status-cancelled { background: #f1f5f9; color: #475569; }
+.status-rejected { background: #fee2e2; color: #991b1b; }
+
+

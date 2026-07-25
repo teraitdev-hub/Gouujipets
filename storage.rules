@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // User Avatars
+    match /avatars/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Pet Photos
+    match /pets/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Partner Galleries
+    match /partners/{partnerId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.uid == partnerId;
+    }
+  }
+}
