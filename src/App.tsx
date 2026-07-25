@@ -56,7 +56,7 @@ import { TermsOfService } from "./pages/Legal/TermsOfService";
 
 // A simple wrapper for public pages that need the PublicNavbar
 const PublicLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="min-h-screen bg-gray-50 flex flex-col">
+  <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col">
     <PublicNavbar />
     <main className="flex-1">
       {children}
@@ -75,7 +75,7 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex items-center justify-center">
         <UiverseLoader text="authenticating" />
       </div>
     );

@@ -28,8 +28,7 @@ export const PublicHome = () => {
   const [selectedCity, setSelectedCity] = useState("All Bangalore");
   const [showContactModal, setShowContactModal] = useState<any | null>(null);
   
-  // Now using a single pre-merged video for absolute 100% flawless sequential looping
-  const backgroundVideo = "/merged_background.mp4";
+  // Replaced video with 2D animated effects
 
   useEffect(() => {
     let unsubscribe: () => void;
@@ -137,25 +136,11 @@ export const PublicHome = () => {
   });
 
   return (
-    <PageTransition className="min-h-screen bg-transparent font-sans overflow-x-hidden pb-20 md:pb-6 relative">
-      
-      {/* GLOBAL FIXED VIDEO BACKGROUND */}
-      <div className="fixed inset-0 -z-10 w-full h-full bg-slate-900 overflow-hidden flex items-center justify-center">
-        <video
-          src={backgroundVideo}
-          muted
-          loop
-          playsInline
-          autoPlay
-          style={{ width: '100%', height: '100%', objectFit: 'cover', transform: 'scale(1.25)', transformOrigin: 'center center', filter: 'brightness(1.3) contrast(1.05)' }}
-        />
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.05)' }}></div>
-      </div>
-
+    <PageTransition className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] font-sans overflow-x-hidden pb-20 md:pb-6 relative">
       <PublicNavbar />
 
       {/* ========== HERO SECTION (NEW & STUNNING) ========== */}
-      <section className="relative pt-10 pb-16 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden border-b border-white/10">
+      <section className="relative pt-10 pb-16 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden border-b border-slate-200/60">
         
 
         
@@ -165,9 +150,9 @@ export const PublicHome = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-black font-bold text-[10px] sm:text-xs uppercase tracking-widest shadow-sm mb-6"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-slate-200 text-slate-800 font-bold text-[10px] sm:text-xs uppercase tracking-widest shadow-sm mb-6"
             >
-              <Sparkles size={14} className="text-black" />
+              <Sparkles size={14} className="text-purple-600" />
               India's #1 Verified Pet Care Network
             </motion.div>
             
@@ -175,16 +160,16 @@ export const PublicHome = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-6xl font-black text-black tracking-tight leading-tight"
+              className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight"
             >
-              Find the Perfect <span className="text-black underline decoration-4 underline-offset-4 decoration-purple-500">Care</span> <br className="hidden sm:block" /> for your Best Friend
+              Find the Perfect <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Care</span> <br className="hidden sm:block" /> for your Best Friend
             </motion.h1>
             
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-sm sm:text-base text-black/80 font-bold max-w-2xl mx-auto mt-6"
+              className="text-sm sm:text-base text-slate-600 font-semibold max-w-2xl mx-auto mt-6"
             >
               Book verified boarding resorts, professional groomers, and 24/7 vets near you. Transparent pricing, instant booking, and peace of mind.
             </motion.p>
@@ -196,7 +181,7 @@ export const PublicHome = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="pt-4 max-w-2xl mx-auto"
           >
-            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-2 bg-white/80 backdrop-blur-md p-2 rounded-2xl border border-white/50 shadow-xl focus-within:ring-2 focus-within:ring-black/20 focus-within:border-gray-400 transition-all z-20 relative">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-2 bg-white/90 backdrop-blur-md p-2 rounded-2xl border border-slate-200/80 shadow-xl focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all z-20 relative">
               <div className="flex items-center w-full sm:w-auto flex-1 gap-2 px-4 py-2 border-b sm:border-b-0 sm:border-r border-slate-200">
                 <MapPin size={20} className="text-black shrink-0" />
                 <select
@@ -230,12 +215,12 @@ export const PublicHome = () => {
 
       {/* ========== SIMPLIFIED CORE CATEGORIES ========== */}
       <section className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="bg-transparent rounded-[32px] p-6 sm:p-10 border border-white/10">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-black text-black tracking-tight">
+        <div className="bg-white/60 backdrop-blur-md rounded-[32px] p-6 sm:p-10 border border-slate-200/80 shadow-sm relative overflow-hidden">
+          <div className="text-center mb-8 relative z-10">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Our Core Services
             </h2>
-            <p className="text-black/80 font-bold mt-2">Select a category to explore verified partners</p>
+            <p className="text-slate-600 font-semibold mt-2">Select a category to explore verified partners</p>
           </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
@@ -252,17 +237,17 @@ export const PublicHome = () => {
                   else navigate(`/${cat.id}`);
                 }
               }}
-              className={`relative bg-transparent rounded-3xl p-6 border transition-all duration-300 cursor-pointer flex flex-col items-center text-center hover:-translate-y-1 ${
-                activeCategoryTab === cat.id ? "border-black ring-1 ring-black/20 bg-black/5" : "border-white/20 hover:border-black/50"
+              className={`relative bg-white rounded-3xl p-6 border transition-all duration-300 cursor-pointer flex flex-col items-center text-center hover:-translate-y-1 z-10 shadow-xs hover:shadow-md ${
+                activeCategoryTab === cat.id ? "border-purple-600 ring-2 ring-purple-500/20 bg-purple-50/50" : "border-slate-200/80 hover:border-slate-300"
               }`}
             >
-              <div className="w-16 h-16 rounded-2xl bg-white group-hover:bg-gray-100 flex items-center justify-center text-3xl mb-4 transition-colors shadow-inner border border-gray-200">
+              <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-3xl mb-4 transition-colors shadow-inner border border-slate-200/60">
                 <span className="group-hover:scale-110 transition-transform">{cat.icon}</span>
               </div>
-              <h3 className="font-black text-base text-black transition-colors mb-1">
+              <h3 className="font-black text-base text-slate-900 transition-colors mb-1">
                 {cat.title}
               </h3>
-              <p className="text-xs font-bold text-black/70">
+              <p className="text-xs font-semibold text-slate-500">
                 {cat.desc}
               </p>
             </div>
@@ -273,16 +258,16 @@ export const PublicHome = () => {
 
       {/* ========== VERIFIED x AMAZON DIRECTORY LISTINGS (Featured Local Businesses) ========== */}
       <section className="py-6 px-3 sm:px-6 max-w-7xl mx-auto">
-        <div className="bg-transparent rounded-[32px] p-6 sm:p-10 border border-white/10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2 border-b border-black/10 pb-3">
+        <div className="bg-white/60 backdrop-blur-md rounded-[32px] p-6 sm:p-10 border border-slate-200/80 shadow-sm relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2 border-b border-slate-200/80 pb-3 relative z-10">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-[11px] font-black text-white uppercase tracking-widest bg-black px-2.5 py-0.5 rounded-full mb-1">
+            <div className="inline-flex items-center gap-1.5 text-[11px] font-black text-white uppercase tracking-widest bg-slate-900 px-2.5 py-0.5 rounded-full mb-1">
               <Award size={12} className="stroke-[3]" /> VERIFIED LOCAL PARTNERS IN {selectedCity.toUpperCase()}
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-black tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Popular Pet Resorts, Vets & Grooming Centers
             </h2>
-            <p className="text-xs text-black/80 font-bold mt-0.5">
+            <p className="text-xs text-slate-600 font-semibold mt-0.5">
               Compare ratings, verified amenities, transparent rates and book directly with instant confirmation.
             </p>
           </div>
@@ -290,7 +275,7 @@ export const PublicHome = () => {
           <div className="flex items-center gap-2 self-start sm:self-auto">
             <button
               onClick={() => setActiveCategoryTab('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${activeCategoryTab === 'all' ? 'bg-black text-white shadow-md border border-black' : 'bg-transparent border border-black/20 text-black hover:bg-black/10'}`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${activeCategoryTab === 'all' ? 'bg-slate-900 text-white shadow-md border border-slate-900' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}`}
             >
               All ({facilities.length})
             </button>
@@ -307,19 +292,19 @@ export const PublicHome = () => {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="animate-pulse bg-white/10 h-72 rounded-2xl border border-white/20"></div>
+              <div key={i} className="animate-pulse bg-slate-200/60 h-72 rounded-2xl border border-slate-200"></div>
             ))}
           </div>
         ) : filteredFacilities.length === 0 ? (
-          <div className="bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 p-10 text-center max-w-md mx-auto shadow-sm">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 text-white flex items-center justify-center mx-auto mb-3 font-black text-xl border border-white/30">
+          <div className="bg-white rounded-3xl border border-slate-200/80 p-10 text-center max-w-md mx-auto shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center mx-auto mb-3 font-black text-xl border border-slate-200">
               🔍
             </div>
-            <h3 className="font-black text-white text-base mb-1">No matching partners found</h3>
-            <p className="text-xs text-white/60 mb-4">We couldn't find facilities matching "{searchQuery || activeCategoryTab}". Try resetting filters to explore all verified centers.</p>
+            <h3 className="font-black text-slate-900 text-base mb-1">No matching partners found</h3>
+            <p className="text-xs text-slate-500 mb-4">We couldn't find facilities matching "{searchQuery || activeCategoryTab}". Try resetting filters to explore all verified centers.</p>
             <button 
               onClick={() => { setSearchQuery(""); setActiveCategoryTab("all"); }}
-              className="px-5 py-2.5 rounded-xl bg-transparent border border-white/30 hover:bg-white/10 transition-colors text-white text-xs font-black"
+              className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 transition-colors text-white text-xs font-black shadow-sm"
             >
               Reset Filters & Show All
             </button>
@@ -333,44 +318,44 @@ export const PublicHome = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25, delay: idx * 0.04 }}
                 onClick={() => navigate(`/facility/${facility.id || facility._id}`, { state: { facility } })}
-                className="group bg-transparent rounded-2xl border border-white/10 hover:-translate-y-1 hover:border-purple-400/50 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer relative"
+                className="group bg-white rounded-2xl border border-slate-200/80 hover:-translate-y-1 hover:border-purple-300 hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer relative shadow-xs"
               >
                 {/* Image Banner */}
-                <div className="h-40 sm:h-48 relative overflow-hidden bg-white/5 rounded-t-2xl">
+                <div className="h-40 sm:h-48 relative overflow-hidden bg-slate-100 rounded-t-2xl">
                   <img
                     src={facility.images[0]}
                     alt={facility.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
 
                   {/* Top Category Badge */}
-                  <div className="absolute top-1.5 left-1.5 bg-black/50 backdrop-blur-md px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-2xs border border-white/20">
-                    <Check size={9} className="stroke-[3] text-white" />
-                    <span className="text-[8px] font-black text-white uppercase tracking-tight">{facility.type || "Resort"}</span>
+                  <div className="absolute top-1.5 left-1.5 bg-white/90 backdrop-blur-md px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-2xs border border-slate-200">
+                    <Check size={9} className="stroke-[3] text-purple-600" />
+                    <span className="text-[8px] font-black text-slate-800 uppercase tracking-tight">{facility.type || "Resort"}</span>
                   </div>
 
                   {/* Top Rating Badge */}
-                  <div className="absolute top-1.5 right-1.5 bg-black/50 backdrop-blur-md px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-2xs border border-white/20">
-                    <Star size={9} className="text-yellow-400 fill-yellow-400" />
-                    <span className="text-[9px] font-black text-white">{facility.rating}</span>
+                  <div className="absolute top-1.5 right-1.5 bg-white/90 backdrop-blur-md px-1.5 py-0.5 rounded-md flex items-center gap-0.5 shadow-2xs border border-slate-200">
+                    <Star size={9} className="text-amber-500 fill-amber-500" />
+                    <span className="text-[9px] font-black text-slate-800">{facility.rating}</span>
                   </div>
                 </div>
 
                 {/* Card Content & Specifications */}
-                <div className="p-2 sm:p-2.5 flex-1 flex flex-col justify-between gap-1">
+                <div className="p-3 flex-1 flex flex-col justify-between gap-1">
                   <div>
-                    <h3 className="font-black text-white text-xs sm:text-sm group-hover:text-gray-300 transition-colors truncate">
+                    <h3 className="font-black text-slate-900 text-xs sm:text-sm group-hover:text-purple-600 transition-colors truncate">
                       {facility.name}
                     </h3>
                     
-                    <p className="text-[10px] font-bold text-white/60 flex items-center gap-0.5 mt-0.5">
-                      <MapPin size={10} className="text-white shrink-0" />
+                    <p className="text-[10px] font-semibold text-slate-500 flex items-center gap-0.5 mt-0.5">
+                      <MapPin size={10} className="text-slate-400 shrink-0" />
                       <span className="truncate">{typeof facility.address === 'string' ? facility.address : (facility.address?.city || 'Verified Area')}</span>
                     </p>
 
                     {/* Compact Amenities/Services badging */}
-                    <div className="flex flex-wrap gap-0.5 mt-1.5">
+                    <div className="flex flex-wrap gap-1 mt-2">
                       {(() => {
                         const sList = Array.isArray(facility.services_offered) && facility.services_offered.length > 0
                           ? facility.services_offered.map((s: any) => s.name || s)
@@ -379,7 +364,7 @@ export const PublicHome = () => {
                           : ['AC Suite', 'Vet On-Call', 'Play Area'];
                         
                         return sList.slice(0, 2).map((srv: string, i: number) => (
-                          <span key={i} className="bg-white/10 text-white/80 border border-white/20 px-1.5 py-0.2 rounded text-[8px] font-bold">
+                          <span key={i} className="bg-slate-50 text-slate-600 border border-slate-200/80 px-1.5 py-0.5 rounded text-[8px] font-semibold">
                             ✔ {srv}
                           </span>
                         ));
@@ -388,21 +373,21 @@ export const PublicHome = () => {
                   </div>
 
                   {/* Pricing and Action row */}
-                  <div className="mt-auto pt-1">
-                    <div className="flex items-baseline justify-between border-t border-white/10 pt-1">
-                      <span className="text-[8px] text-white/40 line-through">{formatRupee(facility.mrpPrice)}</span>
+                  <div className="mt-auto pt-2">
+                    <div className="flex items-baseline justify-between border-t border-slate-100 pt-2">
+                      <span className="text-[8px] text-slate-400 line-through font-semibold">{formatRupee(facility.mrpPrice)}</span>
                       <div className="flex items-baseline gap-0.5">
-                        <span className="text-white font-bold text-[10px]">₹</span>
-                        <span className="text-xs sm:text-sm font-black text-white">{facility.priceFrom}</span>
-                        <span className="text-[8px] text-white/60 font-bold">/day</span>
+                        <span className="text-slate-900 font-bold text-[10px]">₹</span>
+                        <span className="text-xs sm:text-sm font-black text-slate-900">{facility.priceFrom}</span>
+                        <span className="text-[8px] text-slate-500 font-semibold">/day</span>
                       </div>
                     </div>
 
                     {/* Single Row Actions */}
-                    <div className="flex items-center gap-1 mt-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1 mt-2.5" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setShowContactModal(facility)}
-                        className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-colors"
+                        className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors"
                         title="Call Now"
                       >
                         <Phone size={16} />
@@ -415,7 +400,7 @@ export const PublicHome = () => {
                           const msg = `Hi ${facility.name}, I found you on GouujiPets and would like to inquire about boarding/services for my pet!`;
                           window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(msg)}`, '_blank');
                         }}
-                        className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-colors"
+                        className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors"
                         title="WhatsApp"
                       >
                         <MessageCircle size={16} />
@@ -423,7 +408,7 @@ export const PublicHome = () => {
 
                       <button
                         onClick={() => navigate(`/checkout/${facility.id || facility._id}`, { state: { facility } })}
-                        className="flex-1 py-2.5 bg-transparent border border-white/30 hover:bg-white/10 text-white font-black text-xs rounded-xl transition-all shadow-md text-center flex items-center justify-center gap-1.5"
+                        className="flex-1 py-2.5 bg-slate-900 hover:bg-purple-600 text-white font-black text-xs rounded-xl transition-all shadow-sm text-center flex items-center justify-center gap-1"
                       >
                         <span>⚡ Book Stay</span>
                       </button>
@@ -438,17 +423,17 @@ export const PublicHome = () => {
       </section>
 
       {/* ========== EMERGENCY VET & CLINIC CAROUSEL ========== */}
-      <section className="py-8 px-3 sm:px-6 max-w-7xl mx-auto my-6 bg-transparent border border-red-500/30 text-white rounded-3xl relative overflow-hidden">
-        <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-red-600/20 rounded-full blur-3xl pointer-events-none" />
+      <section className="py-8 px-4 sm:px-6 max-w-7xl mx-auto my-6 bg-gradient-to-r from-rose-50 to-red-50 border border-red-200 text-slate-900 rounded-3xl relative overflow-hidden shadow-xs">
+        <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-red-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-4xl relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
-            <span className="bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 w-max mb-3">
+            <span className="bg-red-500 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1 w-max mb-3 shadow-2xs">
               <HeartPulse size={13} /> 24/7 EMERGENCY & AMBULANCE DISPATCH
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black mb-2 leading-tight">
+            <h2 className="text-2xl sm:text-3xl font-black mb-2 leading-tight text-slate-900">
               Need Urgent Veterinary Assistance or ICU Care?
             </h2>
-            <p className="text-red-200/80 text-xs sm:text-sm font-medium leading-relaxed">
+            <p className="text-slate-600 text-xs sm:text-sm font-medium leading-relaxed">
               Our verified emergency hospitals offer oxygen support, surgical ICUs, and on-call specialist doctors ready within 15 minutes anywhere across {selectedCity}.
             </p>
           </div>
@@ -457,14 +442,14 @@ export const PublicHome = () => {
               onClick={() => {
                 alert("Direct Emergency Dispatch Hotline: 1800-PET-EMERGENCY (Connected to nearest 24/7 hospital)");
               }}
-              className="bg-transparent border border-red-500/30 hover:bg-red-500/10 text-white font-black px-6 py-3.5 rounded-2xl shadow-xl flex items-center justify-center gap-2 text-sm transition-transform active:scale-95"
+              className="bg-red-600 hover:bg-red-700 text-white font-black px-6 py-3.5 rounded-2xl shadow-md flex items-center justify-center gap-2 text-sm transition-transform active:scale-95"
             >
               <Phone size={16} className="text-white animate-bounce" />
               <span>Call Emergency Line</span>
             </button>
             <button
               onClick={() => navigate('/boarding?type=veterinary')}
-              className="bg-transparent hover:bg-red-950/40 text-white font-bold px-6 py-3.5 rounded-2xl border border-red-500/50 text-center text-sm transition-colors"
+              className="bg-white hover:bg-slate-50 text-slate-800 font-bold px-6 py-3.5 rounded-2xl border border-slate-300 text-center text-sm transition-colors shadow-2xs"
             >
               Explore 24/7 Clinics
             </button>
@@ -474,24 +459,24 @@ export const PublicHome = () => {
 
       {/* ========== WHY TRUST GOUUJIPETS (VERIFIED CARE Features) ========== */}
       <section className="py-10 px-3 sm:px-6 max-w-7xl mx-auto">
-        <div className="bg-transparent rounded-[32px] p-6 sm:p-10 border border-white/10">
-          <h2 className="text-xl sm:text-2xl font-black text-white text-center mb-2">Why 50,000+ Pet Parents Trust Gouuji Assured™</h2>
-          <p className="text-xs sm:text-sm text-white/70 font-medium text-center max-w-xl mx-auto mb-8">Every facility on our platform undergoes a rigorous 42-point physical inspection before listing.</p>
+        <div className="bg-white/60 backdrop-blur-md rounded-[32px] p-6 sm:p-10 border border-slate-200/80 shadow-sm">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 text-center mb-2">Why 50,000+ Pet Parents Trust Gouuji Assured™</h2>
+          <p className="text-xs sm:text-sm text-slate-600 font-semibold text-center max-w-xl mx-auto mb-8">Every facility on our platform undergoes a rigorous 42-point physical inspection before listing.</p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {[
-            { icon: ShieldCheck, title: "100% Background Checked", desc: "Every resort owner, groomer & vet doctor's credentials are verified physically.", color: "text-black bg-white" },
-            { icon: Users, title: "Expert Care Managers", desc: "Dedicated professionals looking after your pet's needs round the clock.", color: "text-black bg-white" },
-            { icon: CheckCircle2, title: "Instant Booking & Refund", desc: "Book suites right away with transparent pricing. Zero cancellation fees up to 24h before.", color: "text-black bg-white" },
-            { icon: Award, title: "Verified Customer Reviews", desc: "Only pet parents who completed verified stays can submit ratings & testimonials.", color: "text-black bg-white" },
+            { icon: ShieldCheck, title: "100% Background Checked", desc: "Every resort owner, groomer & vet doctor's credentials are verified physically.", color: "text-purple-600 bg-purple-50" },
+            { icon: Users, title: "Expert Care Managers", desc: "Dedicated professionals looking after your pet's needs round the clock.", color: "text-blue-600 bg-blue-50" },
+            { icon: CheckCircle2, title: "Instant Booking & Refund", desc: "Book suites right away with transparent pricing. Zero cancellation fees up to 24h before.", color: "text-emerald-600 bg-emerald-50" },
+            { icon: Award, title: "Verified Customer Reviews", desc: "Only pet parents who completed verified stays can submit ratings & testimonials.", color: "text-amber-600 bg-amber-50" },
           ].map((item, i) => (
-            <div key={i} className="bg-transparent p-5 rounded-2xl border border-white/10 flex flex-col justify-between hover:bg-white/5 transition-colors">
+            <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition-all shadow-xs">
               <div>
-                <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center mb-3 border border-white/10`}>
+                <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center mb-3 border border-slate-200/60`}>
                   <item.icon size={20} />
                 </div>
-                <h3 className="font-black text-white text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-white/60 font-medium leading-relaxed">{item.desc}</p>
+                <h3 className="font-black text-slate-900 text-sm mb-1">{item.title}</h3>
+                <p className="text-xs text-slate-500 font-medium leading-relaxed">{item.desc}</p>
               </div>
             </div>
           ))}
@@ -501,15 +486,15 @@ export const PublicHome = () => {
 
       {/* ========== ABOUT GOUUJIPETS ========== */}
       <section className="py-10 px-3 sm:px-6 max-w-7xl mx-auto">
-        <div className="bg-transparent rounded-[32px] p-6 sm:p-10 border border-white/10">
+        <div className="bg-white/60 backdrop-blur-md rounded-[32px] p-6 sm:p-10 border border-slate-200/80 shadow-sm">
           <div className="text-center mb-8">
-            <span className="inline-flex items-center gap-1.5 text-[11px] font-black text-black uppercase tracking-widest bg-white px-3 py-1 rounded-full mb-3">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-black text-purple-700 uppercase tracking-widest bg-purple-100 px-3 py-1 rounded-full mb-3">
               🐾 OUR STORY
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-3">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-3">
               India's Most Trusted Pet Care Marketplace
             </h2>
-            <p className="text-white/70 text-sm font-medium max-w-2xl mx-auto leading-relaxed">
+            <p className="text-slate-600 text-sm font-semibold max-w-2xl mx-auto leading-relaxed">
               GouujiPets was founded by pet parents, for pet parents. We connect India's most caring and verified pet service professionals directly with families who love their animals.
             </p>
           </div>
@@ -521,10 +506,10 @@ export const PublicHome = () => {
               { stat: '100%', label: 'Background Checked', icon: '🛡️' },
               { stat: '5★', label: 'Average Rating', icon: '⭐' },
             ].map((item, i) => (
-              <div key={i} className="bg-transparent rounded-2xl p-4 text-center border border-white/10">
+              <div key={i} className="bg-white rounded-2xl p-4 text-center border border-slate-200/80 shadow-xs">
                 <div className="text-2xl mb-1">{item.icon}</div>
-                <div className="text-2xl font-black text-white">{item.stat}</div>
-                <div className="text-xs font-bold text-white/60">{item.label}</div>
+                <div className="text-2xl font-black text-slate-900">{item.stat}</div>
+                <div className="text-xs font-bold text-slate-500">{item.label}</div>
               </div>
             ))}
           </div>
@@ -535,9 +520,9 @@ export const PublicHome = () => {
               { title: '📱 Real-Time Updates', desc: 'Get live photo/video updates, GPS tracking, and instant messages from your pet\'s caretaker during their stay.' },
               { title: '💳 Secure Payments', desc: 'All transactions are encrypted and traceable. Transparent pricing with zero hidden fees.' },
             ].map((item, i) => (
-              <div key={i} className="bg-transparent rounded-2xl p-5 border border-white/10">
-                <h3 className="font-black text-white text-sm mb-2">{item.title}</h3>
-                <p className="text-white/60 text-xs leading-relaxed">{item.desc}</p>
+              <div key={i} className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs">
+                <h3 className="font-black text-slate-900 text-sm mb-2">{item.title}</h3>
+                <p className="text-slate-500 text-xs leading-relaxed font-medium">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -545,11 +530,11 @@ export const PublicHome = () => {
           <div className="mt-8 text-center">
             <button
               onClick={() => navigate('/partner/login')}
-              className="inline-flex items-center gap-2 bg-transparent border border-white/30 hover:bg-white/10 text-white font-black px-8 py-3.5 rounded-2xl shadow-xl transition-all active:scale-95 text-sm"
+              className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-black px-8 py-3.5 rounded-2xl shadow-md transition-all active:scale-95 text-sm"
             >
               🤝 Become a Verified Partner
             </button>
-            <p className="text-white/50 text-xs mt-3">Join hundreds of pet care professionals on India's fastest growing pet marketplace.</p>
+            <p className="text-slate-500 text-xs mt-3 font-semibold">Join hundreds of pet care professionals on India's fastest growing pet marketplace.</p>
           </div>
         </div>
       </section>

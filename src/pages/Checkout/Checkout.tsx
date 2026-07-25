@@ -348,7 +348,7 @@ export const Checkout = () => {
 
   if (bookingResult?.success) {
     return (
-      <PageTransition className="min-h-screen bg-gradient-to-br from-purple-50 to-white flex items-center justify-center p-6">
+      <PageTransition className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex items-center justify-center p-6">
         <div className="bg-white p-10 rounded-[24px] shadow-sm text-center max-w-md w-full border border-purple-100">
           <div className="w-20 h-20 bg-purple-100 text-purple-500 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={44} strokeWidth={1.5} />
@@ -396,7 +396,7 @@ export const Checkout = () => {
   const nightCount = nights();
 
   return (
-    <PageTransition className="min-h-screen bg-gray-50 pb-32">
+    <PageTransition className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] pb-32">
       <header className="bg-white border-b border-gray-100 py-3 px-4 sm:px-6 relative z-10 shadow-2xs">
         <div className="max-w-5xl mx-auto flex items-center gap-4">
           <button

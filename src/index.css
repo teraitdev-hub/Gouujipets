@@ -114,7 +114,7 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground bg-[#FAFAFA]; /* Crisp off-white */
+    @apply bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] text-foreground min-h-screen;
     font-family: var(--font-sans);
     overflow-x: hidden; /* Prevent mobile horizontal scroll */
   }

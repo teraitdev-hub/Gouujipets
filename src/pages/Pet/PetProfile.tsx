@@ -29,7 +29,7 @@ export const PetProfile = () => {
   }
 
   return (
-    <PageTransition className="pb-24 bg-gray-50 min-h-screen">
+    <PageTransition className="pb-24 bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] min-h-screen">
       {/* Cover Header */}
       <div className="h-56 md:h-64 relative w-full overflow-hidden bg-purple-950">
         <img 

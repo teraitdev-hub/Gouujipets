@@ -56,7 +56,7 @@ export const PartnerLayout = ({ children }: PartnerLayoutProps) => {
   }, [user]);
 
   return (
-    <div className="h-[100dvh] bg-[#F4F5F8] text-slate-900 flex overflow-hidden font-sans">
+    <div className="h-[100dvh] bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] text-slate-900 flex overflow-hidden font-sans">
       <PartnerSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
@@ -125,7 +125,7 @@ export const PartnerLayout = ({ children }: PartnerLayoutProps) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto custom-scrollbar bg-[#F4F5F8] p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto custom-scrollbar bg-transparent p-4 sm:p-6">
           {children}
         </main>
       </div>

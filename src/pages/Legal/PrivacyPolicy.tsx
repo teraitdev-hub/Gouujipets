@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen bg-slate-50 py-16 px-6 font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] py-16 px-6 font-sans">
       <div className="max-w-4xl mx-auto bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-slate-200">
         <Link to="/" className="inline-flex items-center gap-2 text-purple-600 font-bold mb-8 hover:text-purple-700 transition-colors">
           <ArrowLeft size={16} /> Back to Home

@@ -182,7 +182,7 @@ export const UserLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex">
       {/* LEFT SIDE - Service Info / Marketing */}
       <div className="hidden lg:flex flex-col justify-center w-1/2 bg-gradient-to-br from-purple-900 via-indigo-900 to-slate-900 p-12 text-white relative overflow-hidden">
         {/* Abstract background blobs */}

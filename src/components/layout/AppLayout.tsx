@@ -14,7 +14,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   const location = useLocation();
 
   return (
-    <div className="h-[100dvh] bg-[#F4F5F8] text-slate-900 flex overflow-hidden relative font-sans">
+    <div className="h-[100dvh] bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] text-slate-900 flex overflow-hidden relative font-sans">
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden pb-16 md:pb-0">
@@ -47,7 +47,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
         </header>
 
         <main
-          className={`flex-1 overflow-y-auto bg-[#F4F5F8] relative ${
+          className={`flex-1 overflow-y-auto bg-transparent relative ${
             location.pathname.startsWith("/boarding") ||
             location.pathname.startsWith("/facility") ||
             location.pathname === "/"

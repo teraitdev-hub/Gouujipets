@@ -219,7 +219,7 @@ export const FacilityDetails = () => {
   ];
 
   return (
-    <PageTransition className="pb-32 bg-white min-h-screen font-sans">
+    <PageTransition className="pb-32 bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] min-h-screen font-sans">
       {/* Header Image Section */}
       <div className="relative h-[40vh] md:h-[48vh] w-full overflow-hidden bg-purple-950">
         <img 

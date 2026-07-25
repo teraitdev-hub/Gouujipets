@@ -11,7 +11,7 @@ interface AuthLayoutProps {
 
 export const AuthLayout = ({ children, imageUrl, title, subtitle }: AuthLayoutProps) => {
   return (
-    <div className="min-h-screen bg-[#FDF4E3] flex flex-col md:flex-row font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col md:flex-row font-sans">
       
       {/* Left Form Section */}
       <div className="w-full md:w-[45%] lg:w-[40%] flex flex-col justify-start md:justify-center overflow-y-auto px-8 md:px-16 lg:px-24 py-12 min-h-screen md:min-h-0">
