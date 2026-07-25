@@ -1,5 +1,6 @@
 import { PageTransition } from "../../components/layout/PageTransition";
 import { Phone, Mail, MapPin, Send, HelpCircle } from "lucide-react";
+import { Map } from "../../components/Map";
 
 export const Contact = () => {
   return (
@@ -64,6 +65,18 @@ export const Contact = () => {
         </div>
 
       </div>
+
+      {/* Map Section */}
+      <div className="bg-[#FDFBF7] rounded-[32px] p-2 shadow-sm border border-[#EBE6DF]">
+        <Map 
+          center={[40.7128, -74.0060]} 
+          zoom={13} 
+          markers={[
+            { position: [40.7128, -74.0060], popupText: "Gouujipets HQ - 123 Pet Care Blvd" }
+          ]} 
+        />
+      </div>
+
     </PageTransition>
   );
 };
