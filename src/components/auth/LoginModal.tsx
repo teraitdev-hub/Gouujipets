@@ -1,9 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Smartphone, PawPrint, Sparkles, ShieldCheck } from "lucide-react";
+import { X, Mail, Smartphone, PawPrint, Sparkles, ShieldCheck, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../lib/firebase";
-import { loginWithGoogle } from "../../services/auth";
+import { loginWithGoogle, setupRecaptcha, sendOTP, verifyOTP } from "../../services/auth";
 import { useState } from "react";
 
 export const LoginModal = () => {
@@ -11,6 +11,13 @@ export const LoginModal = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // Mobile OTP state
+  const [loginTab, setLoginTab] = useState<'otp' | 'google'>('otp');
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState<any>(null);
+  const [showOtpInput, setShowOtpInput] = useState(false);
 
   const handleGoogleLogin = async () => {
     try {
@@ -25,6 +32,56 @@ export const LoginModal = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (!cleanPhone || cleanPhone.length < 10) {
+      setError("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    setIsLoading(true);
+    setError("");
+    try {
+      const recaptchaVerifier = setupRecaptcha("modal-recaptcha-container");
+      const formattedPhone = phone.startsWith('+') ? phone : `+91${cleanPhone.slice(-10)}`;
+      const result = await sendOTP(formattedPhone, recaptchaVerifier);
+      setConfirmationResult(result);
+      setShowOtpInput(true);
+    } catch (err: any) {
+      console.error("OTP Send Error:", err);
+      setError("Failed to send OTP. Please check your network or phone number.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!confirmationResult || !otp || otp.length < 6) {
+      setError("Please enter the 6-digit OTP code.");
+      return;
+    }
+    setIsLoading(true);
+    setError("");
+    try {
+      await verifyOTP(confirmationResult, otp, 'customer');
+      await useAuthStore.getState().loadUser();
+      closeLoginModal();
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError("Invalid OTP code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetOtpFlow = () => {
+    setShowOtpInput(false);
+    setConfirmationResult(null);
+    setOtp("");
+    setError("");
   };
 
   if (!isLoginModalOpen) return null;
@@ -67,30 +124,132 @@ export const LoginModal = () => {
               </div>
 
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-[10px] font-black uppercase tracking-widest mb-3 border border-brand-200/60 shadow-xs">
-                <Sparkles size={12} className="text-purple-500" /> Verified Pet Parent Portal
+                <Sparkles size={12} className="text-purple-500" /> Instant OTP & Social Login
               </div>
 
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-1 tracking-tight">Welcome Back</h2>
-              <p className="text-slate-500 text-xs sm:text-sm font-bold">Sign in to manage bookings, live feeds & wallet rewards.</p>
+              <p className="text-slate-500 text-xs sm:text-sm font-bold">Sign in securely with your Mobile Number or Google.</p>
             </div>
             
             {/* Body */}
             <div className="p-7 pt-5 space-y-4">
               
+              {/* Tab Switcher */}
+              <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl border border-slate-200/60 mb-4">
+                <button
+                  type="button"
+                  onClick={() => { setLoginTab('otp'); setError(''); }}
+                  className={`py-2.5 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all ${
+                    loginTab === 'otp' 
+                      ? 'bg-white text-purple-700 shadow-sm' 
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Smartphone size={15} />
+                  <span>Mobile OTP</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setLoginTab('google'); setError(''); }}
+                  className={`py-2.5 px-3 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all ${
+                    loginTab === 'google' 
+                      ? 'bg-white text-purple-700 shadow-sm' 
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <svg viewBox="0 0 24 24" width="15" height="15" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/></svg>
+                  <span>Google</span>
+                </button>
+              </div>
+
               {error && (
-                <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl font-bold text-xs text-center border border-purple-200 shadow-xs">
-                  {error}
+                <div className="p-3 bg-red-50 text-red-600 rounded-2xl font-bold text-xs text-center border border-red-200 shadow-xs flex items-center justify-center gap-2">
+                  <span>⚠️</span> {error}
                 </div>
               )}
 
-              <button 
-                onClick={handleGoogleLogin}
-                disabled={isLoading}
-                className="w-full bg-white border-2 border-slate-200/80 hover:border-brand-300 hover:bg-slate-50 text-slate-900 font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-sm active:scale-95 disabled:opacity-50 group"
-              >
-                <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" className="group-hover:scale-110 transition-transform"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/></svg>
-                <span>{isLoading ? "Connecting Securely..." : "Continue with Google"}</span>
-              </button>
+              <div id="modal-recaptcha-container"></div>
+
+              {loginTab === 'otp' ? (
+                showOtpInput ? (
+                  <form onSubmit={handleVerifyOtp} className="space-y-4">
+                    <div className="text-center mb-2">
+                      <p className="text-xs text-slate-500 font-medium">Enter the 6-digit OTP sent to</p>
+                      <p className="text-sm font-black text-slate-900">{phone.startsWith('+') ? phone : `+91 ${phone}`}</p>
+                    </div>
+                    <input 
+                      type="text" 
+                      placeholder="• • • • • •"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                      className="w-full bg-slate-50 border border-purple-300 rounded-2xl px-5 py-3.5 font-black outline-none focus:ring-2 focus:ring-purple-600/30 focus:border-purple-600 transition-all text-center tracking-[0.5em] text-xl shadow-inner"
+                      maxLength={6}
+                      autoFocus
+                      required
+                    />
+                    <button 
+                      type="submit" 
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-purple-600/25 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                    >
+                      {isLoading ? <Loader2 className="animate-spin" size={18} /> : (
+                        <>
+                          <span>Verify & Login</span>
+                          <CheckCircle2 size={18} />
+                        </>
+                      )}
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={resetOtpFlow}
+                      className="w-full text-xs text-slate-500 hover:text-slate-800 font-bold py-2 transition-colors text-center"
+                    >
+                      ← Change Mobile Number
+                    </button>
+                  </form>
+                ) : (
+                  <form onSubmit={handleSendOtp} className="space-y-4">
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 font-bold text-sm">
+                        +91
+                      </div>
+                      <input 
+                        type="tel" 
+                        placeholder="Enter 10-digit mobile number"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-3.5 font-bold outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all text-slate-900 placeholder:text-slate-400 placeholder:font-medium text-sm shadow-inner"
+                        maxLength={10}
+                        required
+                        autoFocus
+                      />
+                    </div>
+                    <button 
+                      type="submit" 
+                      disabled={isLoading || phone.length < 10}
+                      className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-purple-600/25 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                    >
+                      {isLoading ? <Loader2 className="animate-spin" size={18} /> : (
+                        <>
+                          <span>Get Instant OTP</span>
+                          <ArrowRight size={18} />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )
+              ) : (
+                <div className="space-y-4 pt-1">
+                  <button 
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
+                    className="w-full bg-white border-2 border-slate-200/80 hover:border-brand-400 hover:bg-slate-50 text-slate-900 font-extrabold py-4 px-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-sm active:scale-95 disabled:opacity-50 group"
+                  >
+                    <svg viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg" className="group-hover:scale-110 transition-transform"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/></svg>
+                    <span>{isLoading ? "Connecting Securely..." : "Continue with Google"}</span>
+                  </button>
+                </div>
+              )}
 
               <div className="relative flex py-2 items-center">
                 <div className="flex-grow border-t border-slate-200/80"></div>
@@ -100,19 +259,17 @@ export const LoginModal = () => {
 
               <button 
                 onClick={() => { closeLoginModal(); navigate('/login/user'); }}
-                className="w-full bg-gradient-to-r from-slate-900 via-slate-800 to-brand-950 hover:from-black hover:to-slate-900 text-white font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95 group"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-md active:scale-95 group text-xs sm:text-sm"
               >
-                <div className="flex items-center gap-1.5 text-brand-400">
-                  <Mail size={18} />
-                  <Smartphone size={18} />
-                </div>
-                <span>Email or Mobile Login</span>
+                <Mail size={16} className="text-purple-400" />
+                <span>Login with Email / Create Account</span>
+                <ArrowRight size={16} className="text-slate-400 group-hover:translate-x-1 transition-transform ml-auto" />
               </button>
 
             </div>
             
             {/* Footer */}
-            <div className="p-6 pt-3 text-center text-xs font-bold text-slate-500 bg-slate-50/80 mt-2 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+            <div className="p-5 pt-3 text-center text-xs font-bold text-slate-500 bg-slate-50/80 mt-2 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
               <span>Don't have an account yet?</span>
               <span 
                 onClick={() => { closeLoginModal(); navigate('/login/user'); }} 
