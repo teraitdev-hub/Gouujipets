@@ -86,6 +86,12 @@ export const setupRecaptcha = (buttonId: string) => {
     console.warn("Error clearing recaptcha verifier", e);
   }
 
+  // CRITICAL FIX: Clear the DOM element to prevent "reCAPTCHA has already been rendered" error
+  const container = document.getElementById(buttonId);
+  if (container) {
+    container.innerHTML = '';
+  }
+
   window.recaptchaVerifier = new RecaptchaVerifier(auth, buttonId, {
     size: 'invisible',
     callback: () => {
