@@ -24,8 +24,12 @@ const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath));
 
 // SPA fallback for frontend routing
-app.get('*', (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
+app.use((req, res, next) => {
+  if (req.method === 'GET') {
+    res.sendFile(path.join(distPath, 'index.html'));
+  } else {
+    next();
+  }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
