@@ -51,7 +51,7 @@ export const LoginModal = () => {
       setShowOtpInput(true);
     } catch (err: any) {
       console.error("OTP Send Error:", err);
-      setError("Failed to send OTP. Please check your network or phone number.");
+      setError(err.message || "Failed to send OTP. Please check your network or phone number.");
     } finally {
       setIsLoading(false);
     }

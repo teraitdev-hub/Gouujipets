@@ -18,6 +18,12 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
+
+// Bypass reCAPTCHA in local development to prevent 'auth/invalid-app-credential'
+if (import.meta.env.DEV) {
+  auth.settings.appVerificationDisabledForTesting = true;
+}
+
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
