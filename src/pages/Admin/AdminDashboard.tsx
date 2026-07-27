@@ -23,7 +23,7 @@ import { formatRupee } from "../../utils/currency";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useLocation, useNavigate } from "react-router-dom";
 import { db } from "../../lib/firebase";
-import { collection, getDocs, query, onSnapshot, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, query, onSnapshot, deleteDoc, doc, updateDoc, addDoc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   fetchAllJournalEntriesPlatform, 
@@ -346,10 +346,33 @@ export const AdminDashboard = () => {
     });
   };
 
-  const handleApprovePartner = async (businessId: string) => {
+  const handleApprovePartner = async (biz: any) => {
     try {
-      const bizRef = doc(db, 'businesses', businessId);
+      const bizRef = doc(db, 'businesses', biz.id);
       await updateDoc(bizRef, { status: 'approved' });
+
+      // Trigger Firebase Email Extension (Trigger Email from Firestore)
+      if (biz.owner_details?.email) {
+        await addDoc(collection(db, 'mail'), {
+          to: biz.owner_details.email,
+          message: {
+            subject: 'Your Partner Account is Approved!',
+            text: `Hi ${biz.owner_details.full_name || 'Partner'},\n\nYour pet care partner account has been approved by the Admin. You can now log in to the GouujiPets Partner Portal.\n\nLogin here: https://gouujipets.web.app/partner/login\n\nWelcome aboard!`,
+            html: `<p>Hi ${biz.owner_details.full_name || 'Partner'},</p><p>Your pet care partner account has been <strong>approved</strong> by the Admin. You can now log in to the GouujiPets Partner Portal.</p><p><a href="https://gouujipets.web.app/partner/login">Login here</a></p><p>Welcome aboard!</p>`
+          }
+        });
+      }
+
+      // Trigger Firebase Twilio SMS Extension (Send Messages with Twilio)
+      if (biz.owner_details?.phone) {
+        await addDoc(collection(db, 'messages'), {
+          to: biz.owner_details.phone,
+          body: `Hi ${biz.owner_details.full_name || 'Partner'}, your GouujiPets partner account is approved! You can now log in. https://gouujipets.web.app/partner/login`
+        });
+      }
+      
+      // Update local state without waiting for snapshot
+      fetchData();
     } catch (error) {
       console.error("Error approving partner:", error);
     }
@@ -632,7 +655,7 @@ export const AdminDashboard = () => {
                         <td className="py-3.5 px-4 text-right space-x-2">
                           {b.status === 'pending' && (
                             <button
-                              onClick={() => handleApprovePartner(b.id)}
+                              onClick={() => handleApprovePartner(b)}
                               className="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[10px] rounded-lg transition-all shadow-2xs inline-block"
                             >
                               Approve

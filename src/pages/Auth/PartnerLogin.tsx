@@ -56,10 +56,8 @@ export const PartnerLogin = () => {
         throw new Error(`Your account has been ${bizData.status}. Please contact support.`);
       }
     } else {
-       // If no business doc found, they might be a customer trying to login as partner.
-       // We can block or create a pending one, but better to block if it's a strict partner login
        await signOut(auth);
-       throw new Error("No partner business found. Please register first.");
+       throw new Error("NOT_REGISTERED");
     }
   };
 
@@ -74,24 +72,20 @@ export const PartnerLogin = () => {
       const existingBizSnap = await getDocs(bizQuery);
       
       if (existingBizSnap.empty) {
-         // Auto-create pending
-         await addDoc(collection(db, "businesses"), {
-          owner_id: userCred.user.uid,
-          name: `${userCred.user.displayName || 'My'}'s Facility`,
-          type: "boarding",
-          address: "Address pending...",
-          status: "pending",
-        });
         await signOut(auth);
-        setError("Your account has been registered via Google. Please wait for Admin approval.");
-        return;
+        throw new Error("NOT_REGISTERED");
       }
       
       await checkApprovalStatus(userCred.user.uid);
       await useAuthStore.getState().loadUser();
       navigate("/partner/dashboard");
     } catch (err: any) {
-      setError(err.message || "Google Login failed or was cancelled.");
+      if (err.message === "NOT_REGISTERED") {
+        setIsLogin(false);
+        setError("You are not registered yet. Please fill out your details to sign up and request approval.");
+      } else {
+        setError(err.message || "Google Login failed or was cancelled.");
+      }
     }
   };
 
@@ -168,7 +162,12 @@ export const PartnerLogin = () => {
         setSuccessMsg("Registration successful! Your account is now pending Admin approval. You will be able to log in once approved.");
       }
     } catch (err: any) {
-      setError(err.message || "Authentication failed");
+      if (err.message === "NOT_REGISTERED") {
+        setIsLogin(false);
+        setError("You are not registered yet. Please fill out your details to sign up and request approval.");
+      } else {
+        setError(err.message || "Authentication failed");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -191,7 +190,7 @@ export const PartnerLogin = () => {
       if (existingBizSnap.empty) {
         if (isLogin) {
             await signOut(auth);
-            throw new Error("No partner account found. Please register first.");
+            throw new Error("NOT_REGISTERED");
         }
         await setDoc(doc(db, "users", userCredential.user.uid), { role: "partner" }, { merge: true });
         await addDoc(collection(db, "businesses"), {
@@ -221,7 +220,12 @@ export const PartnerLogin = () => {
       await useAuthStore.getState().loadUser();
       navigate("/partner/dashboard");
     } catch (err: any) {
-      setError(err.message || "Invalid OTP. Please try again.");
+      if (err.message === "NOT_REGISTERED") {
+        setIsLogin(false);
+        setError("You are not registered yet. Please fill out your details to sign up and request approval.");
+      } else {
+        setError(err.message || "Invalid OTP. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
