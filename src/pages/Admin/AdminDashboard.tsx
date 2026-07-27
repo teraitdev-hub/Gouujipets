@@ -23,7 +23,7 @@ import { formatRupee } from "../../utils/currency";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useLocation, useNavigate } from "react-router-dom";
 import { db } from "../../lib/firebase";
-import { collection, getDocs, query, onSnapshot, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, query, onSnapshot, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   fetchAllJournalEntriesPlatform, 
@@ -346,6 +346,15 @@ export const AdminDashboard = () => {
     });
   };
 
+  const handleApprovePartner = async (businessId: string) => {
+    try {
+      const bizRef = doc(db, 'businesses', businessId);
+      await updateDoc(bizRef, { status: 'approved' });
+    } catch (error) {
+      console.error("Error approving partner:", error);
+    }
+  };
+
   return (
     <PageTransition className="max-w-7xl mx-auto space-y-6 font-sans pb-24">
       {/* Top Banner Control Panel */}
@@ -591,8 +600,9 @@ export const AdminDashboard = () => {
                       <th className="py-2.5 px-4">Owner Partner</th>
                       <th className="py-2.5 px-4">Category</th>
                       <th className="py-2.5 px-4">Address</th>
+                      <th className="py-2.5 px-4">Status</th>
                       <th className="py-2.5 px-4 text-right">Starting Price</th>
-                      <th className="py-2.5 px-4 text-right">Audit Action</th>
+                      <th className="py-2.5 px-4 text-right">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-purple-100 text-xs font-medium">
@@ -609,11 +619,28 @@ export const AdminDashboard = () => {
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-purple-700 font-bold">{b.address || 'Bangalore'}</td>
+                        <td className="py-3.5 px-4">
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+                            b.status === 'pending' ? 'bg-amber-100 text-amber-800' :
+                            b.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
+                            'bg-slate-100 text-slate-800'
+                          }`}>
+                            {b.status || 'approved'}
+                          </span>
+                        </td>
                         <td className="py-3.5 px-4 text-right font-black text-slate-900">₹{b.price_per_night || 999}/night</td>
-                        <td className="py-3.5 px-4 text-right">
+                        <td className="py-3.5 px-4 text-right space-x-2">
+                          {b.status === 'pending' && (
+                            <button
+                              onClick={() => handleApprovePartner(b.id)}
+                              className="px-3 py-1 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[10px] rounded-lg transition-all shadow-2xs inline-block"
+                            >
+                              Approve
+                            </button>
+                          )}
                           <button 
                             onClick={() => inspectPartnerDetails(b)}
-                            className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white font-black text-[10px] rounded-lg transition-all shadow-2xs"
+                            className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white font-black text-[10px] rounded-lg transition-all shadow-2xs inline-block"
                           >
                             Inspect Ledger
                           </button>
