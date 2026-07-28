@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Building2, Search, Filter } from "lucide-react";
 import { db } from "../../lib/firebase";
-import { collection, getDocs, query, orderBy, doc, updateDoc, addDoc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, doc, updateDoc, addDoc, onSnapshot } from "firebase/firestore";
 
 export const AdminBusinesses = () => {
   const [businesses, setBusinesses] = useState<any[]>([]);
@@ -10,51 +10,56 @@ export const AdminBusinesses = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const fetchBusinesses = async () => {
-      try {
-        setIsLoading(true);
-        // Fetch businesses
-        const q = query(collection(db, 'businesses'), orderBy('created_at', 'desc'));
-        const querySnapshot = await getDocs(q);
+    let unsubscribe = () => {};
+
+    const fetchFinancials = async (data: any[]) => {
+      // Fetch all bookings to calculate revenue
+      const bkQ = query(collection(db, 'bookings'));
+      const bkSnap = await getDocs(bkQ);
+      const bookings = bkSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      
+      // Fetch all expenses to calculate expenses
+      const expQ = query(collection(db, 'expenses'));
+      const expSnap = await getDocs(expQ);
+      const expensesData = expSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      const finMap: Record<string, { revenue: number, expenses: number, profit: number }> = {};
+      
+      data.forEach(biz => {
+        const bizId = biz.id;
+        const bizBookings = bookings.filter((b: any) => b.business_id === bizId && b.status !== 'cancelled');
+        const rev = bizBookings.reduce((sum, b: any) => sum + (Number(b.total_amount) || 0) + (Number(b.extra_expenses) || 0), 0);
+        
+        const bizExpenses = expensesData.filter((e: any) => e.business_id === bizId && (e.entry_type === 'expense' || e.entry_type === 'loss' || !e.entry_type));
+        const exp = bizExpenses.reduce((sum, e: any) => sum + (Number(e.amount) || 0), 0);
+        
+        finMap[bizId] = {
+          revenue: rev,
+          expenses: exp,
+          profit: rev - exp
+        };
+      });
+
+      setFinancials(finMap);
+      setBusinesses(data || []);
+      setIsLoading(false);
+    };
+
+    const setupListener = () => {
+      setIsLoading(true);
+      const q = query(collection(db, 'businesses'), orderBy('created_at', 'desc'));
+      unsubscribe = onSnapshot(q, (querySnapshot) => {
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        
-        // Fetch all bookings to calculate revenue
-        const bkQ = query(collection(db, 'bookings'));
-        const bkSnap = await getDocs(bkQ);
-        const bookings = bkSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-        
-        // Fetch all expenses to calculate expenses
-        const expQ = query(collection(db, 'expenses'));
-        const expSnap = await getDocs(expQ);
-        const expensesData = expSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-        const finMap: Record<string, { revenue: number, expenses: number, profit: number }> = {};
-        
-        data.forEach(biz => {
-          const bizId = biz.id;
-          const bizBookings = bookings.filter((b: any) => b.business_id === bizId && b.status !== 'cancelled');
-          const rev = bizBookings.reduce((sum, b: any) => sum + (Number(b.total_amount) || 0) + (Number(b.extra_expenses) || 0), 0);
-          
-          const bizExpenses = expensesData.filter((e: any) => e.business_id === bizId && (e.entry_type === 'expense' || e.entry_type === 'loss' || !e.entry_type));
-          const exp = bizExpenses.reduce((sum, e: any) => sum + (Number(e.amount) || 0), 0);
-          
-          finMap[bizId] = {
-            revenue: rev,
-            expenses: exp,
-            profit: rev - exp
-          };
-        });
-
-        setFinancials(finMap);
-        setBusinesses(data || []);
-      } catch (err) {
-        console.error("Error fetching businesses:", err);
-      } finally {
+        fetchFinancials(data).catch(console.error);
+      }, (error) => {
+        console.error("Error listening to businesses:", error);
         setIsLoading(false);
-      }
+      });
     };
     
-    fetchBusinesses();
+    setupListener();
+
+    return () => unsubscribe();
   }, []);
 
   const handleUpdateStatus = async (businessId: string, newStatus: string, ownerId: any) => {

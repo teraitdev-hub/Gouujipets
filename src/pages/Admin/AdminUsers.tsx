@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Users, Search, Filter } from "lucide-react";
 import { db } from "../../lib/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, onSnapshot } from "firebase/firestore";
 
 export const AdminUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -9,21 +9,18 @@ export const AdminUsers = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setIsLoading(true);
-        const q = query(collection(db, 'users'), orderBy('created_at', 'desc'));
-        const querySnapshot = await getDocs(q);
-        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setUsers(data || []);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    setIsLoading(true);
+    const q = query(collection(db, 'users'), orderBy('created_at', 'desc'));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setUsers(data || []);
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Error listening to users:", error);
+      setIsLoading(false);
+    });
     
-    fetchUsers();
+    return () => unsubscribe();
   }, []);
 
   const filteredUsers = users.filter(u => {
