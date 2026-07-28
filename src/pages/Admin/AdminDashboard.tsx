@@ -2,28 +2,19 @@ import { useState, useEffect } from "react";
 import { PageTransition } from "../../components/layout/PageTransition";
 import { 
   Users, 
-  PawPrint, 
   Store, 
-  DollarSign, 
-  ArrowUpRight, 
   Search, 
   Mail, 
   Phone, 
-  MapPin, 
-  ShieldCheck, 
-  CheckCircle, 
   MessageSquare, 
-  Send, 
-  BookOpen, 
-  Activity,
-  AlertTriangle,
-  FolderOpen
+  BookOpen,
+  Send
 } from "lucide-react";
 import { formatRupee } from "../../utils/currency";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useLocation, useNavigate } from "react-router-dom";
 import { db } from "../../lib/firebase";
-import { collection, getDocs, query, onSnapshot, deleteDoc, doc, updateDoc, addDoc } from "firebase/firestore";
+import { collection, getDocs, onSnapshot, doc, updateDoc, addDoc } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   fetchAllJournalEntriesPlatform, 
