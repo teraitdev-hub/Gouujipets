@@ -120,14 +120,12 @@ export async function fetchJournalEntries(businessId?: string): Promise<JournalE
     // 3. Fallback to Local Storage for 'lending_lent', 'loss', etc. that are not in DB
     const local = getLocalJournalEntries(businessId);
     
-    let combined = [];
+    let combined: JournalEntry[] = [];
     if (entries.length > 0) {
-      // If we have real transactions, only pull non-revenue/expense manual ledger entries from local (like loans)
       const filteredLocal = local.filter(e => e.entry_type !== 'revenue' && e.entry_type !== 'expense');
       combined = [...entries, ...filteredLocal];
     } else {
-      // If DB is totally empty, show full mock data so the detailed ledger matches the dashboard UI
-      combined = [...local];
+      combined = [];
     }
     
     combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
