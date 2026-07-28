@@ -220,6 +220,8 @@ export const PartnerLogin = () => {
           setIsLogin(true);
           setError("An account with this email already exists. We have switched you to the 'Sign In' tab—please enter your password to log in, or click 'Forgot?' to reset it.");
         }
+      } else if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.message?.includes("invalid-credential")) {
+        setError("Incorrect email or password. If you haven't registered your facility yet, please click the 'Register' tab above to sign up!");
       } else {
         setError(err.message || "Authentication failed");
       }

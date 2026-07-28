@@ -162,6 +162,8 @@ export const UserLogin = () => {
           setIsLogin(true);
           setError("An account with this email already exists. We switched you to the 'Sign In' tab—please enter your password to sign in.");
         }
+      } else if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.message?.includes("invalid-credential")) {
+        setError("Incorrect email or password. If you don't have an account yet, please click the 'Register' tab above to sign up!");
       } else {
         setError(err.message || "Authentication failed");
       }

@@ -70,7 +70,11 @@ export const AdminLogin = () => {
       // Navigate to dashboard
       navigate("/admin/dashboard");
     } catch (err: any) {
-      setError(err.message);
+      if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.message?.includes("invalid-credential")) {
+        setError("Invalid email or password. Please check your admin credentials and try again.");
+      } else {
+        setError(err.message || "Login failed");
+      }
     } finally {
       setIsLoading(false);
     }
