@@ -56,15 +56,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   loadUser: async () => {
     return new Promise<void>(async (resolve) => {
       try {
-        const demoAdminStr = localStorage.getItem('petpro_demo_admin');
-        if (demoAdminStr) {
-          set({ isAuthenticated: true, user: JSON.parse(demoAdminStr), isLoading: false });
-          resolve();
-          return;
-        }
-
-
-
         if (authUnsubscribe) {
           authUnsubscribe();
         }

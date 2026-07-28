@@ -5,6 +5,14 @@ import './index.css'
 import App from './App.tsx'
 import { MapProvider } from './context/MapContext'
 
+// CLEAR LOCAL STORAGE CACHES FOR FRESH START
+try {
+  localStorage.removeItem('gouuji_journal_entries');
+  localStorage.removeItem('gouuji_helpdesk_tickets');
+  localStorage.removeItem('petpro_demo_admin');
+  localStorage.removeItem('smart_notifications_v1');
+} catch(e) {}
+
 // FORCE WIPE DUMMY DATA SCRIPT & AUTO-FIX TIMESTAMPS
 import { db } from './lib/firebase'
 import { collection, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore'
@@ -19,7 +27,6 @@ setTimeout(async () => {
         await deleteDoc(doc(db, 'businesses', d.id));
         console.log('DELETED DUMMY:', bizName);
       } else {
-        // If it's a real business but missing created_at, give it one so it appears in ordered queries
         if (!d.data().created_at) {
           await updateDoc(doc(db, 'businesses', d.id), { created_at: new Date().toISOString() });
           console.log('PATCHED MISSING TIMESTAMP:', bizName);
