@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MapPin, Search, Navigation, Loader2, Building2, CheckCircle2, AlertCircle, ShieldAlert, Info, RefreshCw, Target } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { MapPin, Search, Navigation, Loader2, Building2, CheckCircle2, AlertCircle, ShieldAlert, Info, RefreshCw, Target, ArrowRight } from 'lucide-react';
 import { FallbackMap } from '../Map/FallbackMap';
 
 interface LocationPickerProps {
@@ -19,8 +19,8 @@ async function nominatimReverse(lat: number, lng: number): Promise<string> {
       { headers: { 'Accept-Language': 'en' } }
     );
     if (res.ok) {
-      const data = await res.json();
-      return data.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+      const d = await res.json();
+      return d.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
     }
   } catch (_) {}
   return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
@@ -48,17 +48,20 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 }) => {
   const [location, setLocation] = useState(defaultLocation);
   const [mapZoom, setMapZoom] = useState(13);
-  const [manualInput, setManualInput] = useState(defaultAddress);
-  const [exactAddress, setExactAddress] = useState(defaultAddress);
+  const [searchInput, setSearchInput] = useState(defaultAddress);
+  const [exactInput, setExactInput] = useState(defaultAddress);
+  const [pinnedAddress, setPinnedAddress] = useState(defaultAddress);
   const [gpsStatus, setGpsStatus] = useState<GpsStatus>('idle');
   const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
   const [searchStatus, setSearchStatus] = useState<SearchStatus>('idle');
+  const [exactSearchStatus, setExactSearchStatus] = useState<SearchStatus>('idle');
   const watchIdRef = useRef<number | null>(null);
+  const debounceRef = useRef<any>(null);
 
-  // Stop watching GPS on unmount
   useEffect(() => {
     return () => {
       if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
 
@@ -66,14 +69,35 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     setLocation({ lat, lng });
     setMapZoom(zoom);
     const addr = knownAddress ?? await nominatimReverse(lat, lng);
-    setManualInput(addr);
-    setExactAddress(addr);
+    setPinnedAddress(addr);
+    setSearchInput(addr);
+    setExactInput(addr);
     onLocationSelect({ lat, lng, address: addr, exactAddress: addr });
   };
 
-  const handleSearch = async () => {
-    const q = manualInput.trim();
+  // ── Main search input with debounced auto-search ──
+  const handleSearchInputChange = (val: string) => {
+    setSearchInput(val);
+    setSearchStatus('idle');
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (val.trim().length > 4) {
+      debounceRef.current = setTimeout(async () => {
+        setSearchStatus('searching');
+        const result = await nominatimForward(val);
+        if (result) {
+          await applyCoords(result.lat, result.lng, 16, result.display);
+          setSearchStatus('success');
+        } else {
+          setSearchStatus('error');
+        }
+      }, 900); // wait 900ms after user stops typing
+    }
+  };
+
+  const handleSearchNow = async () => {
+    const q = searchInput.trim();
     if (!q) return;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     setSearchStatus('searching');
     const result = await nominatimForward(q);
     if (result) {
@@ -84,25 +108,30 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     }
   };
 
-  // Use watchPosition to keep upgrading accuracy until a good fix arrives
+  // ── Exact address field with its own search button ──
+  const handleExactAddressSearch = async () => {
+    const q = exactInput.trim();
+    if (!q) return;
+    setExactSearchStatus('searching');
+    const result = await nominatimForward(q);
+    if (result) {
+      await applyCoords(result.lat, result.lng, 17, result.display);
+      setExactSearchStatus('success');
+    } else {
+      // Even if not geocodable, still save the text
+      onLocationSelect({ lat: location.lat, lng: location.lng, address: pinnedAddress || exactInput, exactAddress: exactInput });
+      setExactSearchStatus('error');
+    }
+  };
+
+  // ── GPS watchPosition ──
   const handleGPS = () => {
     if (!navigator.geolocation) { setGpsStatus('unavailable'); return; }
+    if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
+    setGpsStatus('locating'); setGpsAccuracy(null);
 
-    // Clear any existing watch
-    if (watchIdRef.current !== null) {
-      navigator.geolocation.clearWatch(watchIdRef.current);
-      watchIdRef.current = null;
-    }
-
-    setGpsStatus('locating');
-    setGpsAccuracy(null);
-
-    // Timeout after 20s if no good fix
     const giveUpTimer = setTimeout(() => {
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-        watchIdRef.current = null;
-      }
+      if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
       setGpsStatus(prev => prev === 'locating' ? 'timeout' : prev);
     }, 20000);
 
@@ -110,18 +139,11 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
       async (pos) => {
         const { latitude: lat, longitude: lng, accuracy } = pos.coords;
         setGpsAccuracy(Math.round(accuracy));
-
-        // Accept position immediately, but keep watching for better accuracy
         setGpsStatus('success');
-        await applyCoords(lat, lng, accuracy < 100 ? 18 : accuracy < 500 ? 16 : 14);
-
-        // Stop watching once we have a good-enough fix (<= 50m)
+        await applyCoords(lat, lng, accuracy < 50 ? 18 : accuracy < 200 ? 16 : 14);
         if (accuracy <= 50) {
           clearTimeout(giveUpTimer);
-          if (watchIdRef.current !== null) {
-            navigator.geolocation.clearWatch(watchIdRef.current);
-            watchIdRef.current = null;
-          }
+          if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
         }
       },
       (err) => {
@@ -139,7 +161,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     setSearchStatus('success');
   };
 
-  const accuracyColor = gpsAccuracy === null ? '' : gpsAccuracy <= 20 ? 'text-green-600' : gpsAccuracy <= 100 ? 'text-blue-600' : 'text-orange-500';
+  const accuracyColor = !gpsAccuracy ? '' : gpsAccuracy <= 20 ? 'text-green-600' : gpsAccuracy <= 100 ? 'text-blue-600' : 'text-orange-500';
 
   return (
     <div className="space-y-4 font-sans">
@@ -148,48 +170,53 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
       <div className="space-y-2">
         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
           <Search size={14} className="text-violet-600" />
-          Search by address / area / landmark
+          Type your address — map updates automatically
         </label>
+
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-violet-500 pointer-events-none" />
+            {searchStatus === 'searching' && (
+              <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-violet-400" />
+            )}
             <input
               type="text"
-              value={manualInput}
-              onChange={(e) => { setManualInput(e.target.value); setSearchStatus('idle'); }}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }}
-              placeholder="e.g. Indiranagar Bangalore  or  Sector 18 Noida"
-              className="w-full h-11 pl-10 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400/20 focus:border-violet-500 transition-all shadow-sm"
+              value={searchInput}
+              onChange={(e) => handleSearchInputChange(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearchNow(); } }}
+              placeholder="Start typing — e.g. MG Road Bangalore, Bandra Mumbai…"
+              className="w-full h-12 pl-10 pr-10 bg-white border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 transition-all shadow-sm"
             />
           </div>
           <button
-            type="button" onClick={handleSearch}
+            type="button" onClick={handleSearchNow}
             disabled={searchStatus === 'searching'}
-            className="h-11 px-4 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 text-white font-bold text-sm rounded-xl flex items-center gap-2 shrink-0 shadow transition-colors"
+            className="h-12 px-5 bg-violet-600 hover:bg-violet-700 active:scale-95 disabled:opacity-60 text-white font-bold text-sm rounded-xl flex items-center gap-2 shrink-0 shadow-md transition-all"
           >
-            {searchStatus === 'searching' ? <><Loader2 size={15} className="animate-spin" /> Searching...</> : <><Search size={15} /> Find on Map</>}
+            {searchStatus === 'searching' ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
+            <span className="hidden sm:inline">Find</span>
           </button>
         </div>
 
         {searchStatus === 'success' && (
           <p className="text-xs font-semibold text-green-600 flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-            <CheckCircle2 size={13} /> Location pinned on map!
+            <CheckCircle2 size={13} /> Location found and pinned on map!
           </p>
         )}
         {searchStatus === 'error' && (
-          <p className="text-xs font-semibold text-red-500 flex items-center gap-1.5 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-            <AlertCircle size={13} /> Address not found. Try landmark name, city or area.
+          <p className="text-xs font-semibold text-orange-600 flex items-center gap-1.5 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+            <AlertCircle size={13} /> Not found. Try a simpler name like "Indiranagar" or your city name.
           </p>
         )}
       </div>
 
-      {/* ─── 2. Live GPS Button ─── */}
+      {/* ─── 2. GPS ─── */}
       <div className="space-y-2">
         <button
           type="button" onClick={handleGPS}
           disabled={gpsStatus === 'locating'}
-          className={`w-full h-12 border font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm ${
-            gpsStatus === 'success'    ? 'bg-green-50 border-green-300 text-green-700' :
+          className={`w-full h-12 border-2 font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 ${
+            gpsStatus === 'success'    ? 'bg-green-50 border-green-400 text-green-700' :
             gpsStatus === 'denied' || gpsStatus === 'unavailable' || gpsStatus === 'timeout'
                                        ? 'bg-orange-50 border-orange-300 text-orange-700' :
             gpsStatus === 'locating'   ? 'bg-violet-100 border-violet-300 text-violet-700 cursor-wait' :
@@ -197,72 +224,54 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           }`}
         >
           {gpsStatus === 'locating'  && <Loader2 size={17} className="animate-spin" />}
-          {gpsStatus === 'success'   && <Target size={17} className="text-green-600" />}
+          {gpsStatus === 'success'   && <Target size={17} />}
           {(gpsStatus === 'denied' || gpsStatus === 'unavailable' || gpsStatus === 'timeout') && <RefreshCw size={17} />}
           {gpsStatus === 'idle'      && <Navigation size={17} />}
-
           <span>
-            {gpsStatus === 'idle'        && '📡 Detect My Exact Live GPS Location'}
-            {gpsStatus === 'locating'    && 'Getting your precise GPS location…'}
-            {gpsStatus === 'success'     && (gpsAccuracy !== null
-              ? `✅ GPS locked — Accuracy ±${gpsAccuracy}m`
-              : '✅ GPS Location Detected!')}
-            {gpsStatus === 'denied'      && 'Permission Denied — Tap to retry after enabling'}
+            {gpsStatus === 'idle'        && '📡 Use My Live GPS Location'}
+            {gpsStatus === 'locating'    && 'Getting your exact location…'}
+            {gpsStatus === 'success'     && (gpsAccuracy ? `✅ GPS Locked ±${gpsAccuracy}m` : '✅ GPS Location Set!')}
+            {gpsStatus === 'denied'      && 'Location Blocked — Tap to retry'}
             {gpsStatus === 'unavailable' && 'GPS Unavailable — Tap to retry'}
             {gpsStatus === 'timeout'     && 'GPS Timed Out — Tap to retry'}
           </span>
         </button>
 
-        {/* Accuracy indicator bar */}
-        {gpsStatus === 'locating' && (
+        {gpsStatus === 'success' && gpsAccuracy && (
           <div className="flex items-center gap-2 px-1">
-            <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-              <div className="h-full bg-violet-500 rounded-full animate-pulse" style={{ width: '60%' }} />
-            </div>
-            <span className="text-[11px] text-violet-600 font-bold shrink-0">Acquiring signal…</span>
-          </div>
-        )}
-        {gpsStatus === 'success' && gpsAccuracy !== null && (
-          <div className="flex items-center gap-2 px-1">
-            <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${gpsAccuracy <= 20 ? 'bg-green-500' : gpsAccuracy <= 100 ? 'bg-blue-500' : 'bg-orange-400'}`}
-                style={{ width: `${Math.max(10, Math.min(100, 100 - (gpsAccuracy / 10)))}%` }}
-              />
+            <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div className={`h-full rounded-full transition-all ${gpsAccuracy <= 20 ? 'bg-green-500' : gpsAccuracy <= 100 ? 'bg-blue-500' : 'bg-orange-400'}`}
+                style={{ width: `${Math.max(10, Math.min(100, 100 - (gpsAccuracy / 8)))}%` }} />
             </div>
             <span className={`text-[11px] font-bold shrink-0 ${accuracyColor}`}>
-              {gpsAccuracy <= 20 ? 'High precision' : gpsAccuracy <= 100 ? 'Good precision' : 'Low precision — drag pin to fine-tune'}
+              {gpsAccuracy <= 20 ? '🎯 Precise' : gpsAccuracy <= 100 ? '👍 Good' : '⚠️ Low — drag pin to adjust'}
             </span>
           </div>
         )}
 
         {gpsStatus === 'denied' && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-1">
-            <p className="text-xs font-bold text-amber-800 flex items-center gap-1.5">
-              <ShieldAlert size={13} /> Browser blocked location access
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <p className="text-xs font-bold text-amber-800 flex items-center gap-1">
+              <ShieldAlert size={12} /> Permission denied
             </p>
-            <p className="text-xs text-amber-700 font-medium leading-relaxed">
-              Click the 🔒 <strong>lock icon</strong> in your browser address bar → <em>Site Settings</em> → <em>Location</em> → set to <strong>Allow</strong> → refresh page.
+            <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+              Tap the 🔒 lock in your browser bar → <strong>Site Settings</strong> → <strong>Location → Allow</strong>, then refresh. Or just type your address above.
             </p>
-            <p className="text-xs text-amber-600 font-semibold">Alternatively, type your address in the search box above.</p>
           </div>
         )}
         {(gpsStatus === 'unavailable' || gpsStatus === 'timeout') && (
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-            <p className="text-xs font-bold text-blue-800 flex items-center gap-1.5"><Info size={13} /> GPS not available right now</p>
-            <p className="text-xs text-blue-600 font-medium mt-0.5 leading-relaxed">
-              Desktop browsers use Wi-Fi or IP location which is less precise. On mobile, enable GPS in device settings for best results.
-              You can also <strong>click any spot on the map</strong> below to set your location manually.
-            </p>
+            <p className="text-xs font-bold text-blue-800 flex items-center gap-1"><Info size={12} /> Signal unavailable</p>
+            <p className="text-xs text-blue-600 mt-0.5 leading-relaxed">Type your area in the search bar above or tap anywhere on the map to set location manually.</p>
           </div>
         )}
       </div>
 
-      {/* ─── 3. Interactive Map ─── */}
+      {/* ─── 3. Map ─── */}
       <div>
         <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1">
           <MapPin size={12} className="text-violet-500" />
-          Click on map or drag the purple pin to fine-tune
+          Tap map or drag the purple pin to fine-tune location
         </p>
         <FallbackMap
           center={[location.lat, location.lng]}
@@ -272,46 +281,54 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         />
       </div>
 
-      {/* ─── 4. Exact address field ─── */}
-      <div className="space-y-1.5">
+      {/* ─── 4. Exact Address with its own SET button ─── */}
+      <div className="space-y-2">
         <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
           <Building2 size={14} className="text-violet-600" />
-          Exact Flat / Building / Landmark (type or edit)
+          Exact Flat / Building / Landmark
         </label>
+
         <textarea
-          value={exactAddress}
+          value={exactInput}
           onChange={(e) => {
-            setExactAddress(e.target.value);
-            onLocationSelect({ lat: location.lat, lng: location.lng, address: e.target.value, exactAddress: e.target.value });
+            setExactInput(e.target.value);
+            setExactSearchStatus('idle');
+            onLocationSelect({ lat: location.lat, lng: location.lng, address: pinnedAddress || e.target.value, exactAddress: e.target.value });
           }}
-          onBlur={async (e) => {
-            const val = e.target.value.trim();
-            if (val && val !== manualInput) {
-              const result = await nominatimForward(val);
-              if (result) {
-                setLocation({ lat: result.lat, lng: result.lng });
-                setMapZoom(16);
-                setManualInput(result.display);
-                setSearchStatus('success');
-                onLocationSelect({ lat: result.lat, lng: result.lng, address: result.display, exactAddress: val });
-              }
-            }
-          }}
-          placeholder="e.g. Flat 4B, Prestige Towers, MG Road, Bengaluru – 560001"
-          className="w-full h-20 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-violet-400/20 focus:border-violet-500 outline-none resize-none transition-all"
+          placeholder="e.g. Flat 4B, Prestige Tower, MG Road, Bengaluru – 560001"
+          rows={2}
+          className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:border-violet-500 outline-none resize-none transition-all"
         />
-        <div className="flex items-center justify-between px-0.5">
-          <p className="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
-            📍 <span className="font-mono font-bold text-violet-700">{location.lat.toFixed(6)}, {location.lng.toFixed(6)}</span>
-            {gpsAccuracy !== null && gpsStatus === 'success' && (
-              <span className={`ml-2 font-bold ${accuracyColor}`}>(±{gpsAccuracy}m)</span>
-            )}
+
+        <button
+          type="button"
+          onClick={handleExactAddressSearch}
+          disabled={exactSearchStatus === 'searching' || !exactInput.trim()}
+          className="w-full h-11 bg-slate-800 hover:bg-slate-900 active:scale-95 disabled:opacity-40 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow transition-all"
+        >
+          {exactSearchStatus === 'searching'
+            ? <><Loader2 size={15} className="animate-spin" /> Finding location on map…</>
+            : <><ArrowRight size={15} /> Set This Address on Map</>}
+        </button>
+
+        {exactSearchStatus === 'success' && (
+          <p className="text-xs font-semibold text-green-600 flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+            <CheckCircle2 size={13} /> Address pinned on map!
           </p>
-          {exactAddress && (
-            <span className="text-[11px] text-green-600 font-bold flex items-center gap-1">
-              <CheckCircle2 size={11} /> Pinned
-            </span>
-          )}
+        )}
+        {exactSearchStatus === 'error' && (
+          <p className="text-xs font-semibold text-slate-500 flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+            <Info size={13} /> Exact flat details saved — search the area name above to move the map pin.
+          </p>
+        )}
+
+        {/* Coordinates */}
+        <div className="flex items-center justify-between px-0.5 pt-0.5">
+          <p className="text-[11px] text-slate-400 font-semibold">
+            📍 <span className="font-mono text-violet-600 font-bold">{location.lat.toFixed(6)}, {location.lng.toFixed(6)}</span>
+            {gpsAccuracy && gpsStatus === 'success' && <span className={`ml-2 ${accuracyColor}`}>(±{gpsAccuracy}m)</span>}
+          </p>
+          {pinnedAddress && <span className="text-[11px] text-green-600 font-bold flex items-center gap-1"><CheckCircle2 size={11} /> Pinned</span>}
         </div>
       </div>
     </div>
