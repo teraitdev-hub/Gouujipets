@@ -143,7 +143,7 @@ export const PartnerLogin = () => {
 
         if (userCredential.user) {
           try {
-            await addDoc(collection(db, "businesses"), {
+            const bizRef = await addDoc(collection(db, "businesses"), {
               owner_id: userCredential.user.uid,
               name: `${formData.name}'s Facility`,
               type: facilityTypes.join(","),
@@ -151,9 +151,21 @@ export const PartnerLogin = () => {
               latitude: location.lat,
               longitude: location.lng,
               status: "pending",
+              created_at: new Date().toISOString()
+            });
+
+            // Trigger real-time Admin Notification record
+            await addDoc(collection(db, "admin_notifications"), {
+              title: "New Partner Registration Pending",
+              message: `${formData.name} registered a new facility (${facilityTypes.join(", ")}) requiring admin verification.`,
+              business_id: bizRef.id,
+              owner_id: userCredential.user.uid,
+              type: "partner_registration",
+              read: false,
+              created_at: new Date().toISOString()
             });
           } catch (bizErr) {
-            console.error("Failed to auto-create business", bizErr);
+            console.error("Failed to auto-create business or admin notification", bizErr);
           }
         }
 
@@ -421,16 +433,31 @@ export const PartnerLogin = () => {
 
                 {/* Location Map Pinning */}
                 <div>
-                  <label className="block text-xs font-black text-slate-500 uppercase tracking-widest mb-2">
-                    Business Location
-                  </label>
-                  <p className="text-xs text-slate-400 mb-2">Drag the pin to set your exact location.</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-black text-slate-500 uppercase tracking-widest">
+                      Business Location
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition((pos) => {
+                            setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                          }, () => alert("Could not fetch location"));
+                        }
+                      }}
+                      className="text-xs font-bold text-violet-600 hover:text-violet-700 flex items-center gap-1 cursor-pointer"
+                    >
+                      <MapPin size={12} /> Detect GPS Location
+                    </button>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-2">Click or drag the pin to set your exact facility location.</p>
                   <div className="w-full h-48 rounded-xl overflow-hidden border border-slate-200 relative bg-slate-100 flex items-center justify-center">
                     {isLoaded ? (
                       <GoogleMap
                         mapContainerStyle={{ width: '100%', height: '100%' }}
                         center={location}
-                        zoom={5}
+                        zoom={13}
                         onClick={(e) => {
                           if (e.latLng) setLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
                         }}

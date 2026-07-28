@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { GoogleMap, Marker, Autocomplete } from '@react-google-maps/api';
 import { useMap } from '../../context/MapContext';
-import { MapPin, Search } from 'lucide-react';
+import { MapPin, Search, Crosshair, Loader2 } from 'lucide-react';
 
 interface LocationPickerProps {
   initialLocation?: { lat: number; lng: number };
@@ -20,6 +20,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   const [mapCenter, setMapCenter] = useState(initialLocation || defaultCenter);
   const [markerPosition, setMarkerPosition] = useState(initialLocation || defaultCenter);
   const [address, setAddress] = useState("");
+  const [isLocating, setIsLocating] = useState(false);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
   const onLoad = useCallback((autocomplete: google.maps.places.Autocomplete) => {
@@ -42,52 +43,95 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     }
   };
 
+  const handleGeocode = useCallback((lat: number, lng: number) => {
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === "OK" && results && results[0]) {
+        const formatted = results[0].formatted_address;
+        setAddress(formatted);
+        onLocationSelect({ lat, lng, address: formatted });
+      } else {
+        const fallback = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        setAddress(fallback);
+        onLocationSelect({ lat, lng, address: fallback });
+      }
+    });
+  }, [onLocationSelect]);
+
   const onMapClick = useCallback((e: google.maps.MapMouseEvent) => {
     if (e.latLng) {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
       setMarkerPosition({ lat, lng });
-      
-      // Reverse Geocoding
-      const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-        if (status === "OK" && results && results[0]) {
-          setAddress(results[0].formatted_address);
-          onLocationSelect({ lat, lng, address: results[0].formatted_address });
-        } else {
-          onLocationSelect({ lat, lng, address: `${lat}, ${lng}` });
-        }
-      });
+      handleGeocode(lat, lng);
     }
-  }, [onLocationSelect]);
+  }, [handleGeocode]);
 
-  if (loadError) return <div>Error loading maps</div>;
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const newPos = { lat, lng };
+        setMapCenter(newPos);
+        setMarkerPosition(newPos);
+        handleGeocode(lat, lng);
+        setIsLocating(false);
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        setIsLocating(false);
+        alert("Unable to retrieve your location. Please check your browser permissions.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
+
+  if (loadError) return <div className="p-4 text-red-500 bg-red-50 rounded-xl">Error loading maps</div>;
   if (!isLoaded) return <div className="animate-pulse bg-gray-200 rounded-xl" style={{ height }}></div>;
 
   return (
-    <div className="flex flex-col gap-4 relative w-full">
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 w-11/12 max-w-md">
-        <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
-          <div className="relative flex items-center">
-            <Search className="absolute left-3 text-gray-500" size={20} />
-            <input
-              type="text"
-              placeholder="Search location..."
-              className="w-full pl-10 pr-4 py-3 rounded-full bg-white/90 backdrop-blur-md shadow-lg border border-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/50 text-gray-800"
-              defaultValue={address}
-            />
-          </div>
-        </Autocomplete>
+    <div className="flex flex-col gap-4 relative w-full font-sans">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 w-11/12 max-w-md flex gap-2">
+        <div className="flex-1">
+          <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
+            <div className="relative flex items-center">
+              <Search className="absolute left-3 text-gray-500" size={18} />
+              <input
+                type="text"
+                placeholder="Search location..."
+                className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white/95 backdrop-blur-md shadow-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-600/50 text-sm text-gray-800"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
+          </Autocomplete>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleDetectLocation}
+          disabled={isLocating}
+          title="Use My Current GPS Location"
+          className="shrink-0 p-2.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg transition-all flex items-center justify-center cursor-pointer border border-purple-400 active:scale-95"
+        >
+          {isLocating ? <Loader2 size={18} className="animate-spin" /> : <Crosshair size={18} />}
+        </button>
       </div>
 
-      <div className="rounded-xl overflow-hidden shadow-inner border border-gray-100" style={{ height }}>
+      <div className="rounded-xl overflow-hidden shadow-inner border border-gray-200 relative" style={{ height }}>
         <GoogleMap
           mapContainerStyle={{ width: '100%', height: '100%' }}
           center={mapCenter}
-          zoom={initialLocation ? 15 : 5}
+          zoom={initialLocation ? 15 : 12}
           onClick={onMapClick}
           options={{
-            disableDefaultUI: true,
+            disableDefaultUI: false,
             zoomControl: true,
             streetViewControl: false,
             mapTypeControl: false,
@@ -96,10 +140,27 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         >
           <Marker 
             position={markerPosition} 
+            draggable={true}
+            onDragEnd={(e) => {
+              if (e.latLng) {
+                const lat = e.latLng.lat();
+                const lng = e.latLng.lng();
+                setMarkerPosition({ lat, lng });
+                handleGeocode(lat, lng);
+              }
+            }}
             animation={window.google.maps.Animation.DROP}
           />
         </GoogleMap>
       </div>
+
+      {address && (
+        <div className="bg-purple-50 border border-purple-200 p-3 rounded-xl flex items-center gap-2 text-xs font-bold text-purple-900">
+          <MapPin size={16} className="text-purple-600 shrink-0" />
+          <span className="truncate">Selected Location: {address}</span>
+        </div>
+      )}
     </div>
   );
 };
+

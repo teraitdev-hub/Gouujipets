@@ -54,6 +54,8 @@ import { RefundPolicy } from "./pages/Legal/RefundPolicy";
 import { PrivacyPolicy } from "./pages/Legal/PrivacyPolicy";
 import { TermsOfService } from "./pages/Legal/TermsOfService";
 
+import { AdminSettings } from "./pages/Admin/AdminSettings";
+
 // A simple wrapper for public pages that need the PublicNavbar
 const PublicLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col">
@@ -126,7 +128,7 @@ function App() {
                     <Route path="ai-insights" element={<AdminDashboard />} />
                     <Route path="cms" element={<AdminDashboard />} />
                     <Route path="gallery" element={<AdminDashboard />} />
-                    <Route path="settings" element={<AdminDashboard />} />
+                    <Route path="settings" element={<AdminSettings />} />
                     <Route path="pets" element={<AdminDashboard />} />
                     <Route path="*" element={<NotFound type="Admin" />} />
                   </Routes>

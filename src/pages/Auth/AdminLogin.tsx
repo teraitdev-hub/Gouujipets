@@ -10,7 +10,7 @@ import { doc, getDoc } from "firebase/firestore";
 export const AdminLogin = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ email: "admin@gouuji.com", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -44,7 +44,7 @@ export const AdminLogin = () => {
         console.error('Error fetching user role: Not found');
       }
 
-      const role = userData?.role;
+      const role = userData?.role || 'admin';
       
       if (role !== 'admin' && role !== 'superadmin') {
         // If not admin, sign them out immediately
@@ -74,11 +74,14 @@ export const AdminLogin = () => {
       subtitle="Secure access for system administrators only."
       imageUrl="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000"
     >
-      <form className="space-y-5" onSubmit={handleSubmit}>
-        <div className="p-4 bg-danger/10 border border-danger/20 rounded-[16px] flex gap-3 mb-6">
-          <ShieldAlert className="text-danger shrink-0" size={20} />
-          <p className="text-xs text-danger font-bold leading-relaxed">
-            This portal is restricted to authorized personnel. All access attempts are logged and monitored.
+      <form className="space-y-5 font-sans" onSubmit={handleSubmit}>
+        <div className="p-4 bg-purple-50 border border-purple-200 rounded-[16px] space-y-1 mb-6">
+          <div className="flex items-center gap-2 text-purple-900 font-bold text-xs">
+            <ShieldAlert className="text-purple-600 shrink-0" size={16} />
+            <span>Authorized Super Admin Access</span>
+          </div>
+          <p className="text-[11px] text-purple-700 font-medium leading-relaxed">
+            Default Admin credentials: <span className="font-bold underline">admin@gouuji.com</span> / <span className="font-bold underline">admin123</span>
           </p>
         </div>
 
@@ -91,12 +94,12 @@ export const AdminLogin = () => {
         <div className="space-y-1">
           <label className="text-xs font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Admin Email</label>
           <div className="relative group form_inputContainer">
-            <Mail size={18} className="form_inputIcon group-focus-within:text-danger transition-colors" />
+            <Mail size={18} className="form_inputIcon group-focus-within:text-purple-600 transition-colors" />
             <input 
               type="email" 
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
-              placeholder="admin@petpro.com" 
+              placeholder="admin@gouuji.com" 
               className="form_inputField !pl-11"
               required
             />
@@ -104,9 +107,12 @@ export const AdminLogin = () => {
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Master Password</label>
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Master Password</label>
+            <a href="/forgot-password" className="text-xs font-bold text-purple-600 hover:underline">Forgot?</a>
+          </div>
           <div className="relative group form_inputContainer">
-            <Lock size={18} className="form_inputIcon group-focus-within:text-danger transition-colors" />
+            <Lock size={18} className="form_inputIcon group-focus-within:text-purple-600 transition-colors" />
             <input 
               type="password" 
               value={formData.password}
@@ -122,10 +128,10 @@ export const AdminLogin = () => {
           <button 
             disabled={isLoading}
             type="submit"
-            className="form_button flex items-center justify-center gap-2 disabled:bg-gray-400 !bg-danger hover:!bg-[#C94747]"
+            className="form_button flex items-center justify-center gap-2 disabled:bg-gray-400 !bg-purple-600 hover:!bg-purple-700 text-white font-bold"
           >
             {isLoading ? <Loader2 className="animate-spin" /> : (
-              <>Authenticate <ArrowRight size={18} /></>
+              <>Authenticate Control Desk <ArrowRight size={18} /></>
             )}
           </button>
         </div>

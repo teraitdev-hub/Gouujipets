@@ -4,86 +4,12 @@ import { PageTransition } from "../../components/layout/PageTransition";
 import { ArrowLeft, MapPin, Star, Clock, Car, Phone, CheckCircle, Crosshair, Scissors, Stethoscope, Home, DollarSign, Package, ChevronRight, ShieldCheck, Sparkles } from "lucide-react";
 import { formatRupee } from "../../utils/currency";
 import { motion } from "framer-motion";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet-routing-machine";
-import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
+import { GoogleMap, Marker, InfoWindow, DirectionsRenderer } from '@react-google-maps/api';
+import { useMap } from '../../context/MapContext';
 import { db } from "../../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
-// Fix for default Leaflet icon in React
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
 
-// Custom icon for facility in Light Purple theme
-const facilityIcon = L.divIcon({
-  className: "custom-facility-icon",
-  html: `
-    <div style="background-color: #9333ea; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-    </div>
-  `,
-  iconSize: [36, 36],
-  iconAnchor: [18, 36],
-});
-
-// User location icon
-const userIcon = L.divIcon({
-  className: "user-location-icon",
-  html: `
-    <div style="position: relative; width: 24px; height: 24px;">
-      <div style="position: absolute; width: 100%; height: 100%; border-radius: 50%; background-color: #c084fc; opacity: 0.4; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></div>
-      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; border-radius: 50%; background-color: #9333ea; border: 2px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.3);"></div>
-    </div>
-    <style>
-      @keyframes ping {
-        75%, 100% { transform: scale(2); opacity: 0; }
-      }
-    </style>
-  `,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
-});
-
-// Component to handle Live Routing
-const RoutingMachine = ({ start, end }: { start: L.LatLngTuple | null, end: L.LatLngTuple }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!start) return;
-
-    const routingControl = (L.Routing as any).control({
-      waypoints: [
-        L.latLng(start[0], start[1]),
-        L.latLng(end[0], end[1])
-      ],
-      lineOptions: {
-        styles: [{ color: '#9333ea', weight: 5, opacity: 0.8 }],
-        extendToWaypoints: true,
-        missingRouteTolerance: 0
-      },
-      show: false,
-      addWaypoints: false,
-      fitSelectedRoutes: true,
-      createMarker: () => null
-    }).addTo(map);
-
-    return () => {
-      try {
-        map.removeControl(routingControl);
-      } catch (e) {
-        // ignore
-      }
-    };
-  }, [map, start, end]);
-
-  return null;
-};
 
 export const FacilityDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -95,8 +21,11 @@ export const FacilityDetails = () => {
   const [services, setServices] = useState<any[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   
-  const [userLoc, setUserLoc] = useState<L.LatLngTuple | null>(null);
+  const [userLoc, setUserLoc] = useState<{ lat: number, lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const { isLoaded, loadError } = useMap();
+  const [directionsResult, setDirectionsResult] = useState<google.maps.DirectionsResult | null>(null);
+  const [activeMarker, setActiveMarker] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -173,7 +102,7 @@ export const FacilityDetails = () => {
       setIsLocating(true);
       watchId = navigator.geolocation.watchPosition(
         (pos) => {
-          setUserLoc([pos.coords.latitude, pos.coords.longitude]);
+          setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
           setIsLocating(false);
         },
         () => {
@@ -189,6 +118,29 @@ export const FacilityDetails = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!userLoc || !facility || !isLoaded) return;
+    
+    const directionsService = new window.google.maps.DirectionsService();
+    const facilityCoords = {
+      lat: Number(facility.lat || facility.latitude || 19.0760),
+      lng: Number(facility.lng || facility.longitude || 72.8777)
+    };
+    
+    directionsService.route(
+      {
+        origin: userLoc,
+        destination: facilityCoords,
+        travelMode: window.google.maps.TravelMode.DRIVING
+      },
+      (result, status) => {
+        if (status === window.google.maps.DirectionsStatus.OK) {
+          setDirectionsResult(result);
+        }
+      }
+    );
+  }, [userLoc, facility, isLoaded]);
 
   if (isLoading) {
     return (
@@ -213,10 +165,10 @@ export const FacilityDetails = () => {
     );
   }
 
-  const facilityCoords: L.LatLngTuple = [
-    Number(facility.lat || facility.latitude || 19.0760),
-    Number(facility.lng || facility.longitude || 72.8777)
-  ];
+  const facilityCoords = {
+    lat: Number(facility.lat || facility.latitude || 19.0760),
+    lng: Number(facility.lng || facility.longitude || 72.8777)
+  };
 
   return (
     <PageTransition className="pb-32 bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] min-h-screen font-sans">
@@ -453,44 +405,69 @@ export const FacilityDetails = () => {
               </div>
             )}
             
-            <MapContainer 
-              center={facilityCoords} 
-              zoom={15} 
-              style={{ height: '100%', width: '100%', zIndex: 0 }}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              
-              {/* Destination Marker */}
-              <Marker position={facilityCoords} icon={facilityIcon}>
-                <Popup>
-                  <div className="p-1 min-w-[180px] font-sans">
-                    <div className="font-black text-sm text-purple-950">{facility.name}</div>
-                    <div className="text-xs text-purple-700 mt-1 flex items-start gap-1">
-                      <MapPin size={12} className="text-purple-600 shrink-0 mt-0.5" />
-                      <span>{typeof facility.address === 'string' ? facility.address : 'Verified Center'}</span>
-                    </div>
-                    <div className="mt-2 text-xs font-black text-purple-600">
-                      Starting from {formatRupee(facility.priceFrom || 999)}/day
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-
-              {/* Start (User) Marker */}
-              {userLoc && (
-                <Marker position={userLoc} icon={userIcon}>
-                  <Popup>
-                    <div className="font-bold">You are here</div>
-                  </Popup>
+            {loadError && <div className="p-4 text-red-500 bg-red-50 w-full h-full flex items-center justify-center">Map failed to load</div>}
+            {!isLoaded && <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">Loading Map...</div>}
+            {isLoaded && !loadError && (
+              <GoogleMap 
+                center={facilityCoords} 
+                zoom={15} 
+                mapContainerStyle={{ height: '100%', width: '100%' }}
+                options={{
+                  disableDefaultUI: false,
+                  scrollwheel: false,
+                }}
+              >
+                {/* Destination Marker */}
+                <Marker 
+                  position={facilityCoords} 
+                  onClick={() => setActiveMarker("facility")}
+                  animation={window.google.maps.Animation.DROP}
+                >
+                  {activeMarker === "facility" && (
+                    <InfoWindow onCloseClick={() => setActiveMarker(null)}>
+                      <div className="p-1 min-w-[180px] font-sans">
+                        <div className="font-black text-sm text-purple-950">{facility.name}</div>
+                        <div className="text-xs text-purple-700 mt-1 flex items-start gap-1">
+                          <MapPin size={12} className="text-purple-600 shrink-0 mt-0.5" />
+                          <span>{typeof facility.address === 'string' ? facility.address : 'Verified Center'}</span>
+                        </div>
+                        <div className="mt-2 text-xs font-black text-purple-600">
+                          Starting from {formatRupee(facility.priceFrom || 999)}/day
+                        </div>
+                      </div>
+                    </InfoWindow>
+                  )}
                 </Marker>
-              )}
 
-              {/* Draw Live Route */}
-              <RoutingMachine start={userLoc} end={facilityCoords} />
-            </MapContainer>
+                {/* Start (User) Marker */}
+                {userLoc && !directionsResult && (
+                  <Marker 
+                    position={userLoc} 
+                    onClick={() => setActiveMarker("user")}
+                  >
+                    {activeMarker === "user" && (
+                      <InfoWindow onCloseClick={() => setActiveMarker(null)}>
+                        <div className="font-bold p-1">You are here</div>
+                      </InfoWindow>
+                    )}
+                  </Marker>
+                )}
+
+                {/* Draw Live Route */}
+                {directionsResult && (
+                  <DirectionsRenderer 
+                    directions={directionsResult} 
+                    options={{
+                      polylineOptions: {
+                        strokeColor: '#9333ea',
+                        strokeWeight: 5,
+                        strokeOpacity: 0.8
+                      }
+                    }}
+                  />
+                )}
+              </GoogleMap>
+            )}
           </div>
         </div>
       </div>
