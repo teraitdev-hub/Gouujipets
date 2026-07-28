@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { GoogleMap, useLoadScript, Marker, Autocomplete } from '@react-google-maps/api';
 import { MapPin, Search, Loader2 } from 'lucide-react';
+import { FallbackMap } from '../Map/FallbackMap';
+import { useMap } from '../../context/MapContext';
 
 interface LocationPickerProps {
   onLocationSelect: (location: { lat: number, lng: number, address: string }) => void;
@@ -19,25 +21,32 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   const [address, setAddress] = useState("");
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
 
+  const { authFailed } = useMap();
+
+  const apiKey = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY && import.meta.env.VITE_GOOGLE_MAPS_API_KEY !== "YOUR_GOOGLE_MAPS_API_KEY_HERE")
+    ? import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+    : (import.meta.env.VITE_FIREBASE_API_KEY || "");
+
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_FIREBASE_API_KEY || "", // Ensure you have a valid Google Maps API Key
+    googleMapsApiKey: apiKey,
     libraries,
   });
 
   const reverseGeocode = async (lat: number, lng: number) => {
     try {
-      const geocoder = new window.google.maps.Geocoder();
-      const response = await geocoder.geocode({ location: { lat, lng } });
-      if (response.results[0]) {
-        const newAddress = response.results[0].formatted_address;
-        setAddress(newAddress);
-        onLocationSelect({ lat, lng, address: newAddress });
-      } else {
-        onLocationSelect({ lat, lng, address: "Location selected" });
+      if (window.google && window.google.maps && window.google.maps.Geocoder) {
+        const geocoder = new window.google.maps.Geocoder();
+        const response = await geocoder.geocode({ location: { lat, lng } });
+        if (response.results[0]) {
+          const newAddress = response.results[0].formatted_address;
+          setAddress(newAddress);
+          onLocationSelect({ lat, lng, address: newAddress });
+          return;
+        }
       }
+      onLocationSelect({ lat, lng, address: `Latitude: ${lat.toFixed(4)}, Longitude: ${lng.toFixed(4)}` });
     } catch (e) {
-      console.error("Geocoding failed:", e);
-      onLocationSelect({ lat, lng, address: "Location selected" });
+      onLocationSelect({ lat, lng, address: `Latitude: ${lat.toFixed(4)}, Longitude: ${lng.toFixed(4)}` });
     }
   };
 
@@ -64,14 +73,21 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     }
   };
 
-  if (loadError) return <div className="p-4 bg-red-50 text-red-600 rounded-xl">Error loading Google Maps</div>;
-  
-  if (!isLoaded) return (
-    <div className={`flex flex-col items-center justify-center bg-slate-100 ${className}`}>
-      <Loader2 className="animate-spin text-slate-400 mb-2" size={24} />
-      <span className="text-xs text-slate-500 font-semibold">Loading Map...</span>
-    </div>
-  );
+  if (loadError || authFailed || !isLoaded) {
+    return (
+      <div className="space-y-3">
+        <FallbackMap 
+          center={[location.lat, location.lng]} 
+          zoom={14} 
+          className={className} 
+          onLocationSelect={(lat, lng) => {
+            setLocation({ lat, lng });
+            onLocationSelect({ lat, lng, address: `Selected Location (${lat.toFixed(4)}, ${lng.toFixed(4)})` });
+          }} 
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3">

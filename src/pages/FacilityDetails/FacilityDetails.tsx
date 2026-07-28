@@ -6,6 +6,7 @@ import { formatRupee } from "../../utils/currency";
 import { motion } from "framer-motion";
 import { GoogleMap, Marker, InfoWindow, DirectionsRenderer } from '@react-google-maps/api';
 import { useMap } from '../../context/MapContext';
+import { FallbackMap } from '../../components/Map/FallbackMap';
 import { db } from "../../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
 
@@ -23,7 +24,7 @@ export const FacilityDetails = () => {
   
   const [userLoc, setUserLoc] = useState<{ lat: number, lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const { isLoaded, loadError } = useMap();
+  const { isLoaded, loadError, authFailed } = useMap();
   const [directionsResult, setDirectionsResult] = useState<google.maps.DirectionsResult | null>(null);
   const [activeMarker, setActiveMarker] = useState<string | null>(null);
 
@@ -405,9 +406,17 @@ export const FacilityDetails = () => {
               </div>
             )}
             
-            {loadError && <div className="p-4 text-red-500 bg-red-50 w-full h-full flex items-center justify-center">Map failed to load</div>}
-            {!isLoaded && <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">Loading Map...</div>}
-            {isLoaded && !loadError && (
+            {(loadError || authFailed || !isLoaded) ? (
+              <FallbackMap
+                center={[facilityCoords.lat, facilityCoords.lng]}
+                zoom={14}
+                markers={[
+                  { position: [facilityCoords.lat, facilityCoords.lng] as [number, number], popupText: facility.name },
+                  ...(userLoc ? [{ position: [userLoc.lat, userLoc.lng] as [number, number], popupText: "Your Current GPS Location" }] : [])
+                ]}
+                className="w-full h-full"
+              />
+            ) : (
               <GoogleMap 
                 center={facilityCoords} 
                 zoom={15} 
@@ -421,7 +430,6 @@ export const FacilityDetails = () => {
                 <Marker 
                   position={facilityCoords} 
                   onClick={() => setActiveMarker("facility")}
-                  animation={window.google.maps.Animation.DROP}
                 >
                   {activeMarker === "facility" && (
                     <InfoWindow onCloseClick={() => setActiveMarker(null)}>

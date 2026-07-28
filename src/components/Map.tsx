@@ -1,6 +1,7 @@
 import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
 import { useMap } from '../context/MapContext';
 import { useState } from 'react';
+import { FallbackMap } from './Map/FallbackMap';
 
 interface MapProps {
   center?: [number, number];
@@ -13,16 +14,22 @@ interface MapProps {
 }
 
 export const Map = ({ 
-  center = [51.505, -0.09], // Default center
+  center = [12.9716, 77.5946], // Default Bangalore
   zoom = 13,
   markers = [],
-  className = "h-[400px] w-full rounded-xl shadow-lg border border-slate-200 z-0"
+  className = "h-[400px] w-full rounded-2xl shadow-lg border border-slate-200 z-0"
 }: MapProps) => {
-  const { isLoaded, loadError } = useMap();
+  const { isLoaded, loadError, authFailed } = useMap();
   const [activeMarker, setActiveMarker] = useState<number | null>(null);
 
-  if (loadError) return <div className="text-red-500 p-4 bg-red-50 rounded-xl border border-red-100">Map failed to load</div>;
-  if (!isLoaded) return <div className={`${className} animate-pulse bg-gray-200`} />;
+  // If Google Maps fail or auth errors out, render clean interactive FallbackMap (OpenStreetMap)
+  if (loadError || authFailed) {
+    return <FallbackMap center={center} zoom={zoom} markers={markers} className={className} />;
+  }
+
+  if (!isLoaded) {
+    return <FallbackMap center={center} zoom={zoom} markers={markers} className={className} />;
+  }
 
   const centerLatLng = { lat: center[0], lng: center[1] };
 
@@ -44,7 +51,6 @@ export const Map = ({
               key={idx} 
               position={position}
               onClick={() => setActiveMarker(idx)}
-              animation={window.google.maps.Animation.DROP}
             >
               {activeMarker === idx && marker.popupText && (
                 <InfoWindow onCloseClick={() => setActiveMarker(null)}>
@@ -60,4 +66,3 @@ export const Map = ({
     </div>
   );
 };
-
