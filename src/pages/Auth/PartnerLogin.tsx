@@ -18,7 +18,7 @@ export const PartnerLogin = () => {
   const isApprovedParam = searchParams.get('approved') === 'true';
 
   const { isAuthenticated, user } = useAuthStore();
-  const [isLogin, setIsLogin] = useState(!isApprovedParam);
+  const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", password: "", phone: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -147,22 +147,56 @@ export const PartnerLogin = () => {
       }
 
       if (isLogin) {
-        const userCredential = await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
-        
-        await checkApprovalStatus(userCredential.user.uid);
-        
-        await useAuthStore.getState().loadUser();
-        navigate("/partner/dashboard");
+        // ===== SIGN IN FLOW =====
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
+          
+          // Check if they have a business record
+          const bizQuery = query(collection(db, "businesses"), where("owner_id", "==", userCredential.user.uid), limit(1));
+          const existingBizSnap = await getDocs(bizQuery);
+          
+          if (existingBizSnap.empty) {
+            // They have an Auth account but no business — sign them out and tell them to register
+            await signOut(auth);
+            setIsLogin(false);
+            setError("Your account exists but you haven't registered a facility yet. Please fill out the registration form below.");
+            return;
+          }
+          
+          const bizData = existingBizSnap.docs[0].data();
+          if (bizData.status === "pending") {
+            await signOut(auth);
+            setError("Your registration is still pending Admin approval. You will receive a notification once approved.");
+            return;
+          } else if (bizData.status === "rejected" || bizData.status === "suspended") {
+            await signOut(auth);
+            setError(`Your account has been ${bizData.status}. Please contact support.`);
+            return;
+          }
+          
+          // Active — let them in
+          await useAuthStore.getState().loadUser();
+          navigate("/partner/dashboard");
+        } catch (signInErr: any) {
+          if (signInErr.code === "auth/invalid-credential" || signInErr.code === "auth/user-not-found" || signInErr.code === "auth/wrong-password") {
+            setError("Incorrect email or password. If you just registered, make sure you don't have any typos in your email. If you don't have an account yet, please click 'Register' to create a new account.");
+          } else {
+            setError(signInErr.message || "Sign in failed.");
+          }
+        }
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, loginIdentifier, formData.password);
-        
-        await setDoc(doc(db, "users", userCredential.user.uid), {
-          full_name: formData.name,
-          phone: formData.phone,
-          role: "partner"
-        }, { merge: true });
+        // ===== REGISTER FLOW =====
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, loginIdentifier, formData.password);
+          
+          await setDoc(doc(db, "users", userCredential.user.uid), {
+            full_name: formData.name,
+            phone: formData.phone,
+            email: loginIdentifier,
+            role: "partner",
+            created_at: new Date().toISOString()
+          }, { merge: true });
 
-        if (userCredential.user) {
           try {
             const bizRef = await addDoc(collection(db, "businesses"), {
               owner_id: userCredential.user.uid,
@@ -175,7 +209,6 @@ export const PartnerLogin = () => {
               created_at: new Date().toISOString()
             });
 
-            // Trigger real-time Admin Notification record
             await addDoc(collection(db, "admin_notifications"), {
               title: "New Partner Registration Pending",
               message: `${formData.name} registered a new facility (${facilityTypes.join(", ")}) requiring admin verification.`,
@@ -188,57 +221,20 @@ export const PartnerLogin = () => {
           } catch (bizErr) {
             console.error("Failed to auto-create business or admin notification", bizErr);
           }
-        }
 
-        await signOut(auth);
-        setShowApprovalModal(true);
+          await signOut(auth);
+          setShowApprovalModal(true);
+        } catch (regErr: any) {
+          if (regErr.code === "auth/email-already-in-use") {
+            setIsLogin(true);
+            setError("This email is already registered. We've switched you to Sign In. Please enter your password to log in, or use 'Forgot?' to reset it.");
+          } else {
+            setError(regErr.message || "Registration failed.");
+          }
+        }
       }
     } catch (err: any) {
-      if (err.message === "NOT_REGISTERED") {
-        setIsLogin(false);
-        setError("You are not a registered partner yet. Please fill out your details below to sign up and request Admin approval.");
-      } else if (err.code === "auth/email-already-in-use" || err.message?.includes("email-already-in-use")) {
-        try {
-          const userCredential = await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
-          const bizQuery = query(collection(db, "businesses"), where("owner_id", "==", userCredential.user.uid), limit(1));
-          const existingBizSnap = await getDocs(bizQuery);
-          if (existingBizSnap.empty) {
-            await setDoc(doc(db, "users", userCredential.user.uid), { role: "partner" }, { merge: true });
-            const bizRef = await addDoc(collection(db, "businesses"), {
-              owner_id: userCredential.user.uid,
-              name: `${formData.name || 'My'}'s Facility`,
-              type: facilityTypes.join(","),
-              address: "Bangalore, Karnataka, India",
-              latitude: location.lat,
-              longitude: location.lng,
-              status: "pending",
-              created_at: new Date().toISOString()
-            });
-            await addDoc(collection(db, "admin_notifications"), {
-              title: "New Partner Registration Pending",
-              message: `${formData.name || 'Partner'} registered a new facility (${facilityTypes.join(", ")}) requiring admin verification.`,
-              business_id: bizRef.id,
-              owner_id: userCredential.user.uid,
-              type: "partner_registration",
-              read: false,
-              created_at: new Date().toISOString()
-            });
-            await signOut(auth);
-            setShowApprovalModal(true);
-          } else {
-            await checkApprovalStatus(userCredential.user.uid);
-            await useAuthStore.getState().loadUser();
-            navigate("/partner/dashboard");
-          }
-        } catch (signInErr: any) {
-          setIsLogin(true);
-          setError("This email address is already registered in our system. We have switched you to 'Sign In'—please enter your password to log in, or click 'Forgot?' if you need to reset it.");
-        }
-      } else if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.message?.includes("invalid-credential")) {
-        setError(`Incorrect email or password. (Firebase Error: ${err.message}). If you just registered, make sure you don't have any typos. If you haven't registered, click 'Register'.`);
-      } else {
-        setError(err.message || "Authentication failed");
-      }
+      setError(err.message || "Authentication failed");
     } finally {
       setIsLoading(false);
     }

@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
-import { Users, Search, Filter } from "lucide-react";
+import { Users, Search, Filter, X } from "lucide-react";
 import { db } from "../../lib/firebase";
-import { collection, getDocs, query, orderBy, onSnapshot } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc } from "firebase/firestore";
 
 export const AdminUsers = () => {
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUserForManage, setSelectedUserForManage] = useState<any | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
-    const q = query(collection(db, 'users'), orderBy('created_at', 'desc'));
+    const q = query(collection(db, 'users'));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setUsers(data || []);
@@ -56,7 +57,7 @@ export const AdminUsers = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden animate-fade-in">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -98,7 +99,7 @@ export const AdminUsers = () => {
                       </span>
                     </td>
                     <td className="p-4 text-slate-600 font-medium text-sm">
-                      {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {user.created_at || user.createdDate ? new Date(user.created_at || user.createdDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                     </td>
                     <td className="p-4 text-center">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
@@ -109,7 +110,10 @@ export const AdminUsers = () => {
                       </span>
                     </td>
                     <td className="p-4 text-right">
-                      <button className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 text-xs font-black rounded-lg transition-all shadow-sm">
+                      <button 
+                        onClick={() => setSelectedUserForManage(user)}
+                        className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 text-xs font-black rounded-lg transition-all shadow-sm"
+                      >
                         Manage
                       </button>
                     </td>
@@ -127,6 +131,93 @@ export const AdminUsers = () => {
           </div>
         </div>
       </div>
+
+      {selectedUserForManage && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl p-6 relative border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <button 
+              onClick={() => setSelectedUserForManage(null)} 
+              className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="text-xl font-black text-slate-900 mb-1">Manage User</h3>
+            <p className="text-xs font-bold text-purple-600 mb-6 uppercase tracking-wider">
+              {selectedUserForManage.email || "No Email Address"}
+            </p>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const userRef = doc(db, 'users', selectedUserForManage.id);
+                await updateDoc(userRef, {
+                  full_name: selectedUserForManage.full_name || selectedUserForManage.name || '',
+                  role: selectedUserForManage.role || 'customer',
+                  status: selectedUserForManage.status || 'active'
+                });
+                
+                // State is updated automatically by onSnapshot!
+                setSelectedUserForManage(null);
+                alert("User updated successfully!");
+              } catch (err: any) {
+                console.error(err);
+                alert("Failed to update user: " + err.message);
+              }
+            }} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
+                <input 
+                  type="text" 
+                  value={selectedUserForManage.full_name || selectedUserForManage.name || ""} 
+                  onChange={(e) => setSelectedUserForManage({ ...selectedUserForManage, full_name: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none transition-all"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Platform Role</label>
+                <select 
+                  value={selectedUserForManage.role || "customer"} 
+                  onChange={(e) => setSelectedUserForManage({ ...selectedUserForManage, role: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none cursor-pointer transition-all"
+                >
+                  <option value="customer">Customer / Pet Parent</option>
+                  <option value="partner">Partner / Business Owner</option>
+                  <option value="admin">Administrator</option>
+                  <option value="superadmin">Super Administrator</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Account Status</label>
+                <select 
+                  value={selectedUserForManage.status || "active"} 
+                  onChange={(e) => setSelectedUserForManage({ ...selectedUserForManage, status: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none cursor-pointer transition-all"
+                >
+                  <option value="active">Active</option>
+                  <option value="suspended">Suspended</option>
+                </select>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <button 
+                  type="button" 
+                  onClick={() => setSelectedUserForManage(null)}
+                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-xl transition-all shadow-md shadow-purple-600/10 active:scale-[0.98]"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

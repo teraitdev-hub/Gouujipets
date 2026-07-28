@@ -92,7 +92,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                 email: firebaseUser.email || '',
                 full_name: firebaseUser.displayName || 'Unknown',
                 avatar_url: firebaseUser.photoURL || '',
-                loginMethod: 'google',
+                loginMethod: firebaseUser.providerData.some(p => p.providerId === 'password') ? 'email' : 'google',
                 isActive: true,
                 walletBalance: 0,
                 rewardPoints: 0,

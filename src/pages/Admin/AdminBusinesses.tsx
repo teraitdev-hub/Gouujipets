@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Building2, Search, Filter } from "lucide-react";
+import { Building2, Search, Filter, X } from "lucide-react";
 import { db } from "../../lib/firebase";
 import { collection, getDocs, query, orderBy, doc, updateDoc, addDoc, onSnapshot } from "firebase/firestore";
 
@@ -8,6 +8,7 @@ export const AdminBusinesses = () => {
   const [financials, setFinancials] = useState<Record<string, { revenue: number, expenses: number, profit: number }>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedBizForManage, setSelectedBizForManage] = useState<any | null>(null);
 
   useEffect(() => {
     let unsubscribe = () => {};
@@ -63,7 +64,7 @@ export const AdminBusinesses = () => {
   }, []);
 
   const handleUpdateStatus = async (businessId: string, newStatus: string, ownerId: any) => {
-    if (!window.confirm(`Are you sure you want to ${newStatus} this facility?`)) return;
+    if (!window.confirm(`Are you sure you want to change status to "${newStatus}" for this facility?`)) return;
     try {
       await updateDoc(doc(db, 'businesses', businessId), { status: newStatus });
       setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: newStatus } : b));
@@ -80,7 +81,7 @@ export const AdminBusinesses = () => {
         },
         created_at: new Date().toISOString()
       });
-      alert(`Facility marked as ${newStatus}. Direct login approval link (${loginUrl}) sent to partner.`);
+      alert(`Facility marked as ${newStatus}. Status update sent to partner.`);
     } catch (err) {
       console.error(err);
       alert("Failed to update status.");
@@ -121,7 +122,7 @@ export const AdminBusinesses = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden animate-fade-in">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -179,10 +180,10 @@ export const AdminBusinesses = () => {
                         facility.status === 'pending' ? 'text-amber-700 bg-amber-50 border border-amber-200' :
                         'text-red-700 bg-red-50 border border-red-200'
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${
-                          facility.status === 'active' || facility.status === 'verified' ? 'bg-emerald-500' : 
-                          facility.status === 'pending' ? 'bg-amber-500' : 'bg-red-500'
-                        }`}></span>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        facility.status === 'active' || facility.status === 'verified' ? 'bg-emerald-500' : 
+                        facility.status === 'pending' ? 'bg-amber-500' : 'bg-red-500'
+                      }`}></span>
                         {facility.status || 'pending'}
                       </span>
                     </td>
@@ -197,7 +198,10 @@ export const AdminBusinesses = () => {
                           </button>
                         </div>
                       ) : (
-                        <button className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 text-xs font-black rounded-lg transition-all shadow-sm">
+                        <button 
+                          onClick={() => setSelectedBizForManage(facility)}
+                          className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 text-xs font-black rounded-lg transition-all shadow-sm"
+                        >
                           Manage
                         </button>
                       )}
@@ -217,6 +221,126 @@ export const AdminBusinesses = () => {
           </div>
         </div>
       </div>
+
+      {selectedBizForManage && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl p-6 relative border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <button 
+              onClick={() => setSelectedBizForManage(null)} 
+              className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="text-xl font-black text-slate-900 mb-1">Manage Facility</h3>
+            <p className="text-xs font-bold text-purple-600 mb-6 uppercase tracking-wider">
+              {selectedBizForManage.name || "Unnamed Facility"}
+            </p>
+            
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const bizRef = doc(db, 'businesses', selectedBizForManage.id);
+                await updateDoc(bizRef, {
+                  name: selectedBizForManage.name,
+                  type: selectedBizForManage.type,
+                  address: selectedBizForManage.address,
+                  status: selectedBizForManage.status
+                });
+                
+                // Update state in lists
+                setBusinesses(prev => prev.map(b => b.id === selectedBizForManage.id ? { ...b, ...selectedBizForManage } : b));
+                
+                // Send mail update
+                const loginUrl = `${window.location.origin}/partner/login?approved=true`;
+                const recipient = typeof selectedBizForManage.owner_id === 'string' 
+                  ? selectedBizForManage.owner_id 
+                  : (selectedBizForManage.owner_id?.email || selectedBizForManage.owner_id?.id || 'partner@example.com');
+                
+                await addDoc(collection(db, 'mail'), {
+                  to: recipient,
+                  message: {
+                    subject: `GouujiPets Partner Facility Update`,
+                    text: `Your GouujiPets Facility "${selectedBizForManage.name}" has been updated. Status is now: ${selectedBizForManage.status}. Login here: ${loginUrl}`,
+                    html: `<p>Your GouujiPets Facility <strong>${selectedBizForManage.name}</strong> status is now: <strong>${selectedBizForManage.status}</strong>.</p><p><a href="${loginUrl}" style="background-color: #7c3aed; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Login to Dashboard</a></p>`
+                  },
+                  created_at: new Date().toISOString()
+                });
+                
+                setSelectedBizForManage(null);
+                alert("Facility details and status updated successfully!");
+              } catch (err: any) {
+                console.error(err);
+                alert("Failed to update facility: " + err.message);
+              }
+            }} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Facility Name</label>
+                <input 
+                  type="text" 
+                  value={selectedBizForManage.name || ""} 
+                  onChange={(e) => setSelectedBizForManage({ ...selectedBizForManage, name: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none transition-all"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Category Type</label>
+                <select 
+                  value={selectedBizForManage.type || "boarding"} 
+                  onChange={(e) => setSelectedBizForManage({ ...selectedBizForManage, type: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none cursor-pointer transition-all"
+                >
+                  <option value="boarding">Boarding</option>
+                  <option value="daycare">Daycare</option>
+                  <option value="grooming">Grooming</option>
+                  <option value="veterinary">Veterinary Clinic</option>
+                  <option value="training">Training</option>
+                  <option value="walking">Walking</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Address / City</label>
+                <input 
+                  type="text" 
+                  value={selectedBizForManage.address || ""} 
+                  onChange={(e) => setSelectedBizForManage({ ...selectedBizForManage, address: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none transition-all"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Verification Status</label>
+                <select 
+                  value={selectedBizForManage.status || "pending"} 
+                  onChange={(e) => setSelectedBizForManage({ ...selectedBizForManage, status: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none cursor-pointer transition-all"
+                >
+                  <option value="active">Active / Approved</option>
+                  <option value="pending">Pending Verification</option>
+                  <option value="suspended">Suspended</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <button 
+                  type="button" 
+                  onClick={() => setSelectedBizForManage(null)}
+                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-xl transition-all shadow-md shadow-purple-600/10 active:scale-[0.98]"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

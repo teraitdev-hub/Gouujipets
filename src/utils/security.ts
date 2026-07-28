@@ -10,12 +10,8 @@ import { z } from 'zod';
 // 1. Password Security
 // Requires minimum 8 characters, at least 1 uppercase, 1 lowercase, 1 number, and 1 special character.
 export const passwordSchema = z.string()
-  .min(8, { message: 'Password must be at least 8 characters long.' })
-  .max(100, { message: 'Password is too long.' })
-  .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter.' })
-  .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter.' })
-  .regex(/[0-9]/, { message: 'Password must contain at least one number.' })
-  .regex(/[^A-Za-z0-9]/, { message: 'Password must contain at least one special character.' });
+  .min(6, { message: 'Password must be at least 6 characters long.' })
+  .max(100, { message: 'Password is too long.' });
 
 export const checkPasswordStrength = (password: string) => {
   const result = passwordSchema.safeParse(password);

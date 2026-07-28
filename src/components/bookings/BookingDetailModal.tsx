@@ -172,36 +172,75 @@ export const BookingDetailModal = ({ booking, onClose, role = 'customer', onOpen
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        if (booking.pet_ids && booking.pet_ids.length > 0) {
-          const petsQ = query(collection(db, "pets"), where(documentId(), "in", booking.pet_ids));
-          const snap = await getDocs(petsQ);
-          
-          const enriched = snap.docs.map(docSnap => {
-            const petData = docSnap.data();
-            let extra: any = {};
-            
-            if (petData.behavior_notes && typeof petData.behavior_notes === 'string' && petData.behavior_notes.trim().startsWith('{')) {
-              try {
-                extra = JSON.parse(petData.behavior_notes);
-              } catch (e) {}
+        let petIds: string[] = [];
+        if (booking.pet_ids) {
+          if (Array.isArray(booking.pet_ids)) {
+            petIds = booking.pet_ids;
+          } else if (typeof booking.pet_ids === 'string') {
+            try {
+              const parsed = JSON.parse(booking.pet_ids);
+              petIds = Array.isArray(parsed) ? parsed : [parsed];
+            } catch (e) {
+              petIds = [booking.pet_ids];
             }
-            
-            return {
-              ...petData,
-              id: docSnap.id,
-              ...extra,
-              behavior_notes: extra.general !== undefined ? extra.general : petData.behavior_notes
-            };
-          });
-          
-          setPets(enriched);
+          }
         }
+        
+        petIds = petIds.filter(id => typeof id === 'string' && id.trim().length > 0);
+
+        if (petIds.length > 0) {
+          const chunks: string[][] = [];
+          for (let i = 0; i < petIds.length; i += 10) {
+            chunks.push(petIds.slice(i, i + 10));
+          }
+          
+          let allPets: any[] = [];
+          for (const chunk of chunks) {
+            const petsQ = query(collection(db, "pets"), where(documentId(), "in", chunk));
+            const snap = await getDocs(petsQ);
+            const enriched = snap.docs.map(docSnap => {
+              const petData = docSnap.data();
+              let extra: any = {};
+              
+              if (petData.behavior_notes && typeof petData.behavior_notes === 'string' && petData.behavior_notes.trim().startsWith('{')) {
+                try {
+                  extra = JSON.parse(petData.behavior_notes);
+                } catch (e) {}
+              }
+              
+              return {
+                ...petData,
+                id: docSnap.id,
+                ...extra,
+                behavior_notes: extra.general !== undefined ? extra.general : petData.behavior_notes
+              };
+            });
+            allPets = [...allPets, ...enriched];
+          }
+          setPets(allPets);
+        }
+
         await fetchUpdates();
+
+        let serviceIds: string[] = [];
         if (booking.selected_services && booking.selected_services.length > 0) {
-          const serviceIds = booking.selected_services.map((s: any) => typeof s === 'string' ? s : s.id);
-          const servicesQ = query(collection(db, "services"), where(documentId(), "in", serviceIds));
-          const snap = await getDocs(servicesQ);
-          setServices(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+          const rawServiceIds = booking.selected_services.map((s: any) => typeof s === 'string' ? s : s.id);
+          serviceIds = rawServiceIds.filter((id: any) => typeof id === 'string' && id.trim().length > 0);
+        }
+
+        if (serviceIds.length > 0) {
+          const chunks: string[][] = [];
+          for (let i = 0; i < serviceIds.length; i += 10) {
+            chunks.push(serviceIds.slice(i, i + 10));
+          }
+          
+          let allSvcs: any[] = [];
+          for (const chunk of chunks) {
+            const servicesQ = query(collection(db, "services"), where(documentId(), "in", chunk));
+            const snap = await getDocs(servicesQ);
+            allSvcs = [...allSvcs, ...snap.docs.map(d => ({ id: d.id, ...d.data() }))];
+          }
+          setServices(allSvcs);
         }
         
         // Fetch ALL services for this facility for mid-stay addition
