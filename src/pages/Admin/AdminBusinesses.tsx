@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Building2, Search, Filter, X } from "lucide-react";
 import { db } from "../../lib/firebase";
-import { collection, getDocs, query, orderBy, doc, updateDoc, addDoc, onSnapshot } from "firebase/firestore";
+import { collection, getDocs, getDoc, query, orderBy, doc, updateDoc, addDoc, onSnapshot } from "firebase/firestore";
 
 export const AdminBusinesses = () => {
   const [businesses, setBusinesses] = useState<any[]>([]);
