@@ -163,7 +163,7 @@ export const PartnerLogin = () => {
             return;
           }
           
-          const bizList = existingBizSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          const bizList = existingBizSnap.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
           const activeBiz = bizList.find(b => b.status === "active" || b.status === "approved" || b.status === "verified");
           
           if (!activeBiz) {
