@@ -1,3 +1,0 @@
-file 'public/Dogs_playing_in_pools_202607211221.mp4'
-file 'public/Luxury_pet_resort_background_ani_202607211215.mp4'
-file 'public/Pet_resort_with_indoor_waterfalls_202607211221.mp4'
