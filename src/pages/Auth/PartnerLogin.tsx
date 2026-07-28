@@ -179,6 +179,45 @@ export const PartnerLogin = () => {
       if (err.message === "NOT_REGISTERED") {
         setIsLogin(false);
         setError("You are not a registered partner yet. Please fill out your details below to sign up and request Admin approval.");
+      } else if (err.code === "auth/email-already-in-use" || err.message?.includes("email-already-in-use")) {
+        // Attempt login if password is provided, otherwise switch tab
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
+          // Check if business doc exists
+          const bizQuery = query(collection(db, "businesses"), where("owner_id", "==", userCredential.user.uid), limit(1));
+          const existingBizSnap = await getDocs(bizQuery);
+          if (existingBizSnap.empty) {
+            await setDoc(doc(db, "users", userCredential.user.uid), { role: "partner" }, { merge: true });
+            const bizRef = await addDoc(collection(db, "businesses"), {
+              owner_id: userCredential.user.uid,
+              name: `${formData.name || 'My'}'s Facility`,
+              type: facilityTypes.join(","),
+              address: "Address from map pin",
+              latitude: location.lat,
+              longitude: location.lng,
+              status: "pending",
+              created_at: new Date().toISOString()
+            });
+            await addDoc(collection(db, "admin_notifications"), {
+              title: "New Partner Registration Pending",
+              message: `${formData.name || 'Partner'} registered a new facility (${facilityTypes.join(", ")}) requiring admin verification.`,
+              business_id: bizRef.id,
+              owner_id: userCredential.user.uid,
+              type: "partner_registration",
+              read: false,
+              created_at: new Date().toISOString()
+            });
+            await signOut(auth);
+            setShowApprovalModal(true);
+          } else {
+            await checkApprovalStatus(userCredential.user.uid);
+            await useAuthStore.getState().loadUser();
+            navigate("/partner/dashboard");
+          }
+        } catch (signInErr: any) {
+          setIsLogin(true);
+          setError("An account with this email already exists. We have switched you to the 'Sign In' tab—please enter your password to log in, or click 'Forgot?' to reset it.");
+        }
       } else {
         setError(err.message || "Authentication failed");
       }

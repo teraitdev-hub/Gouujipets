@@ -151,7 +151,20 @@ export const UserLogin = () => {
       }
     } catch (err: any) {
       console.error("LOGIN ERROR DETAILS:", err);
-      setError("Error: " + (err.message || String(err)));
+      if (err.code === "auth/email-already-in-use" || err.message?.includes("email-already-in-use")) {
+        // Try sign-in if password was entered
+        try {
+          await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
+          await useAuthStore.getState().loadUser();
+          navigate(intendedRoute || "/dashboard");
+          setIntendedRoute(null);
+        } catch (signInErr) {
+          setIsLogin(true);
+          setError("An account with this email already exists. We switched you to the 'Sign In' tab—please enter your password to sign in.");
+        }
+      } else {
+        setError(err.message || "Authentication failed");
+      }
     } finally {
       setIsLoading(false);
     }
