@@ -71,7 +71,19 @@ export const AdminBusinesses = () => {
       
       const loginUrl = `${window.location.origin}/partner/login?approved=true`;
       
-      const recipient = typeof ownerId === 'string' ? ownerId : (ownerId?.email || ownerId?.id || 'partner@example.com');
+      let recipient = 'partner@example.com';
+      if (ownerId) {
+        const ownerUid = typeof ownerId === 'string' ? ownerId : (ownerId?.id || ownerId?.uid);
+        if (ownerUid) {
+          const userDoc = await getDoc(doc(db, 'users', ownerUid));
+          if (userDoc.exists() && userDoc.data()?.email) {
+            recipient = userDoc.data().email;
+          } else if (typeof ownerId === 'object' && ownerId.email) {
+            recipient = ownerId.email;
+          }
+        }
+      }
+
       await addDoc(collection(db, 'mail'), {
         to: recipient,
         message: {
@@ -252,9 +264,20 @@ export const AdminBusinesses = () => {
                 
                 // Send mail update
                 const loginUrl = `${window.location.origin}/partner/login?approved=true`;
-                const recipient = typeof selectedBizForManage.owner_id === 'string' 
-                  ? selectedBizForManage.owner_id 
-                  : (selectedBizForManage.owner_id?.email || selectedBizForManage.owner_id?.id || 'partner@example.com');
+                
+                let recipient = 'partner@example.com';
+                const ownerId = selectedBizForManage.owner_id;
+                if (ownerId) {
+                  const ownerUid = typeof ownerId === 'string' ? ownerId : (ownerId?.id || ownerId?.uid);
+                  if (ownerUid) {
+                    const userDoc = await getDoc(doc(db, 'users', ownerUid));
+                    if (userDoc.exists() && userDoc.data()?.email) {
+                      recipient = userDoc.data().email;
+                    } else if (typeof ownerId === 'object' && ownerId.email) {
+                      recipient = ownerId.email;
+                    }
+                  }
+                }
                 
                 await addDoc(collection(db, 'mail'), {
                   to: recipient,
