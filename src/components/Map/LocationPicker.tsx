@@ -83,12 +83,26 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         handleGeocode(lat, lng);
         setIsLocating(false);
       },
-      (error) => {
+      async (error) => {
+        try {
+          const response = await fetch('https://ipapi.co/json/');
+          const data = await response.json();
+          if (data.latitude && data.longitude) {
+            const newPos = { lat: data.latitude, lng: data.longitude };
+            setMapCenter(newPos);
+            setMarkerPosition(newPos);
+            handleGeocode(data.latitude, data.longitude);
+            setIsLocating(false);
+            return;
+          }
+        } catch (fallbackErr) {
+          console.error("IP fallback failed:", fallbackErr);
+        }
         console.error("Error getting location:", error);
         setIsLocating(false);
         alert("Unable to retrieve your location. Please check your browser permissions.");
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
     );
   };
 

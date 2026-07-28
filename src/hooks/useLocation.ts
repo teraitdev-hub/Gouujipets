@@ -28,15 +28,30 @@ export const useLocation = () => {
         });
         setIsLoading(false);
       },
-      (err) => {
+      async (err) => {
+        try {
+          // Fallback to IP-based location (very low data usage)
+          const response = await fetch('https://ipapi.co/json/');
+          const data = await response.json();
+          if (data.latitude && data.longitude) {
+            setCurrentLocation({
+              lat: data.latitude,
+              lng: data.longitude,
+            });
+            setIsLoading(false);
+            return;
+          }
+        } catch (fallbackErr) {
+          console.error("IP fallback failed:", fallbackErr);
+        }
+        
         setError(`Unable to retrieve your location: ${err.message}`);
         setIsLoading(false);
-        // Fallback to IP based location could be implemented here via an external API
       },
       {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
+        enableHighAccuracy: false,
+        timeout: 15000,
+        maximumAge: 300000
       }
     );
   }, []);

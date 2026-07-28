@@ -5,7 +5,7 @@ import { Building2, Lock, ArrowRight, Loader2, Mail, User, Eye, EyeOff, PawPrint
 import { auth, db } from "../../lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import type { ConfirmationResult } from "firebase/auth";
-import { collection, addDoc, doc, setDoc, getDocs, query, where, limit } from "firebase/firestore";
+import { collection, addDoc, doc, setDoc, getDocs, query, where, limit, updateDoc } from "firebase/firestore";
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
 import { checkPasswordStrength } from "../../utils/security";
 import { GoogleMap, useLoadScript, Marker } from "@react-google-maps/api";
@@ -56,7 +56,7 @@ export const PartnerLogin = () => {
       const bizData = existingBizSnap.docs[0].data();
       if (bizData.status === "pending") {
         await signOut(auth);
-        throw new Error("Your account is pending admin approval. Please wait for an admin to approve your registration.");
+        throw new Error("Your registration is pending confirmation from the Admin. Once approved, you can log in through the notification link!");
       } else if (bizData.status === "rejected" || bizData.status === "suspended") {
         await signOut(auth);
         throw new Error(`Your account has been ${bizData.status}. Please contact support.`);
@@ -77,8 +77,24 @@ export const PartnerLogin = () => {
       const existingBizSnap = await getDocs(bizQuery);
       
       if (existingBizSnap.empty) {
+        await setDoc(doc(db, "users", userCred.user.uid), {
+          full_name: userCred.user.displayName || "Partner",
+          email: userCred.user.email || "",
+          role: "partner"
+        }, { merge: true });
+        await addDoc(collection(db, "businesses"), {
+          owner_id: userCred.user.uid,
+          name: `${userCred.user.displayName || 'My'}'s Facility`,
+          type: "boarding",
+          address: "Bangalore, Karnataka, India",
+          latitude: 12.9716,
+          longitude: 77.5946,
+          status: "pending",
+          created_at: new Date().toISOString()
+        });
         await signOut(auth);
-        throw new Error("NOT_REGISTERED");
+        setShowApprovalModal(true);
+        return;
       }
       
       await checkApprovalStatus(userCred.user.uid);
@@ -152,7 +168,7 @@ export const PartnerLogin = () => {
               owner_id: userCredential.user.uid,
               name: `${formData.name}'s Facility`,
               type: facilityTypes.join(","),
-              address: "Address from map pin",
+              address: "Bangalore, Karnataka, India",
               latitude: location.lat,
               longitude: location.lng,
               status: "pending",
@@ -174,7 +190,7 @@ export const PartnerLogin = () => {
           }
         }
 
-        await signOut(auth); // Force logout for pending approval
+        await signOut(auth);
         setShowApprovalModal(true);
       }
     } catch (err: any) {
@@ -182,10 +198,8 @@ export const PartnerLogin = () => {
         setIsLogin(false);
         setError("You are not a registered partner yet. Please fill out your details below to sign up and request Admin approval.");
       } else if (err.code === "auth/email-already-in-use" || err.message?.includes("email-already-in-use")) {
-        // Attempt login if password is provided, otherwise switch tab
         try {
           const userCredential = await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
-          // Check if business doc exists
           const bizQuery = query(collection(db, "businesses"), where("owner_id", "==", userCredential.user.uid), limit(1));
           const existingBizSnap = await getDocs(bizQuery);
           if (existingBizSnap.empty) {
@@ -194,7 +208,7 @@ export const PartnerLogin = () => {
               owner_id: userCredential.user.uid,
               name: `${formData.name || 'My'}'s Facility`,
               type: facilityTypes.join(","),
-              address: "Address from map pin",
+              address: "Bangalore, Karnataka, India",
               latitude: location.lat,
               longitude: location.lng,
               status: "pending",
@@ -218,10 +232,10 @@ export const PartnerLogin = () => {
           }
         } catch (signInErr: any) {
           setIsLogin(true);
-          setError("An account with this email already exists. We have switched you to the 'Sign In' tab—please enter your password to log in, or click 'Forgot?' to reset it.");
+          setError("This email address is already registered in our system. We have switched you to 'Sign In'—please enter your password to log in, or click 'Forgot?' if you need to reset it.");
         }
       } else if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.message?.includes("invalid-credential")) {
-        setError("Incorrect email or password. If you haven't registered your facility yet, please click the 'Register' tab above to sign up!");
+        setError("Incorrect email or password. Please verify your credentials. If you haven't registered your facility yet, please click the 'Register' tab above to sign up!");
       } else {
         setError(err.message || "Authentication failed");
       }
@@ -246,15 +260,15 @@ export const PartnerLogin = () => {
         
       if (existingBizSnap.empty) {
         if (isLogin) {
-            await signOut(auth);
-            throw new Error("NOT_REGISTERED");
+          await signOut(auth);
+          throw new Error("NOT_REGISTERED");
         }
         await setDoc(doc(db, "users", userCredential.user.uid), { role: "partner" }, { merge: true });
         await addDoc(collection(db, "businesses"), {
           owner_id: userCredential.user.uid,
           name: `${formData.name || 'My'}'s Facility`,
           type: facilityTypes.length ? facilityTypes.join(",") : "boarding",
-          address: "Address from map pin",
+          address: "Bangalore, Karnataka, India",
           latitude: location.lat,
           longitude: location.lng,
           status: "pending",
@@ -265,11 +279,6 @@ export const PartnerLogin = () => {
         setShowApprovalModal(true);
         setIsLoading(false);
         return;
-      } else {
-        if (!isLogin) {
-            await signOut(auth);
-            throw new Error("Account already exists. Please Sign In.");
-        }
       }
 
       await checkApprovalStatus(userCredential.user.uid);

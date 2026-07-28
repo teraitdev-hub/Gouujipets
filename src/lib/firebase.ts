@@ -6,13 +6,13 @@ import { getFunctions } from "firebase/functions";
 import { getMessaging } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyB1COW2uZ9YP-sYosaESXgRX1AOs6LVknE",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "gouujipets.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "gouujipets",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "gouujipets.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "591158355137",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:591158355137:web:83e6ecd166cd8cf522a040",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-0TQ3BJ55BZ"
 };
 
 export const app = initializeApp(firebaseConfig);

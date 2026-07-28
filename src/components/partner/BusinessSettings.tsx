@@ -76,12 +76,27 @@ export const BusinessSettings = ({ business, onUpdate }: BusinessSettingsProps) 
         }));
         setIsLocating(false);
       },
-      (err) => {
+      async (err) => {
+        try {
+          const response = await fetch('https://ipapi.co/json/');
+          const data = await response.json();
+          if (data.latitude && data.longitude) {
+            setFormData(prev => ({
+              ...prev,
+              lat: data.latitude,
+              lng: data.longitude
+            }));
+            setIsLocating(false);
+            return;
+          }
+        } catch (fallbackErr) {
+          console.error("IP fallback failed:", fallbackErr);
+        }
         console.error("GPS error", err);
         alert("Could not detect exact GPS. Using default city coordinates or you can enter manually.");
         setIsLocating(false);
       },
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
     );
   };
 
