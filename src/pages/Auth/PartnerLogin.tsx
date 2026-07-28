@@ -10,6 +10,7 @@ import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../servi
 import { checkPasswordStrength } from "../../utils/security";
 import { GoogleMap, useLoadScript, Marker } from "@react-google-maps/api";
 import { FallbackMap } from "../../components/Map/FallbackMap";
+import { LocationPicker } from "../../components/ui/LocationPicker";
 
 export const PartnerLogin = () => {
   const navigate = useNavigate();
@@ -541,54 +542,15 @@ export const PartnerLogin = () => {
                 </div>
               )}
 
-              {/* Map Location Selector */}
+              {/* Map & Location Selector */}
               {!isLogin && (
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center justify-between">
-                    <label className="block text-xs font-bold text-slate-600 uppercase flex items-center gap-1">
-                      <MapPin size={14} className="text-violet-600" /> Pin Facility Exact Location
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (navigator.geolocation) {
-                          navigator.geolocation.getCurrentPosition(
-                            (pos) => {
-                              setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-                            },
-                            () => alert("Could not fetch GPS location. Please select manually on map.")
-                          );
-                        }
-                      }}
-                      className="text-[11px] font-bold text-violet-600 bg-violet-50 hover:bg-violet-100 px-2.5 py-1 rounded-lg transition-colors"
-                    >
-                      Detect My GPS
-                    </button>
-                  </div>
-                  <div className="h-40 w-full rounded-2xl overflow-hidden border border-slate-200 relative shadow-inner">
-                    {isLoaded ? (
-                      <GoogleMap
-                        mapContainerStyle={{ width: "100%", height: "100%" }}
-                        center={location}
-                        zoom={13}
-                        onClick={(e) => {
-                          if (e.latLng) {
-                            setLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-                          }
-                        }}
-                        options={{ disableDefaultUI: true, zoomControl: true }}
-                      >
-                        <Marker position={location} />
-                      </GoogleMap>
-                    ) : (
-                      <FallbackMap
-                        center={[location.lat, location.lng]}
-                        zoom={13}
-                        className="w-full h-full"
-                        onLocationSelect={(lat, lng) => setLocation({ lat, lng })}
-                      />
-                    )}
-                  </div>
+                <div className="pt-2">
+                  <LocationPicker
+                    defaultLocation={location}
+                    onLocationSelect={(loc) => {
+                      setLocation({ lat: loc.lat, lng: loc.lng });
+                    }}
+                  />
                 </div>
               )}
 
