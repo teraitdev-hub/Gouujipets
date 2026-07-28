@@ -87,15 +87,6 @@ export const AdminLogin = () => {
       imageUrl="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000"
     >
       <form className="space-y-5 font-sans" onSubmit={handleSubmit}>
-        <div className="p-4 bg-purple-50 border border-purple-200 rounded-[16px] space-y-1 mb-6">
-          <div className="flex items-center gap-2 text-purple-900 font-bold text-xs">
-            <ShieldAlert className="text-purple-600 shrink-0" size={16} />
-            <span>Authorized Super Admin Access</span>
-          </div>
-          <p className="text-[11px] text-purple-700 font-medium leading-relaxed">
-            Default Admin credentials: <span className="font-bold underline">admin@gouuji.com</span> / <span className="font-bold underline">admin123</span>
-          </p>
-        </div>
 
         {error && (
           <div className="p-4 bg-red-50 text-red-600 border border-red-200 rounded-[16px] text-sm font-medium mb-4">
