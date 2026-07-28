@@ -113,7 +113,8 @@ export const BusinessRegistrationModal = ({ isOpen, onClose, onSuccess, ownerId,
                 >
                   <option value="Boarding">Boarding</option>
                   <option value="Grooming">Grooming</option>
-                  <option value="Veterinary">Veterinary</option>
+                  <option value="Veterinary">Veterinary Clinic</option>
+                  <option value="Pet Shop">Pet Shop</option>
                   <option value="Training">Training</option>
                   <option value="Walking">Walking</option>
                   <option value="Pet Sitting">Pet Sitting</option>

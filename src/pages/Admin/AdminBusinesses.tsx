@@ -63,17 +63,19 @@ export const AdminBusinesses = () => {
       await updateDoc(doc(db, 'businesses', businessId), { status: newStatus });
       setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: newStatus } : b));
       
-      // Simulate sending email via Firebase Mail Extension
+      const loginUrl = `${window.location.origin}/partner/login?approved=true`;
+      
       const recipient = typeof ownerId === 'string' ? ownerId : (ownerId?.email || ownerId?.id || 'partner@example.com');
       await addDoc(collection(db, 'mail'), {
         to: recipient,
         message: {
-          subject: `GouujiPets Partner Account ${newStatus === 'active' ? 'Approved' : 'Rejected'}`,
-          text: `Your GouujiPets Partner Account has been ${newStatus}. You can now log in to your dashboard.`
+          subject: `GouujiPets Partner Account ${newStatus === 'active' || newStatus === 'approved' ? 'Approved! 🎉' : 'Status Update'}`,
+          text: `Your GouujiPets Partner Account has been ${newStatus}. Click here to log in to your Partner Dashboard: ${loginUrl}`,
+          html: `<p>Your GouujiPets Partner Account has been ${newStatus}.</p><p><a href="${loginUrl}" style="background-color: #7c3aed; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Click Here to Login to Partner Dashboard</a></p>`
         },
         created_at: new Date().toISOString()
       });
-      alert(`Facility marked as ${newStatus} and email notification sent.`);
+      alert(`Facility marked as ${newStatus}. Direct login approval link (${loginUrl}) sent to partner.`);
     } catch (err) {
       console.error(err);
       alert("Failed to update status.");
