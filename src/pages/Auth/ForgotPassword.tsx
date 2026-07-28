@@ -13,7 +13,7 @@ export const ForgotPassword = () => {
   const [step, setStep] = useState<'request' | 'verify'>('request');
   const [authType, setAuthType] = useState<'email' | 'phone'>('email');
 
-  const isGmail = (input: string) => /^[a-zA-Z0-9._%+-]+@(?:gmail|googlemail)\.com$/.test(input.toLowerCase());
+  const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
   const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ''));
 
   const handleRequestOTP = async (e: React.FormEvent) => {
@@ -21,11 +21,11 @@ export const ForgotPassword = () => {
     if (!identifier) return;
 
     const cleanId = identifier.trim();
-    const validGmail = isGmail(cleanId);
+    const validEmail = isEmail(cleanId);
     const validPhone = isPhone(cleanId);
 
-    if (!validGmail && !validPhone) {
-      setError("Please enter a valid Gmail address or Phone Number.");
+    if (!validEmail && !validPhone) {
+      setError("Please enter a valid Email address or Phone Number.");
       return;
     }
 
@@ -65,7 +65,7 @@ export const ForgotPassword = () => {
             Account Recovery
           </h1>
           <p className="text-gray-500 font-medium mt-2">
-            Enter your Gmail to receive a password reset link.
+            Enter your email to receive a password reset link.
           </p>
         </div>
 
@@ -89,7 +89,7 @@ export const ForgotPassword = () => {
                 <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input 
                   type="text" 
-                  placeholder="Gmail Address"
+                  placeholder="Email Address"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all"
