@@ -110,23 +110,8 @@ export const AdminDashboard = () => {
       const rawUsers = uRes.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const rawBusinesses = bRes.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
-      // AUTO-FIX: If any business is missing created_at, give it a timestamp so it shows up in ordered public feeds
-      import('firebase/firestore').then(({ updateDoc, doc, deleteDoc }) => {
-        const dummyNames = ["Glamour Hounds", "Waggy Tails Daycare Club", "new", "Urban Strides Pet Care", "Splash Dog Pool", "Splash Paws Swimming Pool", "Luxe Pet Spa & Grooming", "Cozy Nook Pet Sitters", "new pet", "Smart Paws Tricks & Treats", "Cozy Pet Daycare", "Aqua Paws Hydrotherapy", "Home Sweet Home Pet Sitting", "Paws & Bubbles Grooming", "Alpha Dog Training Academy", "Pro Dog Training Academy", "The Barking Lot", "Furry Friends Companion", "Happy Tails Walking", "The Fluffy Bubble", "Happy Tails Dog Walking", "pets grooming"];
-        rawBusinesses.forEach((biz: any) => {
-          if (!biz.created_at) {
-            updateDoc(doc(db, 'businesses', biz.id), { created_at: new Date().toISOString() }).catch(() => {});
-            biz.created_at = new Date().toISOString(); // Fix in memory instantly
-          }
-          if (biz.name && dummyNames.includes(biz.name)) {
-            deleteDoc(doc(db, 'businesses', biz.id)).catch(() => {});
-          }
-        });
-      });
-
       const allUsers = rawUsers;
-      const dummyNamesSet = new Set(["Glamour Hounds", "Waggy Tails Daycare Club", "new", "Urban Strides Pet Care", "Splash Dog Pool", "Splash Paws Swimming Pool", "Luxe Pet Spa & Grooming", "Cozy Nook Pet Sitters", "new pet", "Smart Paws Tricks & Treats", "Cozy Pet Daycare", "Aqua Paws Hydrotherapy", "Home Sweet Home Pet Sitting", "Paws & Bubbles Grooming", "Alpha Dog Training Academy", "Pro Dog Training Academy", "The Barking Lot", "Furry Friends Companion", "Happy Tails Walking", "The Fluffy Bubble", "Happy Tails Dog Walking", "pets grooming"]);
-      const allBusinesses = filterRealBusinesses(rawBusinesses).filter((b: any) => !b.name || !dummyNamesSet.has(b.name));
+      const allBusinesses = filterRealBusinesses(rawBusinesses);
       const rawPets = pRes.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const rawBookings = bkRes.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       const allPets = rawPets;
