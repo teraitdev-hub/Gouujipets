@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { GoogleMap, Marker, Autocomplete } from '@react-google-maps/api';
 import { useMap } from '../../context/MapContext';
 import { MapPin, Search, Crosshair, Loader2 } from 'lucide-react';
+import { FallbackMap } from './FallbackMap';
 
 interface LocationPickerProps {
   initialLocation?: { lat: number; lng: number };
@@ -16,7 +17,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   onLocationSelect,
   height = "400px" 
 }) => {
-  const { isLoaded, loadError } = useMap();
+  const { isLoaded, loadError, authFailed } = useMap();
   const [mapCenter, setMapCenter] = useState(initialLocation || defaultCenter);
   const [markerPosition, setMarkerPosition] = useState(initialLocation || defaultCenter);
   const [address, setAddress] = useState("");
@@ -106,7 +107,34 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     );
   };
 
-  if (loadError) return <div className="p-4 text-red-500 bg-red-50 rounded-xl">Error loading maps</div>;
+  if (loadError || authFailed) {
+    return (
+      <div className="w-full relative rounded-2xl overflow-hidden border border-slate-200" style={{ height }}>
+        <FallbackMap 
+          center={[mapCenter.lat, mapCenter.lng]} 
+          zoom={14} 
+          className="w-full h-full z-0" 
+          onLocationSelect={(lat, lng) => {
+            const newPos = { lat, lng };
+            setMarkerPosition(newPos);
+            setMapCenter(newPos);
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'Accept-Language': 'en' } })
+              .then(res => res.json())
+              .then(data => {
+                const formatted = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                setAddress(formatted);
+                onLocationSelect({ lat, lng, address: formatted });
+              })
+              .catch(() => {
+                const fallback = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                setAddress(fallback);
+                onLocationSelect({ lat, lng, address: fallback });
+              });
+          }} 
+        />
+      </div>
+    );
+  }
   if (!isLoaded) return <div className="animate-pulse bg-gray-200 rounded-xl" style={{ height }}></div>;
 
   return (

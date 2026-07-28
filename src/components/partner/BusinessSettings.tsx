@@ -327,28 +327,6 @@ export const BusinessSettings = ({ business, onUpdate }: BusinessSettingsProps) 
             <h3 className="text-xs font-black text-purple-700 uppercase tracking-widest flex items-center gap-1.5">
               <MapPin size={14} /> 2. Complete Address & Interactive Map Coordinates
             </h3>
-            <button 
-              type="button"
-              onClick={handleDetectGPS}
-              disabled={isLocating}
-              className="inline-flex items-center gap-2 bg-purple-100 text-purple-900 hover:bg-purple-200 px-4 py-2 rounded-xl text-xs font-extrabold shadow-xs transition-all active:scale-95 shrink-0"
-            >
-              {isLocating ? <Loader2 size={14} className="animate-spin" /> : <Crosshair size={14} />}
-              <span>Detect My Current GPS Coordinates</span>
-            </button>
-          </div>
-
-          {/* Quick Preset Buttons for Major Cities */}
-          <div className="mb-4">
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Quick City Coordinate Presets:</p>
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => handleCityPreset("Mumbai", "Maharashtra", 19.0760, 72.8777)} className="px-3 py-1 bg-gray-100 hover:bg-purple-100 hover:text-purple-900 rounded-lg text-xs font-bold transition-all">📍 Mumbai</button>
-              <button type="button" onClick={() => handleCityPreset("Bangalore", "Karnataka", 12.9716, 77.5946)} className="px-3 py-1 bg-gray-100 hover:bg-purple-100 hover:text-purple-900 rounded-lg text-xs font-bold transition-all">📍 Bangalore</button>
-              <button type="button" onClick={() => handleCityPreset("Delhi", "Delhi NCR", 28.6139, 77.2090)} className="px-3 py-1 bg-gray-100 hover:bg-purple-100 hover:text-purple-900 rounded-lg text-xs font-bold transition-all">📍 Delhi NCR</button>
-              <button type="button" onClick={() => handleCityPreset("Pune", "Maharashtra", 18.5204, 73.8567)} className="px-3 py-1 bg-gray-100 hover:bg-purple-100 hover:text-purple-900 rounded-lg text-xs font-bold transition-all">📍 Pune</button>
-              <button type="button" onClick={() => handleCityPreset("Hyderabad", "Telangana", 17.3850, 78.4867)} className="px-3 py-1 bg-gray-100 hover:bg-purple-100 hover:text-purple-900 rounded-lg text-xs font-bold transition-all">📍 Hyderabad</button>
-              <button type="button" onClick={() => handleCityPreset("Chennai", "Tamil Nadu", 13.0827, 80.2707)} className="px-3 py-1 bg-gray-100 hover:bg-purple-100 hover:text-purple-900 rounded-lg text-xs font-bold transition-all">📍 Chennai</button>
-            </div>
           </div>
 
           <div className="mb-6 rounded-2xl overflow-hidden border border-purple-200 shadow-sm relative z-0 h-[300px]">
