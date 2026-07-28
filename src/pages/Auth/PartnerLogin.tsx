@@ -152,7 +152,7 @@ export const PartnerLogin = () => {
           const userCredential = await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
           
           // Check if they have a business record
-          const bizQuery = query(collection(db, "businesses"), where("owner_id", "==", userCredential.user.uid), limit(1));
+          const bizQuery = query(collection(db, "businesses"), where("owner_id", "==", userCredential.user.uid));
           const existingBizSnap = await getDocs(bizQuery);
           
           if (existingBizSnap.empty) {
@@ -163,14 +163,18 @@ export const PartnerLogin = () => {
             return;
           }
           
-          const bizData = existingBizSnap.docs[0].data();
-          if (bizData.status === "pending") {
+          const bizList = existingBizSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+          const activeBiz = bizList.find(b => b.status === "active" || b.status === "approved" || b.status === "verified");
+          
+          if (!activeBiz) {
+            const pendingBiz = bizList.find(b => b.status === "pending");
             await signOut(auth);
-            setError("Your registration is still pending Admin approval. You will receive a notification once approved.");
-            return;
-          } else if (bizData.status === "rejected" || bizData.status === "suspended") {
-            await signOut(auth);
-            setError(`Your account has been ${bizData.status}. Please contact support.`);
+            if (pendingBiz) {
+              setError("Your registration is still pending Admin approval. You will receive a notification once approved.");
+            } else {
+              const statusStr = bizList[0].status || "pending";
+              setError(`Your account has been ${statusStr}. Please contact support.`);
+            }
             return;
           }
           
