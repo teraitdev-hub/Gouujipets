@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MapPin, Search, Navigation, Loader2, Building2, CheckCircle2, AlertCircle, ShieldAlert, Info, RefreshCw, Target, ArrowRight } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { MapPin, Navigation, Loader2, Search, CheckCircle2, ChevronRight, X, Building2, Target } from 'lucide-react';
 import { FallbackMap } from '../Map/FallbackMap';
 
 interface LocationPickerProps {
@@ -9,327 +9,347 @@ interface LocationPickerProps {
   className?: string;
 }
 
-type GpsStatus = 'idle' | 'locating' | 'success' | 'denied' | 'unavailable' | 'timeout';
-type SearchStatus = 'idle' | 'searching' | 'success' | 'error';
+interface Suggestion {
+  display_name: string;
+  lat: string;
+  lon: string;
+  address?: any;
+}
 
-async function nominatimReverse(lat: number, lng: number): Promise<string> {
+async function reverseGeocode(lat: number, lng: number) {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
       { headers: { 'Accept-Language': 'en' } }
     );
-    if (res.ok) {
-      const d = await res.json();
-      return d.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-    }
-  } catch (_) {}
-  return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-}
-
-async function nominatimForward(query: string): Promise<{ lat: number; lng: number; display: string } | null> {
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&addressdetails=1`,
-      { headers: { 'Accept-Language': 'en' } }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      if (data?.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), display: data[0].display_name };
-    }
+    if (res.ok) return await res.json();
   } catch (_) {}
   return null;
+}
+
+function formatAddress(data: any): { short: string; full: string; pincode: string } {
+  if (!data?.address) return { short: data?.display_name || '', full: data?.display_name || '', pincode: '' };
+  const a = data.address;
+  const parts = [
+    a.road || a.pedestrian || a.footway || '',
+    a.neighbourhood || a.suburb || a.quarter || '',
+    a.city || a.town || a.village || a.county || '',
+  ].filter(Boolean);
+  const short = parts.slice(0, 2).join(', ');
+  const full = data.display_name;
+  const pincode = a.postcode || '';
+  return { short: short || full, full, pincode };
 }
 
 export const LocationPicker: React.FC<LocationPickerProps> = ({
   onLocationSelect,
   defaultLocation = { lat: 12.9716, lng: 77.5946 },
   defaultAddress = '',
-  className = 'w-full h-72 rounded-2xl overflow-hidden relative shadow-md border border-slate-200',
+  className = 'w-full h-64 rounded-2xl overflow-hidden',
 }) => {
+  const [phase, setPhase] = useState<'idle' | 'detecting' | 'done'>('idle');
   const [location, setLocation] = useState(defaultLocation);
   const [mapZoom, setMapZoom] = useState(13);
-  const [searchInput, setSearchInput] = useState(defaultAddress);
+  const [shortAddr, setShortAddr] = useState('');
+  const [fullAddr, setFullAddr] = useState(defaultAddress);
+  const [pincode, setPincode] = useState('');
   const [exactInput, setExactInput] = useState(defaultAddress);
-  const [pinnedAddress, setPinnedAddress] = useState(defaultAddress);
-  const [gpsStatus, setGpsStatus] = useState<GpsStatus>('idle');
-  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
-  const [searchStatus, setSearchStatus] = useState<SearchStatus>('idle');
-  const [exactSearchStatus, setExactSearchStatus] = useState<SearchStatus>('idle');
-  const watchIdRef = useRef<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [gpsError, setGpsError] = useState('');
   const debounceRef = useRef<any>(null);
+  const watchRef = useRef<number | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     return () => {
-      if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+      if (watchRef.current !== null) navigator.geolocation.clearWatch(watchRef.current);
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
 
-  const applyCoords = async (lat: number, lng: number, zoom: number, knownAddress?: string) => {
+  const applyLocation = async (lat: number, lng: number, zoom = 16, knownData?: any) => {
     setLocation({ lat, lng });
     setMapZoom(zoom);
-    const addr = knownAddress ?? await nominatimReverse(lat, lng);
-    setPinnedAddress(addr);
-    setSearchInput(addr);
-    setExactInput(addr);
-    onLocationSelect({ lat, lng, address: addr, exactAddress: addr });
-  };
-
-  // ── Main search input with debounced auto-search ──
-  const handleSearchInputChange = (val: string) => {
-    setSearchInput(val);
-    setSearchStatus('idle');
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (val.trim().length > 4) {
-      debounceRef.current = setTimeout(async () => {
-        setSearchStatus('searching');
-        const result = await nominatimForward(val);
-        if (result) {
-          await applyCoords(result.lat, result.lng, 16, result.display);
-          setSearchStatus('success');
-        } else {
-          setSearchStatus('error');
-        }
-      }, 900); // wait 900ms after user stops typing
-    }
-  };
-
-  const handleSearchNow = async () => {
-    const q = searchInput.trim();
-    if (!q) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    setSearchStatus('searching');
-    const result = await nominatimForward(q);
-    if (result) {
-      await applyCoords(result.lat, result.lng, 16, result.display);
-      setSearchStatus('success');
+    const data = knownData || await reverseGeocode(lat, lng);
+    if (data) {
+      const fmt = formatAddress(data);
+      setShortAddr(fmt.short);
+      setFullAddr(fmt.full);
+      setPincode(fmt.pincode);
+      setExactInput(fmt.short);
+      onLocationSelect({ lat, lng, address: fmt.full, exactAddress: fmt.short });
     } else {
-      setSearchStatus('error');
+      const fallback = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      setShortAddr(fallback); setFullAddr(fallback);
+      onLocationSelect({ lat, lng, address: fallback, exactAddress: fallback });
     }
+    setPhase('done');
   };
 
-  // ── Exact address field with its own search button ──
-  const handleExactAddressSearch = async () => {
-    const q = exactInput.trim();
-    if (!q) return;
-    setExactSearchStatus('searching');
-    const result = await nominatimForward(q);
-    if (result) {
-      await applyCoords(result.lat, result.lng, 17, result.display);
-      setExactSearchStatus('success');
-    } else {
-      // Even if not geocodable, still save the text
-      onLocationSelect({ lat: location.lat, lng: location.lng, address: pinnedAddress || exactInput, exactAddress: exactInput });
-      setExactSearchStatus('error');
+  // ── Live GPS (watchPosition for max accuracy) ──
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      setGpsError('Your browser does not support location detection. Please type your address below.');
+      setPhase('done');
+      return;
     }
-  };
+    setPhase('detecting');
+    setGpsError('');
 
-  // ── GPS watchPosition ──
-  const handleGPS = () => {
-    if (!navigator.geolocation) { setGpsStatus('unavailable'); return; }
-    if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
-    setGpsStatus('locating'); setGpsAccuracy(null);
+    if (watchRef.current !== null) { navigator.geolocation.clearWatch(watchRef.current); watchRef.current = null; }
 
-    const giveUpTimer = setTimeout(() => {
-      if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
-      setGpsStatus(prev => prev === 'locating' ? 'timeout' : prev);
-    }, 20000);
+    const timeout = setTimeout(() => {
+      if (watchRef.current !== null) { navigator.geolocation.clearWatch(watchRef.current); watchRef.current = null; }
+      setGpsError('Location detection timed out. Please search your address below.');
+      setPhase('done');
+    }, 15000);
 
-    watchIdRef.current = navigator.geolocation.watchPosition(
+    watchRef.current = navigator.geolocation.watchPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng, accuracy } = pos.coords;
-        setGpsAccuracy(Math.round(accuracy));
-        setGpsStatus('success');
-        await applyCoords(lat, lng, accuracy < 50 ? 18 : accuracy < 200 ? 16 : 14);
-        if (accuracy <= 50) {
-          clearTimeout(giveUpTimer);
-          if (watchIdRef.current !== null) { navigator.geolocation.clearWatch(watchIdRef.current); watchIdRef.current = null; }
+        if (accuracy <= 100 || !watchRef.current) {
+          clearTimeout(timeout);
+          if (watchRef.current !== null) { navigator.geolocation.clearWatch(watchRef.current); watchRef.current = null; }
+          await applyLocation(lat, lng, accuracy < 50 ? 18 : 16);
         }
+        // Keep watching until we get ≤100m accuracy
       },
       (err) => {
-        clearTimeout(giveUpTimer);
-        if (err.code === 1) setGpsStatus('denied');
-        else if (err.code === 2) setGpsStatus('unavailable');
-        else setGpsStatus('timeout');
+        clearTimeout(timeout);
+        if (err.code === 1) {
+          setGpsError('Location permission denied. Please allow location access and try again, or type your address below.');
+        } else {
+          setGpsError('Could not detect location. Please type your address below.');
+        }
+        setPhase('done');
       },
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
-  const handleMapPin = async (lat: number, lng: number) => {
-    await applyCoords(lat, lng, mapZoom);
-    setSearchStatus('success');
+  // ── Search suggestions dropdown ──
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (val.trim().length < 3) return;
+    debounceRef.current = setTimeout(async () => {
+      setIsSuggesting(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(val)}&limit=5&addressdetails=1`,
+          { headers: { 'Accept-Language': 'en' } }
+        );
+        if (res.ok) {
+          const data: Suggestion[] = await res.json();
+          setSuggestions(data);
+          setShowSuggestions(data.length > 0);
+        }
+      } catch (_) {}
+      setIsSuggesting(false);
+    }, 500);
   };
 
-  const accuracyColor = !gpsAccuracy ? '' : gpsAccuracy <= 20 ? 'text-green-600' : gpsAccuracy <= 100 ? 'text-blue-600' : 'text-orange-500';
+  const handleSuggestionSelect = async (s: Suggestion) => {
+    setShowSuggestions(false);
+    setSearchQuery('');
+    const lat = parseFloat(s.lat);
+    const lng = parseFloat(s.lon);
+    const fmt = formatAddress({ address: s.address, display_name: s.display_name });
+    await applyLocation(lat, lng, 16, { address: s.address, display_name: s.display_name });
+  };
 
-  return (
-    <div className="space-y-4 font-sans">
+  const handleMapPin = async (lat: number, lng: number) => {
+    await applyLocation(lat, lng, mapZoom);
+  };
 
-      {/* ─── 1. Address Search ─── */}
-      <div className="space-y-2">
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-          <Search size={14} className="text-violet-600" />
-          Type your address — map updates automatically
-        </label>
-
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <MapPin size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-violet-500 pointer-events-none" />
-            {searchStatus === 'searching' && (
-              <Loader2 size={14} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-violet-400" />
-            )}
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => handleSearchInputChange(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearchNow(); } }}
-              placeholder="Start typing — e.g. MG Road Bangalore, Bandra Mumbai…"
-              className="w-full h-12 pl-10 pr-10 bg-white border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 transition-all shadow-sm"
-            />
+  // ─── Phase: idle — Flipkart-style prompt ───
+  if (phase === 'idle') {
+    return (
+      <div className="rounded-2xl border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 p-6 space-y-5 font-sans">
+        {/* Detect button — primary CTA */}
+        <div className="text-center space-y-3">
+          <div className="w-16 h-16 bg-violet-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-violet-200">
+            <Target size={32} className="text-white" />
+          </div>
+          <div>
+            <h3 className="font-black text-slate-900 text-lg">Set Your Location</h3>
+            <p className="text-sm text-slate-500 font-medium mt-0.5">Detect live location or search your address</p>
           </div>
           <button
-            type="button" onClick={handleSearchNow}
-            disabled={searchStatus === 'searching'}
-            className="h-12 px-5 bg-violet-600 hover:bg-violet-700 active:scale-95 disabled:opacity-60 text-white font-bold text-sm rounded-xl flex items-center gap-2 shrink-0 shadow-md transition-all"
+            type="button"
+            onClick={handleDetectLocation}
+            className="w-full h-14 bg-violet-600 hover:bg-violet-700 active:scale-98 text-white font-black text-base rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-violet-200 transition-all"
           >
-            {searchStatus === 'searching' ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-            <span className="hidden sm:inline">Find</span>
+            <Navigation size={20} />
+            📡 Detect My Current Location
           </button>
+          <p className="text-[11px] text-slate-400 font-medium">We will ask for your browser's location permission</p>
         </div>
 
-        {searchStatus === 'success' && (
-          <p className="text-xs font-semibold text-green-600 flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-            <CheckCircle2 size={13} /> Location found and pinned on map!
-          </p>
-        )}
-        {searchStatus === 'error' && (
-          <p className="text-xs font-semibold text-orange-600 flex items-center gap-1.5 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
-            <AlertCircle size={13} /> Not found. Try a simpler name like "Indiranagar" or your city name.
-          </p>
-        )}
-      </div>
+        {/* Divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-slate-200" />
+          <span className="text-xs font-bold text-slate-400 uppercase">or enter manually</span>
+          <div className="flex-1 h-px bg-slate-200" />
+        </div>
 
-      {/* ─── 2. GPS ─── */}
-      <div className="space-y-2">
-        <button
-          type="button" onClick={handleGPS}
-          disabled={gpsStatus === 'locating'}
-          className={`w-full h-12 border-2 font-bold text-sm rounded-xl flex items-center justify-center gap-2 transition-all active:scale-95 ${
-            gpsStatus === 'success'    ? 'bg-green-50 border-green-400 text-green-700' :
-            gpsStatus === 'denied' || gpsStatus === 'unavailable' || gpsStatus === 'timeout'
-                                       ? 'bg-orange-50 border-orange-300 text-orange-700' :
-            gpsStatus === 'locating'   ? 'bg-violet-100 border-violet-300 text-violet-700 cursor-wait' :
-                                         'bg-violet-50 hover:bg-violet-100 border-violet-200 text-violet-700'
-          }`}
-        >
-          {gpsStatus === 'locating'  && <Loader2 size={17} className="animate-spin" />}
-          {gpsStatus === 'success'   && <Target size={17} />}
-          {(gpsStatus === 'denied' || gpsStatus === 'unavailable' || gpsStatus === 'timeout') && <RefreshCw size={17} />}
-          {gpsStatus === 'idle'      && <Navigation size={17} />}
-          <span>
-            {gpsStatus === 'idle'        && '📡 Use My Live GPS Location'}
-            {gpsStatus === 'locating'    && 'Getting your exact location…'}
-            {gpsStatus === 'success'     && (gpsAccuracy ? `✅ GPS Locked ±${gpsAccuracy}m` : '✅ GPS Location Set!')}
-            {gpsStatus === 'denied'      && 'Location Blocked — Tap to retry'}
-            {gpsStatus === 'unavailable' && 'GPS Unavailable — Tap to retry'}
-            {gpsStatus === 'timeout'     && 'GPS Timed Out — Tap to retry'}
-          </span>
-        </button>
-
-        {gpsStatus === 'success' && gpsAccuracy && (
-          <div className="flex items-center gap-2 px-1">
-            <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
-              <div className={`h-full rounded-full transition-all ${gpsAccuracy <= 20 ? 'bg-green-500' : gpsAccuracy <= 100 ? 'bg-blue-500' : 'bg-orange-400'}`}
-                style={{ width: `${Math.max(10, Math.min(100, 100 - (gpsAccuracy / 8)))}%` }} />
+        {/* Manual search */}
+        <div className="relative">
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          {isSuggesting && <Loader2 size={14} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-violet-400" />}
+          <input
+            ref={searchRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Search area, street, landmark, city…"
+            className="w-full h-12 pl-11 pr-10 bg-white border-2 border-slate-200 rounded-xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 transition-all shadow-sm"
+          />
+          {showSuggestions && (
+            <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+              {suggestions.map((s, i) => {
+                const fmt = formatAddress({ address: s.address, display_name: s.display_name });
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => handleSuggestionSelect(s)}
+                    className="w-full flex items-start gap-3 px-4 py-3 hover:bg-violet-50 active:bg-violet-100 text-left border-b border-slate-50 last:border-0 transition-colors"
+                  >
+                    <MapPin size={16} className="text-violet-500 mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-slate-900 truncate">{fmt.short || s.display_name.split(',')[0]}</p>
+                      <p className="text-xs text-slate-400 truncate font-medium">{s.display_name}</p>
+                    </div>
+                    <ChevronRight size={14} className="text-slate-300 shrink-0 mt-1" />
+                  </button>
+                );
+              })}
             </div>
-            <span className={`text-[11px] font-bold shrink-0 ${accuracyColor}`}>
-              {gpsAccuracy <= 20 ? '🎯 Precise' : gpsAccuracy <= 100 ? '👍 Good' : '⚠️ Low — drag pin to adjust'}
-            </span>
-          </div>
-        )}
-
-        {gpsStatus === 'denied' && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-            <p className="text-xs font-bold text-amber-800 flex items-center gap-1">
-              <ShieldAlert size={12} /> Permission denied
-            </p>
-            <p className="text-xs text-amber-700 mt-1 leading-relaxed">
-              Tap the 🔒 lock in your browser bar → <strong>Site Settings</strong> → <strong>Location → Allow</strong>, then refresh. Or just type your address above.
-            </p>
-          </div>
-        )}
-        {(gpsStatus === 'unavailable' || gpsStatus === 'timeout') && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-            <p className="text-xs font-bold text-blue-800 flex items-center gap-1"><Info size={12} /> Signal unavailable</p>
-            <p className="text-xs text-blue-600 mt-0.5 leading-relaxed">Type your area in the search bar above or tap anywhere on the map to set location manually.</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+    );
+  }
 
-      {/* ─── 3. Map ─── */}
-      <div>
-        <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-          <MapPin size={12} className="text-violet-500" />
-          Tap map or drag the purple pin to fine-tune location
-        </p>
-        <FallbackMap
-          center={[location.lat, location.lng]}
-          zoom={mapZoom}
-          className={className}
-          onLocationSelect={handleMapPin}
+  // ─── Phase: detecting ───
+  if (phase === 'detecting') {
+    return (
+      <div className="rounded-2xl border-2 border-violet-200 bg-violet-50 p-8 flex flex-col items-center justify-center gap-4 min-h-[180px] font-sans">
+        <div className="relative">
+          <div className="w-16 h-16 bg-violet-600 rounded-full flex items-center justify-center">
+            <Navigation size={28} className="text-white" />
+          </div>
+          <div className="absolute inset-0 rounded-full border-4 border-violet-400 animate-ping opacity-30" />
+        </div>
+        <div className="text-center">
+          <p className="font-black text-violet-900 text-base">Detecting your location…</p>
+          <p className="text-sm text-violet-600 font-medium mt-0.5">Please allow location access if prompted</p>
+        </div>
+        <div className="flex gap-1">
+          {[0, 1, 2].map(i => (
+            <div key={i} className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Phase: done — show confirmed location + map ───
+  return (
+    <div className="space-y-4 font-sans">
+      {/* GPS error banner */}
+      {gpsError && (
+        <div className="bg-orange-50 border border-orange-200 rounded-xl px-4 py-3 flex items-start gap-2">
+          <span className="text-orange-500 text-lg shrink-0">⚠️</span>
+          <p className="text-xs font-semibold text-orange-700 leading-relaxed">{gpsError}</p>
+        </div>
+      )}
+
+      {/* Confirmed address card */}
+      {shortAddr && (
+        <div className="bg-green-50 border-2 border-green-200 rounded-2xl px-4 py-3 flex items-start gap-3">
+          <CheckCircle2 size={20} className="text-green-600 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="font-black text-green-900 text-sm">{shortAddr}</p>
+            {pincode && <p className="text-xs font-bold text-green-700 mt-0.5">📮 PIN: {pincode}</p>}
+            <p className="text-[11px] text-green-600 mt-0.5 truncate">{fullAddr}</p>
+          </div>
+          <button type="button" onClick={() => { setPhase('idle'); setShortAddr(''); setSearchQuery(''); }}
+            className="shrink-0 text-green-400 hover:text-green-600 p-1">
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Change location search */}
+      <div className="relative">
+        <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        {isSuggesting && <Loader2 size={13} className="absolute right-14 top-1/2 -translate-y-1/2 animate-spin text-violet-400" />}
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          placeholder="Search different area or address…"
+          className="w-full h-11 pl-11 pr-28 bg-white border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 transition-all"
         />
+        <button
+          type="button"
+          onClick={handleDetectLocation}
+          className="absolute right-2 top-1/2 -translate-y-1/2 h-7 px-2.5 bg-violet-100 hover:bg-violet-200 text-violet-700 font-bold text-[11px] rounded-lg flex items-center gap-1 transition-colors"
+        >
+          <Navigation size={11} /> GPS
+        </button>
+        {showSuggestions && (
+          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+            {suggestions.map((s, i) => {
+              const fmt = formatAddress({ address: s.address, display_name: s.display_name });
+              return (
+                <button key={i} type="button" onClick={() => handleSuggestionSelect(s)}
+                  className="w-full flex items-start gap-3 px-4 py-3 hover:bg-violet-50 text-left border-b border-slate-50 last:border-0 transition-colors">
+                  <MapPin size={15} className="text-violet-500 mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-slate-900 truncate">{fmt.short || s.display_name.split(',')[0]}</p>
+                    <p className="text-xs text-slate-400 truncate">{s.display_name}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* ─── 4. Exact Address with its own SET button ─── */}
-      <div className="space-y-2">
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-          <Building2 size={14} className="text-violet-600" />
-          Exact Flat / Building / Landmark
-        </label>
+      {/* Map */}
+      <div>
+        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+          <MapPin size={11} className="text-violet-500" /> Tap or drag pin to fine-tune
+        </p>
+        <FallbackMap center={[location.lat, location.lng]} zoom={mapZoom} className={className} onLocationSelect={handleMapPin} />
+      </div>
 
-        <textarea
+      {/* Exact address field */}
+      <div className="space-y-2">
+        <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+          <Building2 size={13} className="text-violet-600" /> House / Flat / Floor / Building
+        </label>
+        <input
+          type="text"
           value={exactInput}
           onChange={(e) => {
             setExactInput(e.target.value);
-            setExactSearchStatus('idle');
-            onLocationSelect({ lat: location.lat, lng: location.lng, address: pinnedAddress || e.target.value, exactAddress: e.target.value });
+            onLocationSelect({ lat: location.lat, lng: location.lng, address: fullAddr || e.target.value, exactAddress: e.target.value });
           }}
-          placeholder="e.g. Flat 4B, Prestige Tower, MG Road, Bengaluru – 560001"
-          rows={2}
-          className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:border-violet-500 outline-none resize-none transition-all"
+          placeholder="e.g. Flat 4B, 2nd Floor, Prestige Tower"
+          className="w-full h-11 px-4 bg-white border-2 border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-violet-500 transition-all"
         />
-
-        <button
-          type="button"
-          onClick={handleExactAddressSearch}
-          disabled={exactSearchStatus === 'searching' || !exactInput.trim()}
-          className="w-full h-11 bg-slate-800 hover:bg-slate-900 active:scale-95 disabled:opacity-40 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-2 shadow transition-all"
-        >
-          {exactSearchStatus === 'searching'
-            ? <><Loader2 size={15} className="animate-spin" /> Finding location on map…</>
-            : <><ArrowRight size={15} /> Set This Address on Map</>}
-        </button>
-
-        {exactSearchStatus === 'success' && (
-          <p className="text-xs font-semibold text-green-600 flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
-            <CheckCircle2 size={13} /> Address pinned on map!
-          </p>
-        )}
-        {exactSearchStatus === 'error' && (
-          <p className="text-xs font-semibold text-slate-500 flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-            <Info size={13} /> Exact flat details saved — search the area name above to move the map pin.
-          </p>
-        )}
-
-        {/* Coordinates */}
-        <div className="flex items-center justify-between px-0.5 pt-0.5">
-          <p className="text-[11px] text-slate-400 font-semibold">
-            📍 <span className="font-mono text-violet-600 font-bold">{location.lat.toFixed(6)}, {location.lng.toFixed(6)}</span>
-            {gpsAccuracy && gpsStatus === 'success' && <span className={`ml-2 ${accuracyColor}`}>(±{gpsAccuracy}m)</span>}
-          </p>
-          {pinnedAddress && <span className="text-[11px] text-green-600 font-bold flex items-center gap-1"><CheckCircle2 size={11} /> Pinned</span>}
-        </div>
+        <p className="text-[11px] text-slate-400 font-mono px-1">
+          📍 {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+        </p>
       </div>
     </div>
   );
