@@ -235,7 +235,7 @@ export const PartnerLogin = () => {
           setError("This email address is already registered in our system. We have switched you to 'Sign In'—please enter your password to log in, or click 'Forgot?' if you need to reset it.");
         }
       } else if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.message?.includes("invalid-credential")) {
-        setError("Incorrect email or password. Please verify your credentials. If you haven't registered your facility yet, please click the 'Register' tab above to sign up!");
+        setError(`Incorrect email or password. (Firebase Error: ${err.message}). If you just registered, make sure you don't have any typos. If you haven't registered, click 'Register'.`);
       } else {
         setError(err.message || "Authentication failed");
       }
