@@ -7,7 +7,7 @@ import { checkPasswordStrength } from "../../utils/security";
 import { auth, db } from "../../lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
 import type { ConfirmationResult } from "firebase/auth";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, limit } from "firebase/firestore";
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
 
 const SERVICE_INFO: Record<string, { title: string, desc: string, icon: string }> = {
@@ -163,6 +163,18 @@ export const UserLogin = () => {
           setError("An account with this email already exists. We switched you to the 'Sign In' tab—please enter your password to sign in.");
         }
       } else if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.message?.includes("invalid-credential")) {
+        try {
+          const usersRef = collection(db, "users");
+          const q = query(usersRef, where("email", "==", loginIdentifier), limit(1));
+          const querySnap = await getDocs(q);
+          if (!querySnap.empty && querySnap.docs[0].data()?.loginMethod === 'google') {
+            setError("This email is registered via Google Sign-In. Please click the 'Sign in with Google' button below to log in.");
+            setIsLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.error(e);
+        }
         setError("Incorrect email or password. If you just registered, make sure you don't have any typos in your email. If you don't have an account yet, please click 'Sign up' at the bottom to register!");
       } else {
         setError(err.message || "Authentication failed");

@@ -179,6 +179,18 @@ export const PartnerLogin = () => {
           navigate("/partner/dashboard");
         } catch (signInErr: any) {
           if (signInErr.code === "auth/invalid-credential" || signInErr.code === "auth/user-not-found" || signInErr.code === "auth/wrong-password") {
+            try {
+              const usersRef = collection(db, "users");
+              const q = query(usersRef, where("email", "==", loginIdentifier), limit(1));
+              const querySnap = await getDocs(q);
+              if (!querySnap.empty && querySnap.docs[0].data()?.loginMethod === 'google') {
+                setError("This email is registered via Google Sign-In. Please click the 'Sign in with Google' button below to log in.");
+                setIsLoading(false);
+                return;
+              }
+            } catch (e) {
+              console.error(e);
+            }
             setError("Incorrect email or password. If you just registered, make sure you don't have any typos in your email. If you don't have an account yet, please click 'Register' to create a new account.");
           } else {
             setError(signInErr.message || "Sign in failed.");
