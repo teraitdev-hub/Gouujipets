@@ -92,6 +92,9 @@ export const PartnerLogin = () => {
       setSuccessMsg("");
       const userCred = await loginWithGoogle('partner');
       
+      const bizQuery = query(collection(db, "businesses"), where("owner_id", "==", userCred.user.uid), limit(1));
+      const existingBizSnap = await getDocs(bizQuery);
+      
       if (existingBizSnap.empty) {
         setPendingGoogleUser(userCred.user);
         setFormData({
@@ -146,12 +149,13 @@ export const PartnerLogin = () => {
         return;
       }
       
-    if (!isLogin && !pendingGoogleUser && !validPhone) {
-      const passwordCheck = checkPasswordStrength(formData.password);
-      if (!passwordCheck.isStrong) {
-        setError(passwordCheck.errors.join(" "));
-        setIsLoading(false);
-        return;
+      if (!pendingGoogleUser) {
+        const passwordCheck = checkPasswordStrength(formData.password);
+        if (!passwordCheck.isStrong) {
+          setError(passwordCheck.errors.join(" "));
+          setIsLoading(false);
+          return;
+        }
       }
     }
 
