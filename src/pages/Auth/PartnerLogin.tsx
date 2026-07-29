@@ -9,6 +9,7 @@ import { collection, addDoc, doc, setDoc, getDocs, query, where, limit, updateDo
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
 import { checkPasswordStrength } from "../../utils/security";
+import { GoogleMap, useLoadScript, Marker } from "@react-google-maps/api";
 
 export const PartnerLogin = () => {
   const navigate = useNavigate();
@@ -29,8 +30,32 @@ export const PartnerLogin = () => {
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
+  const [mapLocation, setMapLocation] = useState({ lat: 20.5937, lng: 78.9629 });
+  const [isGeocoding, setIsGeocoding] = useState(false);
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
+  });
+
   const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
   const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ""));
+
+  const handlePreviewLocation = async () => {
+    setIsGeocoding(true);
+    try {
+      const addressStr = `${formData.street}, ${formData.city}, ${formData.state}, ${formData.pincode}`;
+      if (addressStr.trim().length < 5) return;
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressStr)}`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        setMapLocation({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGeocoding(false);
+    }
+  };
 
   // Auto-redirect if already logged in
   useEffect(() => {
@@ -197,8 +222,15 @@ export const PartnerLogin = () => {
             if (geocodeData && geocodeData.length > 0) {
               lat = parseFloat(geocodeData[0].lat);
               lng = parseFloat(geocodeData[0].lon);
+            } else {
+              lat = mapLocation.lat;
+              lng = mapLocation.lng;
             }
-          } catch (e) { console.error("Geocoding failed", e); }
+          } catch (e) { 
+            console.error("Geocoding failed", e);
+            lat = mapLocation.lat;
+            lng = mapLocation.lng;
+          }
 
           const userCredential = await createUserWithEmailAndPassword(auth, finalEmail, formData.password);
           
@@ -645,6 +677,26 @@ export const PartnerLogin = () => {
                         required
                       />
                     </div>
+                    
+                    <div className="mt-3">
+                      <button type="button" onClick={handlePreviewLocation} className="text-xs font-bold text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 px-3 py-2 rounded-lg border border-violet-200 flex items-center gap-2 transition-colors">
+                        {isGeocoding ? <Loader2 size={14} className="animate-spin" /> : <MapPin size={14} />}
+                        Verify Location on Map
+                      </button>
+                    </div>
+
+                    {isLoaded && (
+                      <div className="h-48 w-full rounded-xl overflow-hidden border border-slate-200 mt-3 shadow-inner">
+                        <GoogleMap
+                          mapContainerStyle={{ width: '100%', height: '100%' }}
+                          center={mapLocation}
+                          zoom={15}
+                          options={{ disableDefaultUI: true, gestureHandling: "cooperative" }}
+                        >
+                          <Marker position={mapLocation} />
+                        </GoogleMap>
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-2">
