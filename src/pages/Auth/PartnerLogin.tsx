@@ -159,7 +159,22 @@ export const PartnerLogin = () => {
       }
     }
 
-    const finalEmail = validPhone ? `${loginIdentifier.replace(/[^0-9]/g, '')}@phone.gouuji.com` : loginIdentifier.toLowerCase();
+    if (validPhone) {
+      try {
+        const recaptchaVerifier = setupRecaptcha("recaptcha-container");
+        const confirmation = await sendOTP(loginIdentifier, recaptchaVerifier);
+        setConfirmationResult(confirmation);
+        setShowOtpInput(true);
+        setSuccessMsg(`OTP sent to ${loginIdentifier}`);
+      } catch (err: any) {
+        setError(err.message || "Failed to send OTP. Please check the number.");
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    const finalEmail = loginIdentifier.toLowerCase();
 
     try {
       if (isLogin) {
@@ -356,16 +371,38 @@ export const PartnerLogin = () => {
           }
         }
 
-        await setDoc(doc(db, "users", userCredential.user.uid), { role: "partner" }, { merge: true });
-        await addDoc(collection(db, "businesses"), {
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+          full_name: formData.name || "Partner",
+          phone: formData.email.trim(),
+          email: "",
+          role: "partner",
+          loginMethod: 'phone'
+        }, { merge: true });
+
+        const bizRef = await addDoc(collection(db, "businesses"), {
           owner_id: userCredential.user.uid,
           name: formData.businessName || `${formData.name || 'My'}'s Facility`,
-          type: facilityTypes.length ? facilityTypes.join(",") : "boarding",
+          type: facilityTypes[0] || "boarding",
+          services: facilityTypes,
           address: `${formData.street}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
+          street: formData.street,
+          city: formData.city,
+          state: formData.state,
+          pincode: formData.pincode,
           latitude: lat,
           longitude: lng,
-          status: "pending",
           certificates: certUrls,
+          status: "pending",
+          created_at: new Date().toISOString()
+        });
+
+        await addDoc(collection(db, "admin_notifications"), {
+          title: "New Partner Registration Pending",
+          message: `${formData.name} registered a new facility (${facilityTypes.join(", ")}) requiring admin verification.`,
+          business_id: bizRef.id,
+          owner_id: userCredential.user.uid,
+          type: "partner_registration",
+          read: false,
           created_at: new Date().toISOString()
         });
         
