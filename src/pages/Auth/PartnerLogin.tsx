@@ -95,24 +95,8 @@ export const PartnerLogin = () => {
       const existingBizSnap = await getDocs(bizQuery);
       
       if (existingBizSnap.empty) {
-        await setDoc(doc(db, "users", userCred.user.uid), {
-          full_name: userCred.user.displayName || "Partner",
-          email: userCred.user.email || "",
-          role: "partner"
-        }, { merge: true });
-        await addDoc(collection(db, "businesses"), {
-          owner_id: userCred.user.uid,
-          name: `${userCred.user.displayName || 'My'}'s Facility`,
-          type: "boarding",
-          address: "Bangalore, Karnataka, India",
-          latitude: 12.9716,
-          longitude: 77.5946,
-          status: "pending",
-          created_at: new Date().toISOString()
-        });
         await signOut(auth);
-        setShowApprovalModal(true);
-        return;
+        throw new Error("NOT_REGISTERED");
       }
       
       await checkApprovalStatus(userCred.user.uid);
@@ -145,6 +129,17 @@ export const PartnerLogin = () => {
     }
 
     if (!isLogin && !validPhone) {
+      if (!formData.name || !formData.businessName || !formData.street || !formData.city || !formData.state || !formData.pincode) {
+        setError("Please fill out all required fields.");
+        setIsLoading(false);
+        return;
+      }
+      if (facilityTypes.length === 0) {
+        setError("Please select at least one service offered by your business.");
+        setIsLoading(false);
+        return;
+      }
+      
       const passwordCheck = checkPasswordStrength(formData.password);
       if (!passwordCheck.isStrong) {
         setError(passwordCheck.errors.join(" "));
