@@ -58,6 +58,15 @@ export const PartnerLogin = () => {
     }
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isLogin && formData.street && formData.city) {
+        handlePreviewLocation();
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [formData.street, formData.city, formData.state, formData.pincode, isLogin]);
+
   // Auto-redirect if already logged in
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -738,12 +747,12 @@ export const PartnerLogin = () => {
                       />
                     </div>
                     
-                    <div className="mt-3">
-                      <button type="button" onClick={handlePreviewLocation} className="text-xs font-bold text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 px-3 py-2 rounded-lg border border-violet-200 flex items-center gap-2 transition-colors">
-                        {isGeocoding ? <Loader2 size={14} className="animate-spin" /> : <MapPin size={14} />}
-                        Verify Location on Map
-                      </button>
-                    </div>
+                    {isGeocoding && (
+                      <div className="mt-3 flex items-center gap-2 text-xs font-bold text-violet-600 bg-violet-50 px-3 py-2 rounded-lg border border-violet-200">
+                        <Loader2 size={14} className="animate-spin" />
+                        Finding location on map...
+                      </div>
+                    )}
 
                     {isLoaded && (
                       <div className="h-48 w-full rounded-xl overflow-hidden border border-slate-200 mt-3 shadow-inner">
@@ -770,14 +779,17 @@ export const PartnerLogin = () => {
                           if (e.target.files) {
                             setCertificates([...certificates, ...Array.from(e.target.files)]);
                           }
+                          e.target.value = ''; // Reset input to allow adding the same file again if needed
                         }}
                         className="hidden"
                         id="cert-upload"
                       />
                       <label htmlFor="cert-upload" className="cursor-pointer flex flex-col items-center justify-center">
                         <UploadCloud size={24} className="text-violet-500 mb-2" />
-                        <span className="text-xs font-bold text-slate-700">Click to upload certificates</span>
-                        <span className="text-[10px] text-slate-400 mt-1">Accepts Images and PDFs</span>
+                        <span className="text-xs font-bold text-slate-700">
+                          {certificates.length > 0 ? "Click to add more certificates" : "Click to upload certificates"}
+                        </span>
+                        <span className="text-[10px] text-slate-400 mt-1">Accepts multiple Images and PDFs</span>
                       </label>
                     </div>
                     {certificates.length > 0 && (
