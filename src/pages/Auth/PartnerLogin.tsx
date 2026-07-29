@@ -9,7 +9,9 @@ import { collection, addDoc, doc, setDoc, getDocs, query, where, limit, updateDo
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
 import { checkPasswordStrength } from "../../utils/security";
-import { GoogleMap, useLoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, useLoadScript, Marker, Autocomplete } from "@react-google-maps/api";
+
+const libraries: ("places")[] = ["places"];
 
 export const PartnerLogin = () => {
   const navigate = useNavigate();
@@ -36,7 +38,42 @@ export const PartnerLogin = () => {
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
+    libraries,
   });
+
+  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
+  const onPlaceChanged = () => {
+    if (autocomplete !== null) {
+      const place = autocomplete.getPlace();
+      if (place.geometry?.location) {
+        setMapLocation({ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() });
+      }
+      if (place.address_components) {
+        let street = "";
+        let city = "";
+        let state = "";
+        let pincode = "";
+        for (const component of place.address_components) {
+          const type = component.types[0];
+          if (type === "street_number") street += component.long_name + " ";
+          if (type === "route") street += component.long_name;
+          if (type === "locality") city = component.long_name;
+          if (type === "administrative_area_level_1") state = component.long_name;
+          if (type === "postal_code") pincode = component.long_name;
+        }
+        setFormData(prev => ({
+          ...prev,
+          street: street.trim() || place.name || prev.street,
+          city: city || prev.city,
+          state: state || prev.state,
+          pincode: pincode || prev.pincode
+        }));
+      } else {
+        setFormData(prev => ({ ...prev, street: place.name || prev.street }));
+      }
+    }
+  };
 
   const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
   const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ""));
@@ -711,14 +748,30 @@ export const PartnerLogin = () => {
                   <div className="pt-2">
                     <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Complete Address</label>
                     <div className="space-y-3">
-                      <input
-                        type="text"
-                        value={formData.street}
-                        onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                        placeholder="Street Address / Landmark"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                        required
-                      />
+                      {isLoaded ? (
+                        <Autocomplete
+                          onLoad={(ac) => setAutocomplete(ac)}
+                          onPlaceChanged={onPlaceChanged}
+                        >
+                          <input
+                            type="text"
+                            value={formData.street}
+                            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                            placeholder="Street Address / Landmark (Start typing to search)"
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                            required
+                          />
+                        </Autocomplete>
+                      ) : (
+                        <input
+                          type="text"
+                          value={formData.street}
+                          onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                          placeholder="Street Address / Landmark"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                          required
+                        />
+                      )}
                       <div className="grid grid-cols-2 gap-3">
                         <input
                           type="text"
