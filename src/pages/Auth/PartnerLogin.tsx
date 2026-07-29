@@ -34,7 +34,6 @@ export const PartnerLogin = () => {
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   const [mapLocation, setMapLocation] = useState({ lat: 20.5937, lng: 78.9629 });
-  const [isGeocoding, setIsGeocoding] = useState(false);
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
@@ -77,32 +76,6 @@ export const PartnerLogin = () => {
 
   const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
   const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ""));
-
-  const handlePreviewLocation = async () => {
-    setIsGeocoding(true);
-    try {
-      const addressStr = `${formData.street}, ${formData.city}, ${formData.state}, ${formData.pincode}`;
-      if (addressStr.trim().length < 5) return;
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressStr)}`);
-      const data = await res.json();
-      if (data && data.length > 0) {
-        setMapLocation({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsGeocoding(false);
-    }
-  };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isLogin && formData.street && formData.city) {
-        handlePreviewLocation();
-      }
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [formData.street, formData.city, formData.state, formData.pincode, isLogin]);
 
   // Auto-redirect if already logged in
   useEffect(() => {
@@ -800,13 +773,6 @@ export const PartnerLogin = () => {
                       />
                     </div>
                     
-                    {isGeocoding && (
-                      <div className="mt-3 flex items-center gap-2 text-xs font-bold text-violet-600 bg-violet-50 px-3 py-2 rounded-lg border border-violet-200">
-                        <Loader2 size={14} className="animate-spin" />
-                        Finding location on map...
-                      </div>
-                    )}
-
                     {isLoaded && (
                       <div className="h-48 w-full rounded-xl overflow-hidden border border-slate-200 mt-3 shadow-inner">
                         <GoogleMap
