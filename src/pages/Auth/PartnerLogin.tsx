@@ -24,6 +24,7 @@ export const PartnerLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [pendingGoogleUser, setPendingGoogleUser] = useState<any>(null);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [facilityTypes, setFacilityTypes] = useState<string[]>(["boarding"]);
   const [showOtpInput, setShowOtpInput] = useState(false);
@@ -91,12 +92,17 @@ export const PartnerLogin = () => {
       setSuccessMsg("");
       const userCred = await loginWithGoogle('partner');
       
-      const bizQuery = query(collection(db, "businesses"), where("owner_id", "==", userCred.user.uid), limit(1));
-      const existingBizSnap = await getDocs(bizQuery);
-      
       if (existingBizSnap.empty) {
-        await signOut(auth);
-        throw new Error("NOT_REGISTERED");
+        setPendingGoogleUser(userCred.user);
+        setFormData({
+          ...formData,
+          name: userCred.user.displayName || "",
+          email: userCred.user.email || ""
+        });
+        setIsLogin(false);
+        setError("");
+        setSuccessMsg("Please complete your business profile to finish registering.");
+        return;
       }
       
       await checkApprovalStatus(userCred.user.uid);
@@ -140,6 +146,7 @@ export const PartnerLogin = () => {
         return;
       }
       
+    if (!isLogin && !pendingGoogleUser && !validPhone) {
       const passwordCheck = checkPasswordStrength(formData.password);
       if (!passwordCheck.isStrong) {
         setError(passwordCheck.errors.join(" "));
@@ -227,13 +234,20 @@ export const PartnerLogin = () => {
             lng = mapLocation.lng;
           }
 
-          const userCredential = await createUserWithEmailAndPassword(auth, finalEmail, formData.password);
+          let uid = "";
+          
+          if (pendingGoogleUser) {
+            uid = pendingGoogleUser.uid;
+          } else {
+            const userCredential = await createUserWithEmailAndPassword(auth, finalEmail, formData.password);
+            uid = userCredential.user.uid;
+          }
           
           let certUrls: string[] = [];
           if (certificates.length > 0) {
             try {
               for (const file of certificates) {
-                const storageRef = ref(storage, `certificates/${userCredential.user.uid}/${Date.now()}_${file.name}`);
+                const storageRef = ref(storage, `certificates/${uid}/${Date.now()}_${file.name}`);
                 await uploadBytes(storageRef, file);
                 const url = await getDownloadURL(storageRef);
                 certUrls.push(url);
@@ -243,41 +257,39 @@ export const PartnerLogin = () => {
             }
           }
 
-          await setDoc(doc(db, "users", userCredential.user.uid), {
+          await setDoc(doc(db, "users", uid), {
             full_name: formData.name,
             phone: validPhone ? loginIdentifier : formData.phone,
-            email: validPhone ? '' : loginIdentifier,
+            email: pendingGoogleUser ? pendingGoogleUser.email : (validPhone ? '' : loginIdentifier),
             role: "partner",
-            created_at: new Date().toISOString()
+            loginMethod: pendingGoogleUser ? 'google' : 'email'
           }, { merge: true });
 
-          try {
-            const bizRef = await addDoc(collection(db, "businesses"), {
-              owner_id: userCredential.user.uid,
-              name: formData.businessName || `${formData.name}'s Facility`,
-              type: facilityTypes.join(","),
-              address: `${formData.street}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
-              latitude: lat,
-              longitude: lng,
-              status: "pending",
-              certificates: certUrls,
-              created_at: new Date().toISOString()
-            });
+          const bizRef = await addDoc(collection(db, "businesses"), {
+            owner_id: uid,
+            name: formData.businessName || `${formData.name}'s Facility`,
+            type: facilityTypes[0] || "boarding",
+            services: facilityTypes,
+            address: `${formData.street}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
+            latitude: lat,
+            longitude: lng,
+            certificates: certUrls,
+            status: "pending",
+            created_at: new Date().toISOString()
+          });
 
-            await addDoc(collection(db, "admin_notifications"), {
-              title: "New Partner Registration Pending",
-              message: `${formData.name} registered a new facility (${facilityTypes.join(", ")}) requiring admin verification.`,
-              business_id: bizRef.id,
-              owner_id: userCredential.user.uid,
-              type: "partner_registration",
-              read: false,
-              created_at: new Date().toISOString()
-            });
-          } catch (bizErr) {
-            console.error("Failed to auto-create business or admin notification", bizErr);
-          }
+          await addDoc(collection(db, "admin_notifications"), {
+            title: "New Partner Registration Pending",
+            message: `${formData.name} registered a new facility (${facilityTypes.join(", ")}) requiring admin verification.`,
+            business_id: bizRef.id,
+            owner_id: uid,
+            type: "partner_registration",
+            read: false,
+            created_at: new Date().toISOString()
+          });
 
           await signOut(auth);
+          setPendingGoogleUser(null);
           setShowApprovalModal(true);
         } catch (regErr: any) {
           if (regErr.code === "auth/email-already-in-use") {
@@ -519,6 +531,7 @@ export const PartnerLogin = () => {
           ) : (
             /* Regular Form */
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name & Credentials */}
               {!isLogin && (
                 <div>
                   <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Full Name / Facility Owner</label>
@@ -528,60 +541,71 @@ export const PartnerLogin = () => {
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Rahul Sharma"
+                      placeholder="John Doe"
                       className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
                       required
+                      disabled={!!pendingGoogleUser}
                     />
                   </div>
                 </div>
               )}
 
-              <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
-                  Email Address or Mobile Number
-                </label>
-                <div className="relative">
-                  <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="partner@example.com or +919876543210"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                    required
-                  />
-                </div>
-              </div>
+              {(!pendingGoogleUser) && (
+                <>
+                  <div className="pt-2">
+                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1">
+                      {isLogin ? "Email Address or Mobile Number" : "Email Address"}
+                    </label>
+                    <div className="relative">
+                      <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        placeholder={isLogin ? "example@email.com or +919876543210" : "example@email.com"}
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                        required
+                      />
+                    </div>
+                  </div>
 
-                {/* Removed Phone OTP field */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-xs font-bold text-slate-600 uppercase">Password</label>
-                    {isLogin && (
-                      <Link to="/forgot-password" className="text-xs font-semibold text-violet-600 hover:text-violet-700">
-                        Forgot?
-                      </Link>
-                    )}
+                  <div className="pt-2">
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-xs font-bold text-slate-600 uppercase">Password</label>
+                      {isLogin && (
+                        <Link to="/forgot-password" className="text-xs font-semibold text-violet-600 hover:text-violet-700">
+                          Forgot?
+                        </Link>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        placeholder="••••••••"
+                        className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      >
+                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                   </div>
-                  <div className="relative">
-                    <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      placeholder="••••••••"
-                      className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
+                </>
+              )}
+
+              {pendingGoogleUser && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm flex flex-col gap-1">
+                  <span className="font-bold">Authenticated with Google</span>
+                  <span className="text-green-600">{pendingGoogleUser.email}</span>
                 </div>
+              )}
 
               {/* Service types selection for registration */}
               {!isLogin && (
