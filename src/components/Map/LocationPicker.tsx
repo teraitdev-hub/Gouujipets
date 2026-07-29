@@ -103,7 +103,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         setIsLocating(false);
         alert("Unable to retrieve your location. Please check your browser permissions.");
       },
-      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
+      { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
     );
   };
 

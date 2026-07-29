@@ -10,7 +10,7 @@ import { doc, getDoc } from "firebase/firestore";
 export const AdminLogin = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
-  const [formData, setFormData] = useState({ email: "admin@gouuji.com", password: "" });
+  const [formData, setFormData] = useState({ email: "gouujipets@gmail.com", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,7 +42,7 @@ export const AdminLogin = () => {
 
       // Auto-grant admin role if email is admin@gouuji.com or superadmin email or missing doc
       const userEmail = (userCredential.user.email || formData.email).toLowerCase();
-      if (!role || userEmail === 'admin@gouuji.com' || userEmail.includes('admin')) {
+      if (!role || userEmail === 'gouujipets@gmail.com' || userEmail === 'admin@gouuji.com' || userEmail.includes('admin')) {
         role = 'admin';
         import('firebase/firestore').then(({ setDoc }) => {
           setDoc(docRef, {
@@ -102,7 +102,7 @@ export const AdminLogin = () => {
               type="email" 
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
-              placeholder="admin@gouuji.com" 
+              placeholder="gouujipets@gmail.com" 
               className="form_inputField !pl-11"
               required
             />

@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
-import { Building2, Lock, ArrowRight, Loader2, Mail, User, Eye, EyeOff, PawPrint, CheckSquare, Square, MapPin, CheckCircle, Clock } from "lucide-react";
-import { auth, db } from "../../lib/firebase";
+import { Building2, Lock, ArrowRight, Loader2, Mail, User, Eye, EyeOff, PawPrint, CheckSquare, Square, MapPin, CheckCircle, Clock, UploadCloud, File as FileIcon, X } from "lucide-react";
+import { auth, db, storage } from "../../lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import type { ConfirmationResult } from "firebase/auth";
 import { collection, addDoc, doc, setDoc, getDocs, query, where, limit, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
 import { checkPasswordStrength } from "../../utils/security";
-import { GoogleMap, useLoadScript, Marker } from "@react-google-maps/api";
-import { FallbackMap } from "../../components/Map/FallbackMap";
-import { LocationPicker } from "../../components/ui/LocationPicker";
 
 export const PartnerLogin = () => {
   const navigate = useNavigate();
@@ -20,7 +18,8 @@ export const PartnerLogin = () => {
   const { isAuthenticated, user } = useAuthStore();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", password: "", phone: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", phone: "", businessName: "", street: "", city: "", state: "", pincode: "" });
+  const [certificates, setCertificates] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -29,12 +28,6 @@ export const PartnerLogin = () => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  
-  const [location, setLocation] = useState({ lat: 20.5937, lng: 78.9629 }); // Default India
-
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
-  });
 
   const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
   const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ""));
@@ -135,21 +128,13 @@ export const PartnerLogin = () => {
       }
     }
 
-    try {
-      if (validPhone) {
-        const recaptchaVerifier = setupRecaptcha("recaptcha-container");
-        const formattedPhone = loginIdentifier.startsWith('+') ? loginIdentifier : `+91${loginIdentifier}`;
-        const result = await sendOTP(formattedPhone, recaptchaVerifier);
-        setConfirmationResult(result);
-        setShowOtpInput(true);
-        setIsLoading(false);
-        return;
-      }
+    const finalEmail = validPhone ? `${loginIdentifier.replace(/[^0-9]/g, '')}@phone.gouuji.com` : loginIdentifier.toLowerCase();
 
+    try {
       if (isLogin) {
         // ===== SIGN IN FLOW =====
         try {
-          const userCredential = await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
+          const userCredential = await signInWithEmailAndPassword(auth, finalEmail, formData.password);
           
           // Check if they have a business record
           const bizQuery = query(collection(db, "businesses"), where("owner_id", "==", userCredential.user.uid));
@@ -185,7 +170,7 @@ export const PartnerLogin = () => {
           if (signInErr.code === "auth/invalid-credential" || signInErr.code === "auth/user-not-found" || signInErr.code === "auth/wrong-password") {
             try {
               const usersRef = collection(db, "users");
-              const q = query(usersRef, where("email", "==", loginIdentifier), limit(1));
+              const q = query(usersRef, where("email", "==", finalEmail), limit(1));
               const querySnap = await getDocs(q);
               if (!querySnap.empty && querySnap.docs[0].data()?.loginMethod === 'google') {
                 setError("This email is registered via Google Sign-In. Please click the 'Sign in with Google' button below to log in.");
@@ -203,12 +188,38 @@ export const PartnerLogin = () => {
       } else {
         // ===== REGISTER FLOW =====
         try {
-          const userCredential = await createUserWithEmailAndPassword(auth, loginIdentifier, formData.password);
+          let lat = 20.5937;
+          let lng = 78.9629;
+          try {
+            const addressStr = `${formData.street}, ${formData.city}, ${formData.state}, ${formData.pincode}`;
+            const geocodeRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressStr)}`);
+            const geocodeData = await geocodeRes.json();
+            if (geocodeData && geocodeData.length > 0) {
+              lat = parseFloat(geocodeData[0].lat);
+              lng = parseFloat(geocodeData[0].lon);
+            }
+          } catch (e) { console.error("Geocoding failed", e); }
+
+          const userCredential = await createUserWithEmailAndPassword(auth, finalEmail, formData.password);
           
+          let certUrls: string[] = [];
+          if (certificates.length > 0) {
+            try {
+              for (const file of certificates) {
+                const storageRef = ref(storage, `certificates/${userCredential.user.uid}/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                certUrls.push(url);
+              }
+            } catch (err) {
+              console.error("Failed to upload certificates", err);
+            }
+          }
+
           await setDoc(doc(db, "users", userCredential.user.uid), {
             full_name: formData.name,
-            phone: formData.phone,
-            email: loginIdentifier,
+            phone: validPhone ? loginIdentifier : formData.phone,
+            email: validPhone ? '' : loginIdentifier,
             role: "partner",
             created_at: new Date().toISOString()
           }, { merge: true });
@@ -216,12 +227,13 @@ export const PartnerLogin = () => {
           try {
             const bizRef = await addDoc(collection(db, "businesses"), {
               owner_id: userCredential.user.uid,
-              name: `${formData.name}'s Facility`,
+              name: formData.businessName || `${formData.name}'s Facility`,
               type: facilityTypes.join(","),
-              address: "Bangalore, Karnataka, India",
-              latitude: location.lat,
-              longitude: location.lng,
+              address: `${formData.street}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
+              latitude: lat,
+              longitude: lng,
               status: "pending",
+              certificates: certUrls,
               created_at: new Date().toISOString()
             });
 
@@ -275,15 +287,43 @@ export const PartnerLogin = () => {
           await signOut(auth);
           throw new Error("NOT_REGISTERED");
         }
+        let lat = 20.5937;
+        let lng = 78.9629;
+        try {
+          const addressStr = `${formData.street}, ${formData.city}, ${formData.state}, ${formData.pincode}`;
+          const geocodeRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressStr)}`);
+          const geocodeData = await geocodeRes.json();
+          if (geocodeData && geocodeData.length > 0) {
+            lat = parseFloat(geocodeData[0].lat);
+            lng = parseFloat(geocodeData[0].lon);
+          }
+        } catch (e) { console.error("Geocoding failed", e); }
+
+        let certUrls: string[] = [];
+        if (certificates.length > 0) {
+          try {
+            for (const file of certificates) {
+              const storageRef = ref(storage, `certificates/${userCredential.user.uid}/${Date.now()}_${file.name}`);
+              await uploadBytes(storageRef, file);
+              const url = await getDownloadURL(storageRef);
+              certUrls.push(url);
+            }
+          } catch (err) {
+            console.error("Failed to upload certificates", err);
+          }
+        }
+
         await setDoc(doc(db, "users", userCredential.user.uid), { role: "partner" }, { merge: true });
         await addDoc(collection(db, "businesses"), {
           owner_id: userCredential.user.uid,
-          name: `${formData.name || 'My'}'s Facility`,
+          name: formData.businessName || `${formData.name || 'My'}'s Facility`,
           type: facilityTypes.length ? facilityTypes.join(",") : "boarding",
-          address: "Bangalore, Karnataka, India",
-          latitude: location.lat,
-          longitude: location.lng,
+          address: `${formData.street}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
+          latitude: lat,
+          longitude: lng,
           status: "pending",
+          certificates: certUrls,
+          created_at: new Date().toISOString()
         });
         
         await signOut(auth);
@@ -486,22 +526,7 @@ export const PartnerLogin = () => {
                 </div>
               </div>
 
-              {!isLogin && (
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Phone Number (For OTP Verification)</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+91 98765 43210"
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                    required
-                  />
-                </div>
-              )}
-
-              {/* Password field */}
-              {(!isPhone(formData.email) || isLogin) && (
+                {/* Removed Phone OTP field */}
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label className="block text-xs font-bold text-slate-600 uppercase">Password</label>
@@ -530,7 +555,6 @@ export const PartnerLogin = () => {
                     </button>
                   </div>
                 </div>
-              )}
 
               {/* Service types selection for registration */}
               {!isLogin && (
@@ -565,16 +589,106 @@ export const PartnerLogin = () => {
                 </div>
               )}
 
-              {/* Map & Location Selector */}
+              {/* Business Details & Location Selector */}
               {!isLogin && (
-                <div className="pt-2">
-                  <LocationPicker
-                    defaultLocation={location}
-                    onLocationSelect={(loc) => {
-                      setLocation({ lat: loc.lat, lng: loc.lng });
-                    }}
-                  />
-                </div>
+                <>
+                  <div className="pt-2">
+                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Business Name</label>
+                    <div className="relative">
+                      <Building2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={formData.businessName}
+                        onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                        placeholder="e.g. Happy Paws Resort"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Complete Address</label>
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={formData.street}
+                        onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                        placeholder="Street Address / Landmark"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                        required
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          type="text"
+                          value={formData.city}
+                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                          placeholder="City"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                          required
+                        />
+                        <input
+                          type="text"
+                          value={formData.state}
+                          onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                          placeholder="State"
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                          required
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        value={formData.pincode}
+                        onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                        placeholder="Pincode"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Business Certificates (Optional)</label>
+                    <div className="w-full border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50 hover:bg-slate-100 transition-all">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/jpeg,image/png,application/pdf"
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            setCertificates([...certificates, ...Array.from(e.target.files)]);
+                          }
+                        }}
+                        className="hidden"
+                        id="cert-upload"
+                      />
+                      <label htmlFor="cert-upload" className="cursor-pointer flex flex-col items-center justify-center">
+                        <UploadCloud size={24} className="text-violet-500 mb-2" />
+                        <span className="text-xs font-bold text-slate-700">Click to upload certificates</span>
+                        <span className="text-[10px] text-slate-400 mt-1">Accepts Images and PDFs</span>
+                      </label>
+                    </div>
+                    {certificates.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {certificates.map((file, idx) => (
+                          <div key={idx} className="flex items-center justify-between bg-violet-50 px-3 py-2 rounded-lg border border-violet-100">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              <FileIcon size={14} className="text-violet-600 shrink-0" />
+                              <span className="text-xs font-medium text-violet-900 truncate">{file.name}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setCertificates(certificates.filter((_, i) => i !== idx))}
+                              className="p-1 hover:bg-violet-100 rounded-md text-violet-600 transition-colors"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
 
               <button

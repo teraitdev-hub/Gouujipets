@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Building2, Search, Filter, X } from "lucide-react";
 import { db } from "../../lib/firebase";
 import { collection, getDocs, getDoc, query, orderBy, doc, updateDoc, addDoc, onSnapshot } from "firebase/firestore";
+import emailjs from "@emailjs/browser";
 
 export const AdminBusinesses = () => {
   const [businesses, setBusinesses] = useState<any[]>([]);
@@ -84,6 +85,29 @@ export const AdminBusinesses = () => {
         }
       }
 
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+      if (serviceId && templateId && publicKey && recipient !== 'partner@example.com') {
+        const statusText = newStatus === 'active' || newStatus === 'approved' ? 'Approved! 🎉' : 'Status Update';
+        try {
+          await emailjs.send(
+            serviceId,
+            templateId,
+            {
+              to_email: recipient,
+              to_name: "Partner",
+              subject: `GouujiPets Partner Account ${statusText}`,
+              message: `Your GouujiPets Partner Account has been ${newStatus}. Click here to log in to your Partner Dashboard: ${loginUrl}`
+            },
+            publicKey
+          );
+        } catch (emailErr) {
+          console.error("Failed to send email via EmailJS:", emailErr);
+        }
+      }
+
       await addDoc(collection(db, 'mail'), {
         to: recipient,
         message: {
@@ -93,7 +117,7 @@ export const AdminBusinesses = () => {
         },
         created_at: new Date().toISOString()
       });
-      alert(`Facility marked as ${newStatus}. Status update sent to partner.`);
+      alert(`Facility marked as ${newStatus}. Status update processed.`);
     } catch (err) {
       console.error(err);
       alert("Failed to update status.");
@@ -136,7 +160,7 @@ export const AdminBusinesses = () => {
 
       <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden animate-fade-in">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
                 <th className="p-4 font-black">Facility Details</th>
@@ -276,6 +300,28 @@ export const AdminBusinesses = () => {
                     } else if (typeof ownerId === 'object' && ownerId.email) {
                       recipient = ownerId.email;
                     }
+                  }
+                }
+                
+                const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+                const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+                const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+                if (serviceId && templateId && publicKey && recipient !== 'partner@example.com') {
+                  try {
+                    await emailjs.send(
+                      serviceId,
+                      templateId,
+                      {
+                        to_email: recipient,
+                        to_name: selectedBizForManage.name || "Partner",
+                        subject: `GouujiPets Partner Facility Update`,
+                        message: `Your GouujiPets Facility "${selectedBizForManage.name}" has been updated. Status is now: ${selectedBizForManage.status}. Login here: ${loginUrl}`
+                      },
+                      publicKey
+                    );
+                  } catch (emailErr) {
+                    console.error("Failed to send email via EmailJS:", emailErr);
                   }
                 }
                 

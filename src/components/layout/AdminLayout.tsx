@@ -76,7 +76,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar bg-transparent p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar bg-transparent p-3 sm:p-4 md:p-6 lg:p-8">
           {children}
         </main>
       </div>

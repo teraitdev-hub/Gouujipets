@@ -15,7 +15,18 @@ import { useRazorpay } from "../../hooks/useRazorpay"; // kept for future live p
 import { UiverseButton } from "../../components/ui/UiverseButton";
 import { UiverseLoader } from "../../components/ui/UiverseLoader";
 import { AddPetModal } from "../../components/pets/AddPetModal";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 
+const containerStyle = {
+  width: '100%',
+  height: '250px',
+  borderRadius: '0.75rem'
+};
+
+const center = {
+  lat: 28.6139,
+  lng: 77.2090
+}; // Default to Delhi
 // ─── Types ──────────────────────────────────────────
 interface Service {
   id: string;
@@ -86,6 +97,8 @@ export const Checkout = () => {
   const [error, setError] = useState("");
   const [unavailableServices, setUnavailableServices] = useState<string[]>([]);
   const [isBoardingFull, setIsBoardingFull] = useState(false);
+  const [needsPickup, setNeedsPickup] = useState(false);
+  const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const nights = () => {
     if (!checkInDate || !checkOutDate) return 1;
@@ -229,6 +242,7 @@ export const Checkout = () => {
     if (!checkInTime) { setError("Please select a check-in time."); return; }
     if (!checkOutDate) { setError("Please select a check-out date."); return; }
     if (!checkOutTime) { setError("Please select a check-out time."); return; }
+    if (needsPickup && !pickupLocation) { setError("Please select your pickup location on the map."); return; }
     setIsProcessing(true);
     try {
       await new Promise(res => setTimeout(res, 1200));
@@ -276,6 +290,8 @@ export const Checkout = () => {
         selected_services: selectedServices.map((id: string) => services.find((s: any) => s.id === id)).filter(Boolean),
         status: "pending",
         type: facility.type || "boarding",
+        pickup_required: needsPickup,
+        pickup_location: needsPickup ? pickupLocation : null,
         notes: `Payment ID: ${paymentId}\n\nSelected Pet Profiles & Instructions:\n[INTAKE_JSON]${JSON.stringify({ pets: selectedPetsData })}[/INTAKE_JSON]`,
         created_at: new Date().toISOString()
       };
@@ -732,6 +748,51 @@ export const Checkout = () => {
                     );
                   })}
                 </div>
+              </div>
+            )}
+          </section>
+
+          <section className="bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-slate-200/80">
+            <h2 className="font-extrabold text-sm sm:text-base text-slate-900 mb-2.5 flex items-center gap-2">
+              <span className="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-black shrink-0">5</span>
+              Transportation
+            </h2>
+            <label className="flex items-center gap-3 p-2.5 border rounded-xl cursor-pointer transition-all border-slate-200/80 bg-white hover:border-slate-300">
+              <input
+                type="checkbox"
+                className="w-5 h-5 rounded accent-purple-600 cursor-pointer"
+                checked={needsPickup}
+                onChange={e => setNeedsPickup(e.target.checked)}
+              />
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-gray-900 text-sm">Need Pickup & Drop Service?</p>
+                <p className="text-xs text-gray-500">We'll fetch the exact location for our driver.</p>
+              </div>
+            </label>
+            
+            {needsPickup && (
+              <div className="mt-4 border border-purple-200 rounded-xl p-3 bg-purple-50/30">
+                <p className="text-xs font-bold text-purple-800 mb-2">Pinpoint your exact location:</p>
+                <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""}>
+                  <GoogleMap
+                    mapContainerStyle={containerStyle}
+                    center={pickupLocation || center}
+                    zoom={13}
+                    onClick={(e) => {
+                      if (e.latLng) {
+                        setPickupLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+                      }
+                    }}
+                  >
+                    {pickupLocation && <Marker position={pickupLocation} />}
+                  </GoogleMap>
+                </LoadScript>
+                {!pickupLocation && (
+                  <p className="text-[11px] text-purple-600 mt-2 font-medium">Click on the map to set your pickup/drop location.</p>
+                )}
+                {pickupLocation && (
+                  <p className="text-[11px] text-green-600 mt-2 font-bold">✓ Location selected successfully.</p>
+                )}
               </div>
             )}
           </section>

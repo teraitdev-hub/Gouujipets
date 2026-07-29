@@ -415,7 +415,7 @@ export const Dashboard = () => {
           <span className="text-[11px] font-bold text-slate-400">Upfront Rates • Zero Hidden Charges</span>
         </div>
 
-        <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-10 gap-2 text-center">
+        <div className="grid grid-cols-3 min-[400px]:grid-cols-4 sm:grid-cols-5 lg:grid-cols-10 gap-2 text-center">
           {[
             { id: "boarding", icon: "🏨", label: "Boarding", badge: "TOP" },
             { id: "grooming", icon: "🛁", label: "Grooming", badge: "20% OFF" },
@@ -506,7 +506,7 @@ export const Dashboard = () => {
                       <span className="text-sm font-black text-slate-900">₹{totalCost}</span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2 justify-end mt-2 md:mt-0">
                       <button
                         onClick={() => { setSelectedBookingForEdit(booking); setIsEditModalOpen(true); }}
                         className="px-3.5 py-2 bg-white hover:bg-purple-50 border border-purple-300 text-purple-900 font-bold text-xs rounded-xl transition-all shadow-2xs"

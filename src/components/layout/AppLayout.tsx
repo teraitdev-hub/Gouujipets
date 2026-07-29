@@ -52,7 +52,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             location.pathname.startsWith("/facility") ||
             location.pathname === "/"
               ? "p-0"
-              : "p-4 md:p-8 max-w-7xl mx-auto w-full"
+              : "p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full"
           }`}
         >
           <div className="relative z-10">{children}</div>

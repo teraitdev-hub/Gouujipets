@@ -96,7 +96,7 @@ export const BusinessSettings = ({ business, onUpdate }: BusinessSettingsProps) 
         alert("Could not detect exact GPS. Using default city coordinates or you can enter manually.");
         setIsLocating(false);
       },
-      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }
+      { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 }
     );
   };
 
@@ -415,11 +415,11 @@ export const BusinessSettings = ({ business, onUpdate }: BusinessSettingsProps) 
           </div>
         </div>
 
-        <div className="pt-6 flex justify-end border-t border-gray-100">
+        <div className="pt-6 flex flex-col sm:flex-row sm:justify-end border-t border-gray-100">
           <button 
             type="submit"
             disabled={isLoading}
-            className="px-10 h-13 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-black text-sm shadow-lg shadow-purple-500/25 transition-all flex items-center gap-2.5 disabled:bg-gray-400 active:scale-95 shadow-2xs"
+            className="px-10 h-13 w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-black text-sm shadow-lg shadow-purple-500/25 transition-all flex justify-center items-center gap-2.5 disabled:bg-gray-400 active:scale-95 shadow-2xs"
           >
             {isLoading ? <Loader2 size={18} className="animate-spin" /> : <><Save size={18} /> Save Complete Shop Profile & Location</>}
           </button>

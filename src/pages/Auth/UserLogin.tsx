@@ -97,7 +97,7 @@ export const UserLogin = () => {
       return;
     }
 
-    if (!isLogin && !validPhone) {
+    if (!isLogin) {
       const passwordCheck = checkPasswordStrength(formData.password);
       if (!passwordCheck.isStrong) {
         setError(passwordCheck.errors.join(" "));
@@ -106,16 +106,11 @@ export const UserLogin = () => {
       }
     }
 
+    const finalEmail = validPhone ? `${loginIdentifier.replace(/[^0-9]/g, '')}@phone.gouuji.com` : loginIdentifier.toLowerCase();
+
     try {
-      if (validPhone) {
-        // Phone OTP Flow
-        const recaptchaVerifier = setupRecaptcha("recaptcha-container");
-        const formattedPhone = loginIdentifier.startsWith('+') ? loginIdentifier : `+91${loginIdentifier}`; // Default to India
-        const result = await sendOTP(formattedPhone, recaptchaVerifier);
-        setConfirmationResult(result);
-        setShowOtpInput(true);
-      } else if (isLogin) {
-        await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, finalEmail, formData.password);
         
         await useAuthStore.getState().loadUser();
         
@@ -126,7 +121,7 @@ export const UserLogin = () => {
           navigate("/dashboard");
         }
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, loginIdentifier, formData.password);
+        const userCredential = await createUserWithEmailAndPassword(auth, finalEmail, formData.password);
         await updateProfile(userCredential.user, { displayName: formData.name });
         
         if (formData.petName && userCredential.user) {
@@ -165,7 +160,7 @@ export const UserLogin = () => {
       } else if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.message?.includes("invalid-credential")) {
         try {
           const usersRef = collection(db, "users");
-          const q = query(usersRef, where("email", "==", loginIdentifier), limit(1));
+          const q = query(usersRef, where("email", "==", finalEmail), limit(1));
           const querySnap = await getDocs(q);
           if (!querySnap.empty && querySnap.docs[0].data()?.loginMethod === 'google') {
             setError("This email is registered via Google Sign-In. Please click the 'Sign in with Google' button below to log in.");
@@ -336,20 +331,11 @@ export const UserLogin = () => {
                   />
                 </div>
                 
-                {!isPhone(formData.email) && (
-                  <div className="relative">
-                    <input 
-                      type="tel" 
-                      placeholder="Phone Number (Optional)"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
-                    />
-                  </div>
-                )}
+                {/* Removed Phone OTP Input */}
 
                 <div className="pt-4 pb-2">
-                  <h3 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2">Add Your First Pet (Optional)</h3>
+                  <h3 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2">Pet Registration <span className="text-red-500">*</span></h3>
+                  <p className="text-xs text-slate-500 mt-1">Please register your pet to continue.</p>
                 </div>
 
                 <div className="flex gap-4">
@@ -360,6 +346,7 @@ export const UserLogin = () => {
                       value={formData.petName}
                       onChange={(e) => setFormData({...formData, petName: e.target.value})}
                       className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
+                      required={!isLogin}
                     />
                   </div>
                   <div className="relative w-32">
@@ -382,6 +369,7 @@ export const UserLogin = () => {
                     value={formData.petBreed}
                     onChange={(e) => setFormData({...formData, petBreed: e.target.value})}
                     className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
+                    required={!isLogin}
                   />
                 </div>
               </>
@@ -401,23 +389,21 @@ export const UserLogin = () => {
               />
             </div>
 
-            {!isPhone(formData.email.trim()) && (
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 transition-colors">
-                  <Lock size={20} />
-                </div>
-                <input 
-                  type="password" 
-                  placeholder="Password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
-                  required={!isPhone(formData.email.trim())}
-                />
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 transition-colors">
+                <Lock size={20} />
               </div>
-            )}
+              <input 
+                type="password" 
+                placeholder="Password"
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
+                required
+              />
+            </div>
 
-            {isLogin && !isPhone(formData.email.trim()) && (
+            {isLogin && (
               <div className="flex justify-end">
                 <Link to="/forgot-password" className="text-sm font-bold text-purple-600 hover:text-purple-700 hover:underline">Forgot Password?</Link>
               </div>
