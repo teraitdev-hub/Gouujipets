@@ -78,3 +78,42 @@ export const onPartnerStatusChange = functions.firestore
     }
     return null;
   });
+
+
+// 4. Audit Trigger: Log changes to businesses
+export const onBusinessUpdate = functions.firestore
+  .document("businesses/{bizId}")
+  .onUpdate(async (change, context) => {
+    const newData = change.after.data();
+    const previousData = change.before.data();
+    
+    if (newData.status !== previousData.status) {
+      await db.collection('audit_logs').add({
+        action: 'BUSINESS_STATUS_CHANGE',
+        target_id: context.params.bizId,
+        details: `Status changed from ${previousData.status} to ${newData.status}`,
+        performed_by: 'System / Cloud Function',
+        created_at: new Date().toISOString()
+      });
+    }
+    return null;
+  });
+
+// 5. Audit Trigger: Log changes to user roles
+export const onUserRoleUpdate = functions.firestore
+  .document("users/{userId}")
+  .onUpdate(async (change, context) => {
+    const newData = change.after.data();
+    const previousData = change.before.data();
+    
+    if (newData.role !== previousData.role) {
+      await db.collection('audit_logs').add({
+        action: 'USER_ROLE_CHANGE',
+        target_user: newData.email || context.params.userId,
+        details: `Role changed from ${previousData.role} to ${newData.role}`,
+        performed_by: 'System / Cloud Function',
+        created_at: new Date().toISOString()
+      });
+    }
+    return null;
+  });

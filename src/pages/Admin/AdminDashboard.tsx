@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { PageTransition } from "../../components/layout/PageTransition";
-import { 
-  Users, 
+import { Shield, Users, 
   Store, 
   Search, 
   Mail, 

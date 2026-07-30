@@ -377,6 +377,29 @@ export const AdminBusinesses = () => {
                   required
                 />
               </div>
+              
+              {selectedBizForManage.gstNumber && (
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">GST / Tax ID</label>
+                  <div className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700">
+                    {selectedBizForManage.gstNumber}
+                  </div>
+                </div>
+              )}
+
+              {selectedBizForManage.certificates && selectedBizForManage.certificates.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Uploaded Documents</label>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedBizForManage.certificates.map((url: string, idx: number) => (
+                      <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="px-3 py-2 bg-purple-50 text-purple-700 font-semibold rounded-lg text-xs hover:bg-purple-100 transition-colors border border-purple-100">
+                        View Document {idx + 1}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <div className="space-y-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Verification Status</label>
                 <select 

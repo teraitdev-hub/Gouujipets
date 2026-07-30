@@ -6,7 +6,9 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 export interface User {
   id: string;
   email?: string;
-  role?: 'customer' | 'partner' | 'superadmin' | string;
+  emailVerified?: boolean;
+  phone?: string;
+  role?: 'customer' | 'partner' | 'admin' | 'super_admin' | string;
   full_name?: string;
   user_metadata?: Record<string, any>;
   [key: string]: any;
@@ -142,6 +144,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             ...firebaseUser,
             id: firebaseUser.uid,
             email: firebaseUser.email || undefined,
+            emailVerified: firebaseUser.emailVerified,
             role: currentRole,
             full_name: userData?.full_name || firebaseUser.displayName || '',
             name: userData?.full_name || firebaseUser.displayName || '',

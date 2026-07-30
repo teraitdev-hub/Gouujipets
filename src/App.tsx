@@ -48,6 +48,7 @@ import { SupportPage } from "./pages/Support/SupportPage";
 import { PartnerSupport } from "./pages/Partner/PartnerSupport";
 import { PublicFooter } from "./components/layout/PublicFooter";
 import { AdminUsers } from "./pages/Admin/AdminUsers";
+import { SuperAdminPortal } from "./pages/Admin/SuperAdminPortal";
 import { AdminBusinesses } from "./pages/Admin/AdminBusinesses";
 import { PartnerEmployees } from "./pages/Partner/PartnerEmployees";
 import { RefundPolicy } from "./pages/Legal/RefundPolicy";
@@ -122,6 +123,7 @@ function App() {
                     <Route path="/" element={<Navigate to="dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="users" element={<AdminUsers />} />
+                    <Route path="superadmin" element={<SuperAdminPortal />} />
                     <Route path="businesses" element={<AdminBusinesses />} />
                     <Route path="finance" element={<AdminDashboard />} />
                     <Route path="helpdesk" element={<AdminDashboard />} />
