@@ -5,7 +5,15 @@ import { useMap } from '../../context/MapContext';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 
 interface LocationPickerProps {
-  onLocationSelect: (location: { lat: number; lng: number; address: string; exactAddress?: string }) => void;
+  onLocationSelect: (location: { 
+    lat: number; 
+    lng: number; 
+    address: string; 
+    exactAddress?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+  }) => void;
   defaultLocation?: { lat: number; lng: number };
   defaultAddress?: string;
   className?: string;
@@ -27,7 +35,9 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   defaultAddress = '',
   className = 'w-full h-80 rounded-2xl overflow-hidden relative shadow-md border-2 border-slate-200',
 }) => {
-  const { isLoaded } = useMap();
+  const { isLoaded, authFailed, loadError } = useMap();
+  const mapAvailable = isLoaded && !authFailed && !loadError;
+  
   const [phase, setPhase] = useState<'idle' | 'detecting' | 'done'>(defaultAddress ? 'done' : 'idle');
   const [location, setLocation] = useState(defaultLocation);
   const [mapZoom, setMapZoom] = useState(defaultAddress ? 17 : 14);
@@ -54,7 +64,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
   /* ── Geocoding Helpers using Official Google SDK (No CORS errors) ── */
   const geocodeCoords = useCallback(async (lat: number, lng: number) => {
-    if (isLoaded && window.google && window.google.maps && window.google.maps.Geocoder) {
+    if (mapAvailable && window.google && window.google.maps && window.google.maps.Geocoder) {
       try {
         const geocoder = new window.google.maps.Geocoder();
         const response = await geocoder.geocode({ location: { lat, lng } });
@@ -66,8 +76,9 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           const pin = get('postal_code');
           const area = get('sublocality_level_1') || get('sublocality') || get('neighborhood') || get('route');
           const city = get('locality') || get('administrative_area_level_2');
+          const state = get('administrative_area_level_1');
           const short = [area, city].filter(Boolean).join(', ') || full.split(',').slice(0, 2).join(', ').trim();
-          return { short: short || full, full, pincode: pin };
+          return { short: short || full, full, pincode: pin, city, state };
         }
       } catch (e) {
         console.warn('Google Geocode error:', e);
@@ -81,14 +92,14 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         const a = data.address || {};
         const parts = [a.road || a.pedestrian || '', a.suburb || a.neighbourhood || '', a.city || a.town || ''].filter(Boolean);
         const full = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-        return { short: parts.slice(0, 2).join(', ') || full, full, pincode: a.postcode || '' };
+        return { short: parts.slice(0, 2).join(', ') || full, full, pincode: a.postcode || '', city: a.city || a.town || '', state: a.state || '' };
       }
     } catch (_) {}
     const fb = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    return { short: fb, full: fb, pincode: '' };
+    return { short: fb, full: fb, pincode: '', city: '', state: '' };
   }, [isLoaded]);
 
-  const applyLocation = useCallback(async (lat: number, lng: number, zoom = 17, presetData?: { short: string; full: string; pincode?: string }) => {
+  const applyLocation = useCallback(async (lat: number, lng: number, zoom = 17, presetData?: { short: string; full: string; pincode?: string; city?: string; state?: string }) => {
     setLocation({ lat, lng });
     setMapZoom(zoom);
     const data = presetData || await geocodeCoords(lat, lng);
@@ -96,7 +107,14 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     setFullAddr(data.full);
     setPincode(data.pincode || '');
     setExactInput(data.short);
-    onLocationSelect({ lat, lng, address: data.full, exactAddress: data.short });
+    onLocationSelect({ 
+      lat, lng, 
+      address: data.full, 
+      exactAddress: data.short,
+      city: data.city,
+      state: data.state,
+      pincode: data.pincode
+    });
     setPhase('done');
   }, [geocodeCoords, onLocationSelect]);
 
@@ -150,7 +168,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
     debounceRef.current = setTimeout(async () => {
       setIsSuggesting(true);
-      if (isLoaded && window.google && window.google.maps && window.google.maps.places && window.google.maps.places.AutocompleteService) {
+      if (mapAvailable && window.google && window.google.maps && window.google.maps.places && window.google.maps.places.AutocompleteService) {
         try {
           const service = new window.google.maps.places.AutocompleteService();
           service.getPlacePredictions(
@@ -203,7 +221,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     setShowSuggestions(false);
     setSearchQuery('');
     
-    if (s.source === 'google' && s.place_id && isLoaded && window.google && window.google.maps && window.google.maps.Geocoder) {
+    if (s.source === 'google' && s.place_id && mapAvailable && window.google && window.google.maps && window.google.maps.Geocoder) {
       try {
         const geocoder = new window.google.maps.Geocoder();
         const response = await geocoder.geocode({ placeId: s.place_id });
@@ -211,9 +229,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           const res = response.results[0];
           const lat = res.geometry.location.lat();
           const lng = res.geometry.location.lng();
-          const full = res.formatted_address.replace(/, India$/, '');
-          const short = s.main_text || full.split(',')[0];
-          await applyLocation(lat, lng, 17, { short, full });
+          await applyLocation(lat, lng, 17);
           return;
         }
       } catch (e) {
@@ -224,7 +240,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     if (s.lat && s.lon) {
       const lat = parseFloat(s.lat);
       const lng = parseFloat(s.lon);
-      await applyLocation(lat, lng, 17, { short: s.main_text || s.display_name.split(',')[0], full: s.display_name });
+      await applyLocation(lat, lng, 17);
     }
   };
 
@@ -397,7 +413,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
       {/* Interactive Map (Official Google Map when loaded, Fallback OSM otherwise) */}
       <div className={className}>
-        {isLoaded ? (
+        {mapAvailable ? (
           <GoogleMap
             mapContainerClassName="w-full h-full"
             center={{ lat: location.lat, lng: location.lng }}

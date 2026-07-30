@@ -3,7 +3,7 @@ import { Building2, MapPin, Tag, Users, Loader2, Save, Crosshair, Navigation, Sp
 import { db, storage } from "../../lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, updateDoc } from "firebase/firestore";
-import { LocationPicker } from "../Map/LocationPicker";
+import { LocationPicker } from "../ui/LocationPicker";
 
 interface BusinessSettingsProps {
   business: any;
@@ -331,7 +331,9 @@ export const BusinessSettings = ({ business, onUpdate }: BusinessSettingsProps) 
 
           <div className="mb-6 rounded-2xl overflow-hidden border border-purple-200 shadow-sm relative z-0 h-[300px]">
             <LocationPicker 
-              initialLocation={{ lat: Number(formData.lat) || 19.0760, lng: Number(formData.lng) || 72.8777 }}
+              defaultLocation={{ lat: Number(formData.lat) || 19.0760, lng: Number(formData.lng) || 72.8777 }}
+              defaultAddress={formData.street}
+              className="w-full h-full"
               onLocationSelect={(loc) => {
                 setFormData(prev => ({ ...prev, lat: loc.lat, lng: loc.lng, street: loc.address || prev.street }));
               }}

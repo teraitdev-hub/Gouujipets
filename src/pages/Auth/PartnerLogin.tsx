@@ -11,6 +11,7 @@ import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../servi
 import { checkPasswordStrength } from "../../utils/security";
 import { GoogleMap, Marker, Autocomplete } from "@react-google-maps/api";
 import { useMap } from "../../context/MapContext";
+import { LocationPicker } from "../../components/ui/LocationPicker";
 
 const libraries: ("places")[] = ["places"];
 
@@ -720,70 +721,28 @@ export const PartnerLogin = () => {
                   <div className="pt-2">
                     <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Complete Address</label>
                     <div className="space-y-3">
-                      {mapAvailable ? (
-                        <Autocomplete
-                          onLoad={(ac) => setAutocomplete(ac)}
-                          onPlaceChanged={onPlaceChanged}
-                        >
-                          <input
-                            type="text"
-                            value={formData.street}
-                            onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                            placeholder="Street Address / Landmark (Start typing to search)"
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                            required
-                          />
-                        </Autocomplete>
-                      ) : (
-                        <input
-                          type="text"
-                          value={formData.street}
-                          onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                          placeholder="Street Address / Landmark"
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                          required
-                        />
-                      )}
-                      <div className="grid grid-cols-2 gap-3">
-                        <input
-                          type="text"
-                          value={formData.city}
-                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                          placeholder="City"
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                          required
-                        />
-                        <input
-                          type="text"
-                          value={formData.state}
-                          onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                          placeholder="State"
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                          required
-                        />
-                      </div>
-                      <input
-                        type="text"
-                        value={formData.pincode}
-                        onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
-                        placeholder="Pincode"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                        required
+                      <LocationPicker
+                        defaultLocation={mapLocation}
+                        defaultAddress={formData.street}
+                        className="h-48 w-full rounded-xl overflow-hidden border border-slate-200 shadow-inner mt-2"
+                        onLocationSelect={(loc) => {
+                          setMapLocation({ lat: loc.lat, lng: loc.lng });
+                          setFormData(prev => ({
+                            ...prev,
+                            street: loc.exactAddress || loc.address || prev.street,
+                            city: loc.city || prev.city,
+                            state: loc.state || prev.state,
+                            pincode: loc.pincode || prev.pincode
+                          }));
+                        }}
                       />
+                      
+                      {/* Hidden inputs to ensure required HTML validation still passes if needed, or we can just rely on the form state directly */}
+                      <input type="hidden" value={formData.street} required />
+                      <input type="hidden" value={formData.city} required />
+                      <input type="hidden" value={formData.state} required />
+                      <input type="hidden" value={formData.pincode} required />
                     </div>
-                    
-                    {mapAvailable && (
-                      <div className="h-48 w-full rounded-xl overflow-hidden border border-slate-200 mt-3 shadow-inner">
-                        <GoogleMap
-                          mapContainerStyle={{ width: '100%', height: '100%' }}
-                          center={mapLocation}
-                          zoom={15}
-                          options={{ disableDefaultUI: true, gestureHandling: "cooperative" }}
-                        >
-                          <Marker position={mapLocation} />
-                        </GoogleMap>
-                      </div>
-                    )}
                   </div>
 
                   <div className="pt-2">
