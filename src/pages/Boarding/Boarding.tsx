@@ -188,22 +188,22 @@ export const Boarding = () => {
   return (
     <PageTransition className="pb-16 max-w-7xl mx-auto px-2.5 sm:px-6 font-sans">
       
-      {/* Hero Banner & Search Header - Apple/Airbnb Style */}
-      <div className="pt-4 pb-4 bg-white/80 backdrop-blur-2xl relative z-30 border-b border-slate-200/60 mb-4 px-4 sm:px-6 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] mt-2">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-3">
+      {/* Hero Banner & Search Header in Light Purple Color Only */}
+      <div className="pt-3 pb-3 bg-purple-50/60 relative z-30 border-b border-purple-200 mb-3 px-3 rounded-2xl shadow-2xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-2.5 gap-2">
           <div>
-            <div className="text-[10px] font-black text-purple-600 uppercase tracking-widest flex items-center gap-1.5 mb-1 bg-purple-50 w-max px-2.5 py-1 rounded-lg">
-              <Sparkles size={12} /> Verified Pet Care Network
+            <div className="text-[10px] font-black text-purple-700 uppercase tracking-widest flex items-center gap-1 mb-0.5">
+              <Sparkles size={12} className="text-purple-600" /> Verified Pet Care Network • Upfront Transparent Pricing
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Explore Stays & Clinics</h1>
+            <h1 className="text-xl sm:text-2xl font-black text-purple-950 tracking-tight">Explore Luxury Stays & Clinics</h1>
           </div>
 
           {/* Category Filter Pills */}
-          <div className="overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 custom-scrollbar flex-1 max-w-2xl flex justify-start md:justify-end">
-            <div className="flex gap-2 w-max">
+          <div className="overflow-x-auto pb-1 -mx-2.5 px-2.5 sm:mx-0 sm:px-0 custom-scrollbar">
+            <div className="flex gap-1.5 w-max">
               <button
                 onClick={() => handleCategoryChange('all')}
-                className={`px-4 py-2 rounded-2xl text-[12px] font-black transition-all shrink-0 ${activeCategory === 'all' ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-slate-900'}`}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-black transition-all shrink-0 ${activeCategory === 'all' ? 'bg-purple-600 text-white shadow-xs scale-102' : 'bg-white text-purple-900 border border-purple-200 hover:bg-purple-100 hover:text-purple-950'}`}
               >
                 All Categories
               </button>
@@ -211,9 +211,9 @@ export const Boarding = () => {
                 <button
                   key={cat.id}
                   onClick={() => handleCategoryChange(cat.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-[12px] font-black transition-all shrink-0 ${activeCategory === cat.id ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:text-slate-900'}`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black transition-all shrink-0 ${activeCategory === cat.id ? 'bg-purple-600 text-white shadow-xs scale-102' : 'bg-white text-purple-900 border border-purple-200 hover:bg-purple-100 hover:text-purple-950'}`}
                 >
-                  <cat.icon size={14} />
+                  <cat.icon size={13} />
                   <span>{cat.name}</span>
                 </button>
               ))}
@@ -222,47 +222,45 @@ export const Boarding = () => {
         </div>
         
         {/* Search Bar & Filter Button Row */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-600" />
             <input 
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by city, resort name, or service..." 
-              className="w-full h-12 pl-11 pr-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-purple-500/10 focus:border-purple-300 transition-all outline-none"
+              placeholder="Search by city, resort name, or service (e.g. AC Rooms, Grooming)..." 
+              className="w-full h-10 pl-9 pr-3 bg-white border border-purple-200 rounded-xl text-xs font-bold text-purple-950 placeholder:text-purple-400 focus:ring-2 focus:ring-purple-400 focus:border-purple-600 transition-all shadow-inner outline-none"
             />
           </div>
           
-          <div className="relative shrink-0 flex items-center bg-slate-50 border border-slate-200 rounded-2xl px-4 h-12 hover:border-purple-300 transition-colors">
-            <Calendar size={16} className="text-slate-500 mr-2" />
+          <div className="relative shrink-0 flex items-center bg-white border border-purple-200 rounded-xl px-3 h-10 shadow-2xs hover:border-purple-400 transition-colors">
+            <Calendar size={14} className="text-purple-600 mr-2" />
             <input 
               type="date" 
               value={searchDate}
               onChange={(e) => setSearchDate(e.target.value)}
-              className="bg-transparent border-none text-sm font-black text-slate-700 outline-none cursor-pointer"
+              className="bg-transparent border-none text-xs font-extrabold text-purple-950 outline-none cursor-pointer"
             />
           </div>
 
-          <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <button 
             onClick={() => setShowFilterModal(true)}
-            className="h-12 px-6 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-purple-600/20 shrink-0 relative"
+            className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 shrink-0 relative"
           >
-            <Filter size={16} />
-            <span>Filters</span>
+            <Filter size={14} />
+            <span>Required Services Filter</span>
             {selectedServicesFilter.length > 0 && (
-              <span className="w-5 h-5 bg-white text-purple-700 rounded-full text-[10px] font-black flex items-center justify-center shadow-sm ml-1">
+              <span className="w-4 h-4 bg-white text-purple-900 rounded-full text-[9px] font-black flex items-center justify-center shadow-2xs">
                 {selectedServicesFilter.length}
               </span>
             )}
-          </motion.button>
+          </button>
         </div>
 
         {/* VERIFIED Quick Filter Pills in Light Purple */}
-        <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2 text-xs font-bold -mx-4 px-4 sm:mx-0 sm:px-0 custom-scrollbar">
-          <span className="text-slate-500 font-extrabold text-[10px] uppercase tracking-wider shrink-0 mr-1">Quick Filters:</span>
+        <div className="mt-2.5 flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold -mx-2.5 px-2.5 sm:mx-0 sm:px-0">
+          <span className="text-purple-700 font-extrabold text-[11px] uppercase tracking-wider shrink-0 mr-1">Quick Filters:</span>
           {[
             { label: "⭐ Top Rated (4.8+)", filter: "4.8" },
             { label: "⚡ 24/7 Emergency", filter: "24/7" },
@@ -276,7 +274,7 @@ export const Boarding = () => {
                 const keyword = item.filter;
                 setSearchQuery(prev => prev.includes(keyword) ? prev.replace(keyword, "").trim() : `${prev} ${keyword}`.trim());
               }}
-              className="bg-slate-50 hover:bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full text-[11px] shrink-0 border border-slate-200 transition-all font-bold"
+              className="bg-white hover:bg-purple-100 text-purple-900 px-3 py-1 rounded-full text-[11px] shrink-0 border border-purple-200 transition-all shadow-2xs font-bold"
             >
               {item.label}
             </button>
@@ -313,102 +311,128 @@ export const Boarding = () => {
       {/* Grid List - Horizontal Cards Directory */}
       <div className="mt-4">
         {isLoading ? (
-          <div className="flex flex-col gap-3">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="animate-pulse bg-white rounded-3xl h-32 border border-slate-200/60 shadow-sm"></div>
+          <div className="flex flex-col gap-1.5">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <div key={i} className="animate-pulse bg-slate-100 h-14 sm:h-16 border-b border-slate-200"></div>
             ))}
           </div>
         ) : filteredFacilities.length > 0 ? (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col border border-slate-200 rounded-sm bg-white overflow-hidden">
             {filteredFacilities.map((facility, index) => (
               <motion.div
                 key={facility.id}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.04 }}
-                whileHover={{ y: -2, scale: 1.005 }}
+                transition={{ delay: index * 0.03 }}
                 onClick={() => navigate(`/facility/${facility.id}`, { state: { facility, selectedServices: selectedServicesFilter } })}
-                className="group cursor-pointer bg-white border border-slate-200/80 rounded-3xl hover:border-purple-300 hover:shadow-[0_12px_24px_-10px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-row relative overflow-hidden"
+                className="group cursor-pointer bg-white border-b border-slate-200 last:border-0 hover:bg-slate-50 transition-colors duration-200 flex flex-row relative"
               >
                 {/* Image */}
-                <div className="w-32 sm:w-48 shrink-0 relative bg-slate-100 overflow-hidden flex self-stretch">
+                <div className="w-[88px] sm:w-28 shrink-0 relative bg-slate-50 overflow-hidden flex self-stretch min-h-[72px] sm:min-h-[64px]">
                   <img 
                     src={facility.images[0]} 
                     alt={facility.name}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-md px-1.5 py-1 rounded-md flex items-center gap-1 shadow-sm border border-slate-200/60">
+                  <div className="absolute top-1 left-1 bg-white/95 backdrop-blur-md px-1 py-0.5 rounded-sm flex items-center gap-0.5 shadow-sm border border-slate-200">
                     {(() => {
                       const catInfo = getCategoryById(facility.type?.toLowerCase());
                       return catInfo ? (
-                        <><catInfo.icon size={10} className="text-purple-600" /><span className="text-[9px] font-black text-slate-800 uppercase tracking-tight">{catInfo.name}</span></>
+                        <><catInfo.icon size={8} className="text-purple-600" /><span className="text-[8px] font-black text-purple-950 uppercase tracking-tight">{catInfo.name}</span></>
                       ) : (
-                        <><CheckCircle size={10} className="text-purple-600" /><span className="text-[9px] font-black text-slate-800 uppercase tracking-tight">{facility.type || 'Boarding'}</span></>
+                        <><CheckCircle size={8} className="text-purple-600" /><span className="text-[8px] font-black text-purple-950 uppercase tracking-tight">{facility.type || 'Boarding'}</span></>
                       );
                     })()}
                   </div>
 
-                  <div className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-md px-1.5 py-1 rounded-md flex items-center gap-1 shadow-sm border border-slate-200/60">
-                    <Star size={10} className="text-amber-500 fill-amber-500" />
-                    <span className="text-[10px] font-black text-slate-900">{facility.rating}</span>
+                  <div className="absolute bottom-1 left-1 bg-white/95 backdrop-blur-md px-1 py-0.5 rounded-sm flex items-center gap-0.5 shadow-sm border border-slate-200">
+                    <Star size={8} className="text-purple-600 fill-purple-600" />
+                    <span className="text-[9px] font-black text-purple-950">{facility.rating}</span>
                   </div>
                 </div>
                 
-                {/* Content - Apple-like spacing */}
-                <div className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between flex-1 gap-4 min-w-0">
+                {/* Content - Justdial Inspired Ultra Thin Mobile Optimized */}
+                <div className="p-1.5 sm:px-2 flex flex-col sm:flex-row items-start sm:items-center justify-between flex-1 gap-1.5 min-w-0">
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <div className="flex items-center gap-2 w-full mb-1">
-                      <h3 className="font-black text-base sm:text-lg text-slate-900 group-hover:text-purple-600 transition-colors line-clamp-1 truncate flex-1 min-w-0">{facility.name}</h3>
-                      <div className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md text-[9px] font-black uppercase flex items-center gap-1 border border-emerald-200/60 shrink-0">
-                        <CheckCircle size={10} /> <span className="hidden xs:inline">Verified</span>
+                    <div className="flex items-center gap-1.5 w-full">
+                      <h3 className="font-black text-xs sm:text-sm text-blue-700 group-hover:underline transition-colors line-clamp-1 truncate flex-1 min-w-0">{facility.name}</h3>
+                      <div className="bg-green-100 text-green-700 px-1 py-0.5 rounded-sm text-[8px] font-black uppercase flex items-center gap-0.5 border border-green-200 shrink-0">
+                        <CheckCircle size={8} /> <span className="hidden xs:inline">Verified</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 min-w-0 mb-3">
-                      <MapPin size={12} className="shrink-0 text-slate-400" />
-                      <span className="truncate">{typeof facility.address === 'string' ? facility.address : (facility.address?.city || 'Verified Location')}</span>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-1.5">
-                      {(() => {
-                        const sList = Array.isArray(facility.services_offered) && facility.services_offered.length > 0
-                          ? facility.services_offered.map((s: any) => s.name || s)
-                          : Array.isArray(facility.amenities)
-                          ? facility.amenities
-                          : typeof facility.amenities === 'string'
-                          ? facility.amenities.split(',').map((a: string) => a.trim())
-                          : ['Deluxe Suite', '24/7 Care', 'Vet On-Call'];
-                        
-                        return sList.slice(0, 3).map((srvName: string, idx: number) => {
-                          const isHighlighted = selectedServicesFilter.some(req => srvName.toLowerCase().includes(req.toLowerCase()));
-                          return (
-                            <span 
-                              key={idx} 
-                              className={`px-2 py-1 rounded-lg text-[10px] font-bold tracking-tight transition-all ${
-                                isHighlighted
-                                  ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                                  : 'bg-slate-50 text-slate-600 border border-slate-200/80'
-                              }`}
-                            >
-                              {srvName}
-                            </span>
-                          );
-                        });
-                      })()}
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5">
+                      <div className="flex items-center gap-1">
+                        <span className="bg-green-600 text-white px-1.5 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5">
+                          {facility.rating} <Star size={8} className="fill-white" />
+                        </span>
+                        <span className="text-[8px] text-slate-500 font-medium hidden sm:inline">120 Ratings</span>
+                      </div>
+                      <div className="hidden sm:block w-px h-2.5 bg-slate-200"></div>
+                      <div className="flex items-center gap-0.5 text-[9px] font-medium text-slate-600 min-w-0">
+                        <MapPin size={9} className="shrink-0 text-slate-400" />
+                        <span className="truncate max-w-[100px] sm:max-w-[120px] lg:max-w-none">{typeof facility.address === 'string' ? facility.address : (facility.address?.city || 'Verified Location')}</span>
+                      </div>
+                      <div className="hidden sm:block w-px h-2.5 bg-slate-200"></div>
+                      <div className="flex flex-wrap gap-1">
+                        {(() => {
+                          const sList = Array.isArray(facility.services_offered) && facility.services_offered.length > 0
+                            ? facility.services_offered.map((s: any) => s.name || s)
+                            : Array.isArray(facility.amenities)
+                            ? facility.amenities
+                            : typeof facility.amenities === 'string'
+                            ? facility.amenities.split(',').map((a: string) => a.trim())
+                            : ['Deluxe Suite', '24/7 Care', 'Vet On-Call'];
+                          
+                          return sList.slice(0, 1).map((srvName: string, idx: number) => {
+                            const isHighlighted = selectedServicesFilter.some(req => srvName.toLowerCase().includes(req.toLowerCase()));
+                            return (
+                              <span 
+                                key={idx} 
+                                className={`px-1.5 py-0.5 rounded text-[7px] font-bold tracking-tight transition-all ${
+                                  isHighlighted
+                                    ? 'bg-blue-600 text-white shadow-2xs'
+                                    : 'bg-slate-100 text-slate-600 border border-slate-200'
+                                }`}
+                              >
+                                {srvName}
+                              </span>
+                            );
+                          });
+                        })()}
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 gap-3 sm:gap-2 pl-0 sm:pl-4 sm:border-l sm:border-slate-100 shrink-0">
+                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto mt-1 sm:mt-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100 gap-1.5 sm:gap-0.5 pl-0 sm:pl-2 sm:border-l sm:border-slate-100 shrink-0">
                     <div className="flex flex-col sm:flex-col items-start sm:items-end justify-center shrink-0">
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Starting From</span>
                       <div className="flex items-baseline gap-0.5">
-                        <span className="text-sm font-bold text-slate-900">₹</span>
-                        <p className="text-xl sm:text-2xl font-black text-slate-900 leading-none">{facility.priceFrom}</p>
+                        <p className="text-[11px] sm:text-xs font-black text-purple-950 leading-tight">{formatRupee(facility.priceFrom)}</p>
                       </div>
-                      <span className="text-[10px] text-slate-400 line-through font-bold mt-1">₹{Math.round(facility.priceFrom * 1.35)}</span>
+                      <span className="text-[7px] text-purple-400 line-through font-bold leading-tight">{formatRupee(Math.round(facility.priceFrom * 1.35))}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      <a 
+                        href={`tel:${facility.phone || '+919876543210'}`}
+                        className="px-1.5 py-1 rounded-sm bg-green-600 hover:bg-green-700 border border-green-600 text-white font-bold flex items-center gap-1 transition-colors text-[9px]"
+                        title="Show Number"
+                      >
+                        <Phone size={10} />
+                        <span className="hidden sm:inline">Call</span>
+                      </a>
+                      <button 
+                        onClick={() => {
+                          const cleanPhone = (facility.phone || '919876543210').replace(/[\s+-]/g, '');
+                          const whatsappPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+                          const msg = `Hi ${facility.name}, I found you on GouujiPets and would like to inquire about booking/services!`;
+                          window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                        }}
+                        className="p-1 rounded-sm bg-slate-100 hover:bg-slate-200 border border-slate-200 text-emerald-700 transition-colors"
+                        title="WhatsApp"
+                      >
+                        <MessageCircle size={12} />
+                      </button>
                       <button 
                         onClick={() => { 
                           if (!isAuthenticated) {
@@ -417,9 +441,9 @@ export const Boarding = () => {
                             navigate(`/checkout/${facility.id || facility._id}`, { state: { facility, selectedServices: selectedServicesFilter } });
                           }
                         }}
-                        className="px-6 py-2.5 bg-slate-900 hover:bg-purple-600 text-white font-black text-sm rounded-xl transition-all flex items-center justify-center gap-1 shadow-md active:scale-95 whitespace-nowrap"
+                        className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[9px] rounded-sm transition-all flex items-center justify-center gap-1 whitespace-nowrap"
                       >
-                        <span>View Details</span>
+                        <span>Enquire</span>
                       </button>
                     </div>
                   </div>

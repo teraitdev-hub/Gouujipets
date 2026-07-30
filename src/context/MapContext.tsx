@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { useJsApiLoader } from "@react-google-maps/api";
+import { APIProvider, useApiIsLoaded } from "@vis.gl/react-google-maps";
 
 interface MapContextType {
   isLoaded: boolean;
@@ -14,7 +14,19 @@ const MapContext = createContext<MapContextType>({
   authFailed: false,
 });
 
-const libraries: ("geometry" | "drawing" | "visualization")[] = ["geometry"];
+// A wrapper component to track loading state from vis.gl
+const MapStateTracker = ({ children, authFailed }: { children: ReactNode, authFailed: boolean }) => {
+  const isApiLoaded = useApiIsLoaded();
+  
+  const effectiveIsLoaded = isApiLoaded && !authFailed;
+  const effectiveError = authFailed ? new Error("Google Maps Auth Failed") : undefined;
+
+  return (
+    <MapContext.Provider value={{ isLoaded: effectiveIsLoaded, loadError: effectiveError, authFailed }}>
+      {children}
+    </MapContext.Provider>
+  );
+};
 
 export const MapProvider = ({ children }: { children: ReactNode }) => {
   const [authFailed, setAuthFailed] = useState(false);
@@ -31,19 +43,12 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
     ? import.meta.env.VITE_GOOGLE_MAPS_API_KEY
     : (import.meta.env.VITE_FIREBASE_API_KEY || "");
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: apiKey,
-    libraries,
-  });
-
-  const effectiveIsLoaded = isLoaded && !authFailed;
-  const effectiveError = loadError || (authFailed ? new Error("Google Maps Auth Failed") : undefined);
-
   return (
-    <MapContext.Provider value={{ isLoaded: effectiveIsLoaded, loadError: effectiveError, authFailed }}>
-      {children}
-    </MapContext.Provider>
+    <APIProvider apiKey={apiKey} onLoad={() => console.log('Maps API has loaded.')}>
+      <MapStateTracker authFailed={authFailed}>
+        {children}
+      </MapStateTracker>
+    </APIProvider>
   );
 };
 

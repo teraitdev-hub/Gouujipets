@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { PageTransition } from "../../components/layout/PageTransition";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Calendar, CreditCard, ShieldCheck, CheckCircle,
   Clock, Tag, IndianRupee, AlertCircle, Loader2, Check
@@ -16,7 +15,7 @@ import { useRazorpay } from "../../hooks/useRazorpay"; // kept for future live p
 import { UiverseButton } from "../../components/ui/UiverseButton";
 import { UiverseLoader } from "../../components/ui/UiverseLoader";
 import { AddPetModal } from "../../components/pets/AddPetModal";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { Map, AdvancedMarker } from "@vis.gl/react-google-maps";
 
 const containerStyle = {
   width: '100%',
@@ -100,10 +99,6 @@ export const Checkout = () => {
   const [isBoardingFull, setIsBoardingFull] = useState(false);
   const [needsPickup, setNeedsPickup] = useState(false);
   const [pickupLocation, setPickupLocation] = useState<{ lat: number; lng: number } | null>(null);
-  
-  // Wizard state
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 3;
 
   const nights = () => {
     if (!checkInDate || !checkOutDate) return 1;
@@ -418,70 +413,35 @@ export const Checkout = () => {
 
   return (
     <PageTransition className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] pb-32">
-      <header className="bg-white/80 backdrop-blur-xl border-b border-gray-100 py-4 px-4 sm:px-6 relative z-10 shadow-sm sticky top-0">
-        <div className="max-w-5xl mx-auto flex flex-col gap-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => {
-                if (currentStep > 1) setCurrentStep(prev => prev - 1);
-                else navigate(-1);
-              }}
-              className="w-10 h-10 bg-slate-50 hover:bg-slate-100 rounded-full flex items-center justify-center transition-colors border border-slate-200/60"
-            >
-              <ArrowLeft size={18} className="text-slate-700" />
-            </button>
-            <div className="flex-1">
-              <h1 className="text-lg font-black text-slate-900 leading-tight">Secure Checkout</h1>
-              <p className="text-xs font-semibold text-slate-500">{facility.name}</p>
-            </div>
-          </div>
-          
-          {/* Stepper Progress Bar */}
-          <div className="flex items-center gap-2">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden relative">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: currentStep >= step ? "100%" : "0%" }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
-                  className="absolute inset-0 bg-purple-600 rounded-full"
-                />
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
-            <span className={currentStep >= 1 ? "text-purple-600" : ""}>Dates</span>
-            <span className={currentStep >= 2 ? "text-purple-600" : ""}>Pets & Services</span>
-            <span className={currentStep >= 3 ? "text-purple-600" : ""}>Review & Pay</span>
+      <header className="bg-white border-b border-gray-100 py-3 px-4 sm:px-6 relative z-10 shadow-2xs">
+        <div className="max-w-5xl mx-auto flex items-center gap-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+          >
+            <ArrowLeft size={16} />
+          </button>
+          <div>
+            <h1 className="text-base font-black text-gray-900 leading-tight">Secure Checkout</h1>
+            <p className="text-[11px] text-gray-400">{facility.name}</p>
           </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8">
-        <div className="space-y-6">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-5 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+        <div className="lg:col-span-8 space-y-3.5 sm:space-y-4">
           {error && (
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm font-semibold shadow-sm">
-              <AlertCircle size={18} className="shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 bg-purple-50 border border-purple-200 text-purple-700 px-3 py-2 rounded-xl text-xs font-medium">
+              <AlertCircle size={15} className="shrink-0 mt-0.5" />
               <p>{error}</p>
-            </motion.div>
+            </div>
           )}
 
-          <AnimatePresence mode="wait">
-            {/* STEP 1: DATES */}
-            {currentStep === 1 && (
-              <motion.div
-                key="step1"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6"
-              >
-                <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60">
-                  <h2 className="font-black text-xl text-slate-900 mb-6 flex items-center gap-3">
-                    <span className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-black">1</span>
-                    When do you need care?
-                  </h2>
+          <section className="bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-slate-200/80">
+            <h2 className="font-extrabold text-sm sm:text-base text-slate-900 mb-2.5 flex items-center gap-2">
+              <span className="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-black">1</span>
+              Select Dates
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               <div className="bg-slate-50/50 p-2.5 rounded-xl border border-slate-200/70 space-y-2">
                 <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">Check-in Date & Time</label>
@@ -625,39 +585,16 @@ export const Checkout = () => {
               </div>
             </div>
             {isBoardingFull && (
-              <p className="mt-4 text-rose-600 font-bold text-sm bg-rose-50 px-4 py-3 rounded-xl border border-rose-100 flex items-center gap-2">
-                <AlertCircle size={16} />
-                Facility is fully booked for these dates.
+              <p className="mt-2 text-purple-600 font-bold text-xs bg-purple-50 px-2.5 py-1.5 rounded-lg border border-purple-100">
+                ⚠️ Facility is fully booked for these dates.
               </p>
             )}
           </section>
-          
-          <div className="flex justify-end pt-4">
-            <button 
-              disabled={!checkInDate || !checkOutDate || !checkInTime || !checkOutTime || isBoardingFull}
-              onClick={() => setCurrentStep(2)}
-              className="bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-black px-10 py-4 rounded-2xl shadow-lg transition-all active:scale-95"
-            >
-              Continue to Pets
-            </button>
-          </div>
-        </motion.div>
-      )}
 
-      {/* STEP 2: PETS & ADDONS */}
-      {currentStep === 2 && (
-        <motion.div
-          key="step2"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-6"
-        >
-          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60">
-            <h2 className="font-black text-xl text-slate-900 mb-6 flex items-center gap-3">
-              <span className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-black">2</span>
-              Who is staying?
+          <section className="bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-slate-200/80">
+            <h2 className="font-extrabold text-sm sm:text-base text-slate-900 mb-2.5 flex items-center gap-2">
+              <span className="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-black">2</span>
+              Select Pets
             </h2>
             {pets.length > 0 ? (
               <div className="space-y-2">
@@ -703,9 +640,9 @@ export const Checkout = () => {
           </section>
 
           {services.length > 0 && (
-            <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60">
-              <h3 className="text-xl font-black text-slate-900 mb-2">Enhance their stay</h3>
-              <p className="text-sm font-semibold text-slate-500 mb-6">Add premium grooming, walks, or vet checkups.</p>
+            <section className="bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-slate-200/80">
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900 mb-0.5">Add-on Services</h3>
+              <p className="text-xs text-slate-500 mb-3">Enhance your pet's stay with our premium services.</p>
               
               <div className="grid gap-2">
                 {services.map((service: any) => {
@@ -745,14 +682,14 @@ export const Checkout = () => {
             </section>
           )}
 
-          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <h2 className="font-black text-xl text-slate-900 flex items-center gap-3">
-                <span className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-black shrink-0">3</span>
-                <span>Automatic Profile Verification</span>
+          <section className="bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-slate-200/80">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-3">
+              <h2 className="font-extrabold text-sm sm:text-base text-slate-900 flex items-center gap-2">
+                <span className="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-black shrink-0">4</span>
+                <span>Selected Pet Profiles & Care Verification</span>
               </h2>
-              <span className="text-xs font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 self-start sm:self-auto">
-                Profiles Linked
+              <span className="text-[10px] font-extrabold text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-100 self-start sm:self-auto">
+                Automatic Profile Link
               </span>
             </div>
 
@@ -815,9 +752,9 @@ export const Checkout = () => {
             )}
           </section>
 
-          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60">
-            <h2 className="font-black text-xl text-slate-900 mb-6 flex items-center gap-3">
-              <span className="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-black shrink-0">4</span>
+          <section className="bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-slate-200/80">
+            <h2 className="font-extrabold text-sm sm:text-base text-slate-900 mb-2.5 flex items-center gap-2">
+              <span className="w-5 h-5 bg-slate-900 text-white rounded-full flex items-center justify-center text-[10px] font-black shrink-0">5</span>
               Transportation
             </h2>
             <label className="flex items-center gap-3 p-2.5 border rounded-xl cursor-pointer transition-all border-slate-200/80 bg-white hover:border-slate-300">
@@ -836,20 +773,19 @@ export const Checkout = () => {
             {needsPickup && (
               <div className="mt-4 border border-purple-200 rounded-xl p-3 bg-purple-50/30">
                 <p className="text-xs font-bold text-purple-800 mb-2">Pinpoint your exact location:</p>
-                <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""}>
-                  <GoogleMap
-                    mapContainerStyle={containerStyle}
-                    center={pickupLocation || center}
-                    zoom={13}
-                    onClick={(e) => {
-                      if (e.latLng) {
-                        setPickupLocation({ lat: e.latLng.lat(), lng: e.latLng.lng() });
-                      }
-                    }}
-                  >
-                    {pickupLocation && <Marker position={pickupLocation} />}
-                  </GoogleMap>
-                </LoadScript>
+                <Map
+                  mapId="CHECKOUT_PICKUP_MAP"
+                  style={containerStyle}
+                  defaultCenter={pickupLocation || center}
+                  defaultZoom={13}
+                  onClick={(e) => {
+                    if (e.detail.latLng) {
+                      setPickupLocation({ lat: e.detail.latLng.lat, lng: e.detail.latLng.lng });
+                    }
+                  }}
+                >
+                  {pickupLocation && <AdvancedMarker position={pickupLocation} />}
+                </Map>
                 {!pickupLocation && (
                   <p className="text-[11px] text-purple-600 mt-2 font-medium">Click on the map to set your pickup/drop location.</p>
                 )}
@@ -859,30 +795,10 @@ export const Checkout = () => {
               </div>
             )}
           </section>
+        </div>
 
-          <div className="flex justify-end pt-4">
-            <button 
-              disabled={selectedPets.length === 0}
-              onClick={() => setCurrentStep(3)}
-              className="bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-black px-10 py-4 rounded-2xl shadow-lg transition-all active:scale-95"
-            >
-              Continue to Review
-            </button>
-          </div>
-        </motion.div>
-      )}
-
-      {/* STEP 3: REVIEW & PAY */}
-      {currentStep === 3 && (
-        <motion.div
-          key="step3"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-6"
-        >
-          <div className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 relative">
+        <div className="lg:col-span-4">
+          <div className="bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-slate-200/80 relative lg:sticky lg:top-4">
             <div className="space-y-1.5 text-[11px] sm:text-xs mb-2.5">
               {checkIn && (
                 <div className="flex justify-between text-slate-600">
@@ -988,13 +904,10 @@ export const Checkout = () => {
               {checkOutDate && !checkOutTime && <p className="text-purple-500 flex items-center gap-1 font-medium"><AlertCircle size={11} /> Select check-out time</p>}
             </div>
 
-            <p className="text-center text-xs text-slate-400 font-semibold mt-6 flex items-center justify-center gap-1.5">
-              <ShieldCheck size={14} /> Secured by Razorpay · SSL Encrypted
+            <p className="text-center text-[10px] text-slate-400 font-semibold mt-2.5 flex items-center justify-center gap-1">
+              <ShieldCheck size={12} /> Secured by Razorpay · SSL Encrypted
             </p>
           </div>
-        </motion.div>
-      )}
-      </AnimatePresence>
         </div>
       </div>
 

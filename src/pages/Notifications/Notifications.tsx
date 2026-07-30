@@ -90,23 +90,20 @@ export const Notifications = () => {
   }
 
   return (
-    <PageTransition className="pb-24 max-w-3xl mx-auto space-y-6 px-4 sm:px-6 pt-6 font-sans">
+    <PageTransition className="pb-24 max-w-3xl mx-auto space-y-6">
       
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-sm">
-            <Bell size={20} />
-          </div>
-          Notifications
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <Bell className="text-purple-600"/> Notifications
         </h1>
         {notifications.some(n => !n.read) && (
-          <button onClick={markAllRead} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black rounded-xl transition-colors shadow-sm">
+          <button onClick={markAllRead} className="text-purple-700 text-xs font-bold hover:underline">
             Mark all as read
           </button>
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {notifications.map((notif, index) => {
           const IconComponent = getIcon(notif.type);
           return (
@@ -115,44 +112,40 @@ export const Notifications = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               key={notif.id}
-              className={`rounded-[32px] p-6 border transition-all flex gap-5 group cursor-pointer ${
+              className={`rounded-[24px] p-5 shadow-xs border transition-all flex gap-4 hover:-translate-y-0.5 hover:shadow-md ${
                 notif.read 
-                  ? 'bg-white border-slate-200 hover:border-slate-300 shadow-[0_2px_10px_rgb(0,0,0,0.02)]' 
-                  : 'bg-slate-900 border-slate-800 text-white shadow-[0_8px_30px_rgb(0,0,0,0.08)]'
+                  ? 'bg-white/75 backdrop-blur-md border-purple-100' 
+                  : 'bg-purple-50/50 border-purple-300 shadow-[0_8px_30px_rgb(0,0,0,0.02)]'
               }`}
             >
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
                 notif.read 
-                  ? 'bg-slate-50 text-slate-600 group-hover:bg-slate-100' 
-                  : 'bg-slate-800 text-white'
+                  ? 'bg-purple-100 text-purple-700' 
+                  : 'bg-purple-600 text-white shadow-sm'
               }`}>
-                <IconComponent size={24} />
+                <IconComponent size={20} />
               </div>
-              <div className="flex-1 pt-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <h4 className={`text-base truncate ${notif.read ? 'text-slate-900 font-bold' : 'text-white font-black'}`}>
-                    {notif.title}
-                  </h4>
-                  <span className={`text-[10px] font-black uppercase tracking-widest shrink-0 ${notif.read ? 'text-slate-400' : 'text-slate-300'}`}>
-                    {formatTime(notif.created_at)}
-                  </span>
-                </div>
-                <p className={`text-sm leading-relaxed pr-4 ${notif.read ? 'text-slate-500 font-medium' : 'text-slate-300 font-medium'}`}>
+              <div className="flex-1 pt-1">
+                <h4 className={`text-sm mb-1 ${notif.read ? 'text-slate-655 font-medium' : 'text-slate-900 font-bold'}`}>
+                  {notif.title}
+                </h4>
+                <p className="text-xs text-slate-500 leading-relaxed mb-2">
                   {notif.message || notif.content}
                 </p>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  {formatTime(notif.created_at)}
+                </span>
               </div>
-              {!notif.read && <div className="w-3 h-3 bg-emerald-500 rounded-full mt-2.5 shrink-0 shadow-sm border-2 border-slate-900" />}
+              {!notif.read && <div className="w-2.5 h-2.5 bg-purple-600 rounded-full mt-2" />}
             </motion.div>
           );
         })}
         
         {notifications.length === 0 && (
-          <div className="text-center py-16 bg-white rounded-[32px] border border-dashed border-slate-200 shadow-sm">
-            <div className="w-20 h-20 bg-slate-50 text-slate-300 rounded-[24px] flex items-center justify-center mx-auto mb-5">
-              <Bell size={40} />
-            </div>
-            <h3 className="text-lg font-black text-slate-900">All caught up!</h3>
-            <p className="text-sm font-medium text-slate-500 mt-2">You have no new notifications.</p>
+          <div className="text-center py-12 bg-white/70 backdrop-blur-xl rounded-[24px] border border-purple-100">
+            <Bell className="text-slate-300 mx-auto mb-3" size={32} />
+            <h3 className="text-sm font-bold text-slate-900">All caught up!</h3>
+            <p className="text-xs text-slate-500 mt-1">You have no new notifications.</p>
           </div>
         )}
       </div>

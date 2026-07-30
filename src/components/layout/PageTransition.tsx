@@ -4,28 +4,22 @@ import type { ReactNode } from "react";
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 15,
-    scale: 0.98,
-    filter: "blur(4px)"
+    y: 20,
   },
   in: {
     opacity: 1,
     y: 0,
-    scale: 1,
-    filter: "blur(0px)"
   },
   out: {
     opacity: 0,
-    y: -10,
-    scale: 1.02,
-    filter: "blur(4px)"
+    y: -20,
   },
 };
 
 const pageTransition: Transition = {
-  type: "spring",
-  stiffness: 260,
-  damping: 20,
+  type: "tween",
+  ease: "anticipate",
+  duration: 0.4,
 };
 
 interface PageTransitionProps {

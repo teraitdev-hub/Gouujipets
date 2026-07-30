@@ -2,50 +2,34 @@ import { PageTransition } from "../../components/layout/PageTransition";
 import { ShoppingBag, Star, Plus } from "lucide-react";
 import { formatRupee } from "../../utils/currency";
 
-import { useState, useEffect } from "react";
-import { db } from "../../lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
-
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  rating: number;
-  image: string;
-}
+const mockProducts = [
+  {
+    id: "p1",
+    name: "Premium Royal Canin Golden Retriever Adult Dry Dog Food",
+    category: "Food",
+    price: 35.99,
+    rating: 4.8,
+    image: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&q=80&w=600"
+  },
+  {
+    id: "p2",
+    name: "Interactive Puzzle Toy for Dogs",
+    category: "Toys",
+    price: 15.50,
+    rating: 4.5,
+    image: "https://images.unsplash.com/photo-1576201836106-db1758fd1c97?auto=format&fit=crop&q=80&w=600"
+  },
+  {
+    id: "p3",
+    name: "Comfort Orthopedic Pet Bed",
+    category: "Accessories",
+    price: 45.00,
+    rating: 4.9,
+    image: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&q=80&w=600"
+  }
+];
 
 export const Shop = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "products"));
-        const productsList = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Product[];
-        setProducts(productsList);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
   return (
     <PageTransition className="p-8">
       <div className="flex justify-between items-end mb-8">
@@ -59,7 +43,7 @@ export const Shop = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products.map((product) => (
+        {mockProducts.map((product) => (
           <div key={product.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-xl transition-shadow group cursor-pointer flex flex-col h-full">
             <div className="w-full aspect-square rounded-xl overflow-hidden bg-gray-50 mb-4 relative">
               <img 

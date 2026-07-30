@@ -9,7 +9,7 @@ import { collection, addDoc, doc, setDoc, getDocs, query, where, limit, updateDo
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
 import { checkPasswordStrength } from "../../utils/security";
-import { GoogleMap, Marker, Autocomplete } from "@react-google-maps/api";
+
 import { useMap } from "../../context/MapContext";
 import { LocationPicker } from "../../components/ui/LocationPicker";
 
@@ -40,39 +40,7 @@ export const PartnerLogin = () => {
   const { isLoaded, loadError, authFailed } = useMap();
   const mapAvailable = isLoaded && !loadError && !authFailed;
 
-  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
 
-  const onPlaceChanged = () => {
-    if (autocomplete !== null) {
-      const place = autocomplete.getPlace();
-      if (place.geometry?.location) {
-        setMapLocation({ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() });
-      }
-      if (place.address_components) {
-        let street = "";
-        let city = "";
-        let state = "";
-        let pincode = "";
-        for (const component of place.address_components) {
-          const type = component.types[0];
-          if (type === "street_number") street += component.long_name + " ";
-          if (type === "route") street += component.long_name;
-          if (type === "locality") city = component.long_name;
-          if (type === "administrative_area_level_1") state = component.long_name;
-          if (type === "postal_code") pincode = component.long_name;
-        }
-        setFormData(prev => ({
-          ...prev,
-          street: street.trim() || place.name || prev.street,
-          city: city || prev.city,
-          state: state || prev.state,
-          pincode: pincode || prev.pincode
-        }));
-      } else {
-        setFormData(prev => ({ ...prev, street: place.name || prev.street }));
-      }
-    }
-  };
 
   const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
   const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ""));

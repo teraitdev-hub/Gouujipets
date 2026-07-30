@@ -204,7 +204,7 @@ export const BusinessRegistrationModal = ({ isOpen, onClose, onSuccess, ownerId,
             </div>
             
             <p className="text-[11px] font-medium text-gray-400 leading-relaxed text-center mt-4">
-              By clicking register, your registration will be submitted for approval. After approval you will get a mail, follow that mail to login to your portal.
+              By clicking register, your business will become instantly discoverable by thousands of pet parents on Gouuji Pets.
             </p>
           </form>
         </div>

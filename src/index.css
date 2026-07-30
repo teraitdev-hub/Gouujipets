@@ -88,27 +88,25 @@
 }
 
 :root {
-  --background: 0 0% 100%; /* Pure white base */
+  --background: 0 0% 98%; /* #FAFAFA */
   --foreground: 222.2 84% 4.9%;
   --card: 0 0% 100%;
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 262.1 83.3% 57.8%; /* Rich Violet for CTA */
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
+  --primary: 173 80% 40%; /* #0D9488 Teal */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 96%;
   --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
+  --muted: 0 0% 96%;
   --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
+  --accent: 0 0% 96%;
   --accent-foreground: 222.2 47.4% 11.2%;
   --destructive: 0 84.2% 60.2%;
   --border: 214.3 31.8% 91.4%;
   --input: 214.3 31.8% 91.4%;
-  --ring: 262.1 83.3% 57.8%;
-  
-  /* Refined, modern radii scale */
-  --radius: 1.25rem; 
+  --ring: 173 80% 40%;
+  --radius: 1rem; /* Slightly sharper overall look */
 }
 
 @layer base {
@@ -202,24 +200,20 @@
 }
 
 /* Custom Sleek Scrollbar */
-::-webkit-scrollbar {
+.custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
-::-webkit-scrollbar-track {
-  background: transparent;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.3); /* Slate-500 with low opacity */
-  border-radius: 10px;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(13, 148, 136, 0.35);
+  border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.6);
-}
-
-::selection {
-  background: rgba(124, 58, 237, 0.2); /* Violet selection */
-  color: #1e1b4b; /* Violet 950 */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(13, 148, 136, 0.6);
 }
 
 /* Custom Uiverse Button */

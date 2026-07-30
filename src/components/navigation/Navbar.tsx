@@ -3,24 +3,12 @@ import { Menu, Search, MapPin, Phone, ShieldCheck, Sparkles } from "lucide-react
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { NotificationBell } from "../layout/NotificationBell";
-import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 
 export const Navbar = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("Bangalore / Near Me");
-  const [hidden, setHidden] = useState(false);
-  const { scrollY } = useScroll();
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const previous = scrollY.getPrevious() ?? 0;
-    if (latest > previous && latest > 150) {
-      setHidden(true);
-    } else {
-      setHidden(false);
-    }
-  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,15 +20,7 @@ export const Navbar = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
   };
 
   return (
-    <motion.header
-      variants={{
-        visible: { y: 0 },
-        hidden: { y: "-100%" },
-      }}
-      animate={hidden ? "hidden" : "visible"}
-      transition={{ duration: 0.35, ease: "easeInOut" }}
-      className="bg-white/85 backdrop-blur-2xl text-purple-950 border-b border-purple-200/50 sticky top-0 z-[60] shadow-[0_4px_24px_rgba(0,0,0,0.02)] font-sans"
-    >
+    <header className="bg-purple-50 text-purple-950 border-b border-purple-200 sticky top-0 z-40 shadow-sm font-sans">
       {/* Top micro bar for VERIFIED / Amazon credibility in Soft Light Purple */}
       <div className="bg-purple-100/80 px-3 md:px-6 py-1 flex items-center justify-between text-[11px] border-b border-purple-200 font-bold">
         <div className="flex items-center gap-2 text-purple-900">
@@ -174,6 +154,6 @@ export const Navbar = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
           </button>
         ))}
       </div>
-    </motion.header>
+    </header>
   );
 };

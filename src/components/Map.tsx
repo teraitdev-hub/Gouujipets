@@ -1,4 +1,4 @@
-import { GoogleMap, Marker, InfoWindow } from '@react-google-maps/api';
+import { Map as VisMap, AdvancedMarker, InfoWindow } from '@vis.gl/react-google-maps';
 import { useMap } from '../context/MapContext';
 import { useState } from 'react';
 import { FallbackMap } from './Map/FallbackMap';
@@ -35,19 +35,17 @@ export const Map = ({
 
   return (
     <div className={className}>
-      <GoogleMap
-        mapContainerStyle={{ width: '100%', height: '100%', borderRadius: 'inherit' }}
-        center={centerLatLng}
-        zoom={zoom}
-        options={{
-          disableDefaultUI: false,
-          scrollwheel: false,
-        }}
+      <VisMap
+        mapId="PUBLIC_HOME_MAP"
+        defaultCenter={centerLatLng}
+        defaultZoom={zoom}
+        disableDefaultUI={false}
+        gestureHandling="cooperative"
       >
         {markers.map((marker, idx) => {
           const position = { lat: marker.position[0], lng: marker.position[1] };
           return (
-            <Marker 
+            <AdvancedMarker 
               key={idx} 
               position={position}
               onClick={() => setActiveMarker(idx)}
@@ -59,10 +57,10 @@ export const Map = ({
                   </div>
                 </InfoWindow>
               )}
-            </Marker>
+            </AdvancedMarker>
           );
         })}
-      </GoogleMap>
+      </VisMap>
     </div>
   );
 };

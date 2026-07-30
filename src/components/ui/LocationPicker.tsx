@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MapPin, Navigation, Loader2, Search, CheckCircle2, ChevronRight, X, Building2, Target, AlertTriangle, Check } from 'lucide-react';
 import { FallbackMap } from '../Map/FallbackMap';
 import { useMap } from '../../context/MapContext';
-import { GoogleMap, Marker } from '@react-google-maps/api';
+import { Map, AdvancedMarker, useMapsLibrary } from '@vis.gl/react-google-maps';
 
 interface LocationPickerProps {
   onLocationSelect: (location: { 
@@ -38,6 +38,9 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   const { isLoaded, authFailed, loadError } = useMap();
   const mapAvailable = isLoaded && !authFailed && !loadError;
   
+  const placesLib = useMapsLibrary('places');
+  const geocodingLib = useMapsLibrary('geocoding');
+  
   const [phase, setPhase] = useState<'idle' | 'detecting' | 'done'>(defaultAddress ? 'done' : 'idle');
   const [location, setLocation] = useState(defaultLocation);
   const [mapZoom, setMapZoom] = useState(defaultAddress ? 17 : 14);
@@ -64,9 +67,9 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
   /* ── Geocoding Helpers using Official Google SDK (No CORS errors) ── */
   const geocodeCoords = useCallback(async (lat: number, lng: number) => {
-    if (mapAvailable && window.google && window.google.maps && window.google.maps.Geocoder) {
+    if (mapAvailable && geocodingLib) {
       try {
-        const geocoder = new window.google.maps.Geocoder();
+        const geocoder = new geocodingLib.Geocoder();
         const response = await geocoder.geocode({ location: { lat, lng } });
         if (response.results && response.results.length > 0) {
           const res = response.results[0];
@@ -97,7 +100,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     } catch (_) {}
     const fb = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     return { short: fb, full: fb, pincode: '', city: '', state: '' };
-  }, [isLoaded]);
+  }, [mapAvailable, geocodingLib]);
 
   const applyLocation = useCallback(async (lat: number, lng: number, zoom = 17, presetData?: { short: string; full: string; pincode?: string; city?: string; state?: string }) => {
     setLocation({ lat, lng });
@@ -168,29 +171,26 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
     debounceRef.current = setTimeout(async () => {
       setIsSuggesting(true);
-      if (mapAvailable && window.google && window.google.maps) {
+      if (mapAvailable && placesLib && (placesLib as any).AutocompleteSuggestion) {
         try {
-          const placesLib = await window.google.maps.importLibrary("places") as any;
-          if (placesLib.AutocompleteSuggestion) {
-            const request = { input: val, includedRegionCodes: ['in'] };
-            const { suggestions } = await placesLib.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
-            setIsSuggesting(false);
-            if (suggestions && suggestions.length > 0) {
-              setSuggestions(
-                suggestions.map((s: any) => {
-                  const p = s.placePrediction;
-                  return {
-                    display_name: p.text.text,
-                    place_id: p.placeId,
-                    main_text: p.mainText.text,
-                    secondary_text: p.secondaryText?.text || '',
-                    source: 'google',
-                  };
-                })
-              );
-              setShowSuggestions(true);
-              return;
-            }
+          const request = { input: val, includedRegionCodes: ['in'] };
+          const { suggestions } = await (placesLib as any).AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+          setIsSuggesting(false);
+          if (suggestions && suggestions.length > 0) {
+            setSuggestions(
+              suggestions.map((s: any) => {
+                const p = s.placePrediction;
+                return {
+                  display_name: p.text.text,
+                  place_id: p.placeId,
+                  main_text: p.mainText.text,
+                  secondary_text: p.secondaryText?.text || '',
+                  source: 'google',
+                };
+              })
+            );
+            setShowSuggestions(true);
+            return;
           }
         } catch (e) {
           setIsSuggesting(false);
@@ -222,29 +222,26 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
   const handleSuggestionPick = async (s: Suggestion) => {
     setShowSuggestions(false);
-    if (s.source === 'google' && s.place_id && mapAvailable && window.google && window.google.maps) {
+    if (s.source === 'google' && s.place_id && mapAvailable && placesLib && (placesLib as any).Place) {
       try {
-        const placesLib = await window.google.maps.importLibrary("places") as any;
-        if (placesLib.Place) {
-          const place = new placesLib.Place({ id: s.place_id });
-          await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress', 'addressComponents'] });
-          if (place.location) {
-            const lat = place.location.lat();
-            const lng = place.location.lng();
-            
-            let city = '', state = '', pin = '';
-            if (place.addressComponents) {
-              for (const comp of place.addressComponents) {
-                const types = comp.types;
-                if (types.includes('locality')) city = comp.longText;
-                else if (types.includes('administrative_area_level_1')) state = comp.longText;
-                else if (types.includes('postal_code')) pin = comp.longText;
-              }
+        const place = new (placesLib as any).Place({ id: s.place_id });
+        await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress', 'addressComponents'] });
+        if (place.location) {
+          const lat = place.location.lat();
+          const lng = place.location.lng();
+          
+          let city = '', state = '', pin = '';
+          if (place.addressComponents) {
+            for (const comp of place.addressComponents) {
+              const types = comp.types;
+              if (types.includes('locality')) city = comp.longText;
+              else if (types.includes('administrative_area_level_1')) state = comp.longText;
+              else if (types.includes('postal_code')) pin = comp.longText;
             }
-            const address = place.formattedAddress || place.displayName;
-            await applyLocation(lat, lng, 17);
-            return;
           }
+          const address = place.formattedAddress || place.displayName;
+          await applyLocation(lat, lng, 17, { short: address, full: address, city, state, pincode: pin });
+          return;
         }
       } catch (err) {
         console.warn('Google New Places fetch error:', err);
@@ -425,27 +422,22 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         )}
       </div>
 
-      {/* Interactive Map (Official Google Map when loaded, Fallback OSM otherwise) */}
+      {/* Interactive Map */}
       <div className={className}>
         {mapAvailable ? (
-          <GoogleMap
-            mapContainerClassName="w-full h-full"
-            center={{ lat: location.lat, lng: location.lng }}
-            zoom={mapZoom}
+          <Map
+            defaultCenter={{ lat: location.lat, lng: location.lng }}
+            defaultZoom={mapZoom}
+            gestureHandling={'cooperative'}
+            disableDefaultUI={true}
+            mapId="LOCATION_PICKER_MAP"
             onClick={(e) => {
-              if (e.latLng) {
-                handleMapPin(e.latLng.lat(), e.latLng.lng());
+              if (e.detail.latLng) {
+                handleMapPin(e.detail.latLng.lat, e.detail.latLng.lng);
               }
             }}
-            options={{
-              streetViewControl: false,
-              mapTypeControl: false,
-              fullscreenControl: true,
-              zoomControl: true,
-              gestureHandling: 'cooperative',
-            }}
           >
-            <Marker
+            <AdvancedMarker
               position={{ lat: location.lat, lng: location.lng }}
               draggable={true}
               onDragEnd={(e) => {
@@ -454,7 +446,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
                 }
               }}
             />
-          </GoogleMap>
+          </Map>
         ) : (
           <FallbackMap center={[location.lat, location.lng]} zoom={mapZoom} className="w-full h-full" onLocationSelect={handleMapPin} />
         )}

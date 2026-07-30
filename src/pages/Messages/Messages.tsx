@@ -1,135 +1,57 @@
 import { PageTransition } from "../../components/layout/PageTransition";
-import { Search, Edit, CheckCheck, MoreHorizontal, MessageSquare } from "lucide-react";
+import { Search, Edit } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { db } from "../../lib/firebase";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { useAuthStore } from "../../store/useAuthStore";
 
-interface Conversation {
-  id: string;
-  senderName: string;
-  lastMessage: string;
-  updatedAt: string;
-  unread: number;
-  avatar: string;
-  online: boolean;
-}
+const messages = [
+  { id: 1, sender: "Dr. Sarah Jenkins", preview: "Your test results are ready.", time: "10:42 AM", unread: 2, avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150" },
+  { id: 2, sender: "Downtown Groomers", preview: "See you tomorrow at 2 PM!", time: "Yesterday", unread: 0, avatar: "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=150" },
+  { id: 3, sender: "City Pet Boarding", preview: "Bella is doing great today, ate all her food.", time: "Mon", unread: 0, avatar: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=150" },
+];
 
 export const Messages = () => {
-  const { user } = useAuthStore();
-  const [messages, setMessages] = useState<Conversation[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-
-    const q = query(
-      collection(db, "conversations"),
-      where("user_id", "==", user.id)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Conversation[];
-      
-      data.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-      setMessages(data);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching conversations:", error);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [user?.id]);
-
-  const filteredMessages = messages.filter(msg => 
-    msg.senderName?.toLowerCase().includes(search.toLowerCase()) || 
-    msg.lastMessage?.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
-    <PageTransition className="pb-24 max-w-3xl mx-auto space-y-6 px-4 sm:px-6 pt-6 font-sans">
+    <PageTransition className="pb-24 max-w-3xl mx-auto space-y-6">
       
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">Messages</h1>
-        <div className="flex items-center gap-2">
-          <button className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200 transition-colors shadow-sm">
-            <CheckCheck size={18} />
-          </button>
-          <button className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center hover:bg-slate-800 transition-colors shadow-sm">
-            <Edit size={18} />
-          </button>
-        </div>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-900">Messages</h1>
+        <button className="w-10 h-10 rounded-full bg-brand-50 text-brand-700 flex items-center justify-center hover:bg-brand-600 hover:text-white transition-colors">
+          <Edit size={18} />
+        </button>
       </div>
 
       <div className="relative group">
-        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-900 transition-colors" />
+        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-brand-600 transition-colors" />
         <input 
           type="text" 
           placeholder="Search messages..." 
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full h-12 bg-white border border-slate-200 rounded-[20px] pl-11 pr-4 text-sm font-medium focus:outline-none focus:ring-4 focus:ring-slate-100 focus:border-slate-300 transition-all shadow-[0_2px_10px_rgb(0,0,0,0.02)]"
+          className="w-full h-12 bg-white/70 backdrop-blur-xl border border-white/80 rounded-xl pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all shadow-[0_4px_20px_rgb(0,0,0,0.03)]"
         />
       </div>
 
-      <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 overflow-hidden">
-        {filteredMessages.length > 0 ? (
-          filteredMessages.map((msg, index) => {
-            const timeFormatted = new Date(msg.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            return (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                key={msg.id}
-                className="flex items-start gap-4 p-5 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors cursor-pointer group"
-              >
-                <div className="relative shrink-0">
-                  <img src={msg.avatar} alt={msg.senderName} className="w-14 h-14 rounded-full object-cover shadow-sm" />
-                  {msg.online && (
-                    <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <div className="flex justify-between items-center mb-1">
-                    <h4 className={`font-bold text-sm truncate ${msg.unread > 0 ? 'text-slate-900' : 'text-slate-700'}`}>{msg.senderName}</h4>
-                    <span className={`text-[11px] shrink-0 font-semibold ${msg.unread > 0 ? 'text-blue-600' : 'text-slate-400'}`}>{timeFormatted}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <p className={`text-sm truncate pr-4 ${msg.unread > 0 ? 'font-bold text-slate-900' : 'font-medium text-slate-500'}`}>{msg.lastMessage}</p>
-                    {msg.unread > 0 ? (
-                      <span className="shrink-0 w-5 h-5 bg-blue-600 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-sm">
-                        {msg.unread}
-                      </span>
-                    ) : (
-                      <MoreHorizontal size={16} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })
-        ) : (
-          <div className="p-10 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mb-4">
-              <MessageSquare size={32} />
+      <div className="bg-white/70 backdrop-blur-xl rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/80 overflow-hidden">
+        {messages.map((msg, index) => (
+          <motion.div 
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
+            key={msg.id}
+            className="flex items-center gap-4 p-4 border-b border-white/50 last:border-0 hover:bg-white/50 transition-colors cursor-pointer"
+          >
+            <div className="relative">
+              <img src={msg.avatar} alt={msg.sender} className="w-14 h-14 rounded-full object-cover border border-slate-200" />
+              {msg.unread > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">{msg.unread}</span>}
             </div>
-            <h3 className="text-lg font-black text-slate-900 mb-1">No Messages Found</h3>
-            <p className="text-sm font-medium text-slate-500">Try adjusting your search to find what you're looking for.</p>
-          </div>
-        )}
+            <div className="flex-1 min-w-0">
+              <div className="flex justify-between items-center mb-1">
+                <h4 className={`font-bold text-sm truncate ${msg.unread > 0 ? 'text-slate-900' : 'text-slate-500'}`}>{msg.sender}</h4>
+                <span className={`text-[10px] shrink-0 ${msg.unread > 0 ? 'text-brand-600 font-bold' : 'text-slate-500'}`}>{msg.time}</span>
+              </div>
+              <p className={`text-xs truncate ${msg.unread > 0 ? 'font-bold text-slate-900' : 'text-slate-500'}`}>{msg.preview}</p>
+            </div>
+          </motion.div>
+        ))}
       </div>
       
     </PageTransition>
   );
 };
-
