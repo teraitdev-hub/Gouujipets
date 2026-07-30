@@ -168,30 +168,33 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
     debounceRef.current = setTimeout(async () => {
       setIsSuggesting(true);
-      if (mapAvailable && window.google && window.google.maps && window.google.maps.places && window.google.maps.places.AutocompleteService) {
+      if (mapAvailable && window.google && window.google.maps) {
         try {
-          const service = new window.google.maps.places.AutocompleteService();
-          service.getPlacePredictions(
-            { input: val, componentRestrictions: { country: 'in' } },
-            (predictions, status) => {
-              setIsSuggesting(false);
-              if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
-                setSuggestions(
-                  predictions.map(p => ({
-                    display_name: p.description,
-                    place_id: p.place_id,
-                    main_text: p.structured_formatting?.main_text || p.description.split(',')[0],
-                    secondary_text: p.structured_formatting?.secondary_text || p.description,
+          const placesLib = await window.google.maps.importLibrary("places") as any;
+          if (placesLib.AutocompleteSuggestion) {
+            const request = { input: val, includedRegionCodes: ['in'] };
+            const { suggestions } = await placesLib.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+            setIsSuggesting(false);
+            if (suggestions && suggestions.length > 0) {
+              setSuggestions(
+                suggestions.map((s: any) => {
+                  const p = s.placePrediction;
+                  return {
+                    display_name: p.text.text,
+                    place_id: p.placeId,
+                    main_text: p.mainText.text,
+                    secondary_text: p.secondaryText?.text || '',
                     source: 'google',
-                  }))
-                );
-                setShowSuggestions(true);
-              }
+                  };
+                })
+              );
+              setShowSuggestions(true);
+              return;
             }
-          );
-          return;
+          }
         } catch (e) {
-          console.warn('Google Autocomplete error:', e);
+          setIsSuggesting(false);
+          console.warn('Google New Autocomplete error:', e);
         }
       }
 
@@ -219,21 +222,32 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
   const handleSuggestionPick = async (s: Suggestion) => {
     setShowSuggestions(false);
-    setSearchQuery('');
-    
-    if (s.source === 'google' && s.place_id && mapAvailable && window.google && window.google.maps && window.google.maps.Geocoder) {
+    if (s.source === 'google' && s.place_id && mapAvailable && window.google && window.google.maps) {
       try {
-        const geocoder = new window.google.maps.Geocoder();
-        const response = await geocoder.geocode({ placeId: s.place_id });
-        if (response.results && response.results.length > 0) {
-          const res = response.results[0];
-          const lat = res.geometry.location.lat();
-          const lng = res.geometry.location.lng();
-          await applyLocation(lat, lng, 17);
-          return;
+        const placesLib = await window.google.maps.importLibrary("places") as any;
+        if (placesLib.Place) {
+          const place = new placesLib.Place({ id: s.place_id });
+          await place.fetchFields({ fields: ['location', 'displayName', 'formattedAddress', 'addressComponents'] });
+          if (place.location) {
+            const lat = place.location.lat();
+            const lng = place.location.lng();
+            
+            let city = '', state = '', pin = '';
+            if (place.addressComponents) {
+              for (const comp of place.addressComponents) {
+                const types = comp.types;
+                if (types.includes('locality')) city = comp.longText;
+                else if (types.includes('administrative_area_level_1')) state = comp.longText;
+                else if (types.includes('postal_code')) pin = comp.longText;
+              }
+            }
+            const address = place.formattedAddress || place.displayName;
+            await applyLocation(lat, lng, 17);
+            return;
+          }
         }
-      } catch (e) {
-        console.warn('Google Place geocode error:', e);
+      } catch (err) {
+        console.warn('Google New Places fetch error:', err);
       }
     }
 

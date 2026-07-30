@@ -14,7 +14,7 @@ const MapContext = createContext<MapContextType>({
   authFailed: false,
 });
 
-const libraries: ("places" | "geometry" | "drawing" | "visualization")[] = ["places", "geometry"];
+const libraries: ("geometry" | "drawing" | "visualization")[] = ["geometry"];
 
 export const MapProvider = ({ children }: { children: ReactNode }) => {
   const [authFailed, setAuthFailed] = useState(false);
