@@ -994,6 +994,7 @@ export const Checkout = () => {
         </motion.div>
       )}
       </AnimatePresence>
+        </div>
       </div>
 
       <AddPetModal
