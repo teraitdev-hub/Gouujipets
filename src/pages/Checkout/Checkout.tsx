@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { PageTransition } from "../../components/layout/PageTransition";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Calendar, CreditCard, ShieldCheck, CheckCircle,
   Clock, Tag, IndianRupee, AlertCircle, Loader2, Check
