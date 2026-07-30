@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Search, MapPin, User, Sparkles, Menu, X, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 
 export const PublicNavbar = () => {
   const { isAuthenticated, openLoginModal, user } = useAuthStore();
@@ -10,6 +10,17 @@ export const PublicNavbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("Bangalore / Near Me");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = scrollY.getPrevious() ?? 0;
+    if (latest > previous && latest > 150) {
+      setHidden(true);
+    } else {
+      setHidden(false);
+    }
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +39,15 @@ export const PublicNavbar = () => {
   ];
 
   return (
-    <header className="bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 shadow-sm font-sans">
+    <motion.header
+      variants={{
+        visible: { y: 0 },
+        hidden: { y: "-100%" },
+      }}
+      animate={hidden ? "hidden" : "visible"}
+      transition={{ duration: 0.35, ease: "easeInOut" }}
+      className="bg-white/85 backdrop-blur-2xl border-b border-slate-200/60 sticky top-0 z-[60] shadow-[0_4px_24px_rgba(0,0,0,0.02)] font-sans"
+    >
       {/* Main Header Row */}
       <div className="px-4 md:px-8 py-3 flex items-center justify-between gap-4 max-w-7xl mx-auto">
         
@@ -206,7 +225,7 @@ export const PublicNavbar = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 };
 

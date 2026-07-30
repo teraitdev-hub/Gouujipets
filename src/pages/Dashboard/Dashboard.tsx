@@ -156,51 +156,51 @@ export const Dashboard = () => {
   };
 
   return (
-    <PageTransition className="pb-24 max-w-7xl mx-auto space-y-5 font-sans">
+    <PageTransition className="pb-24 max-w-6xl mx-auto space-y-6 font-sans px-4 sm:px-6 pt-6">
       
-      {/* 1. Amazon / VERIFIED Top Status Bar & Active Pet Selector in Light Pink & Purple Theme */}
-      <div className="bg-white border border-purple-100 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+      {/* 1. Header Profile & Active Pet Selector */}
+      <div className="bg-white border border-slate-200/60 rounded-[32px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
           <div className="relative shrink-0">
             {primaryPet ? (
               <img 
                 src={primaryPet.photo_url || primaryPet.avatar_url || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=200"} 
                 alt={primaryPet.name} 
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border-2 border-purple-500 shadow-sm"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-[20px] object-cover border-4 border-slate-50 shadow-sm"
               />
             ) : (
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-lg shadow-sm">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[20px] bg-slate-900 text-white flex items-center justify-center font-black text-3xl shadow-sm">
                 🐶
               </div>
             )}
-            <span className="absolute -bottom-1 -right-1 bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-xs">
+            <span className="absolute -bottom-2 -right-2 bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-md uppercase tracking-wider border border-white">
               ACTIVE
             </span>
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
                 {primaryPet ? `${primaryPet.name}'s Dashboard` : `Welcome, ${user?.name || "Pet Parent"} 👋`}
               </h2>
               {primaryPet && (
-                <span className="bg-purple-100 text-purple-800 text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-0.5 border border-purple-200">
-                  <ShieldCheck size={12} className="text-purple-600" /> 100% Verified
+                <span className="bg-emerald-50 text-emerald-700 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-100 uppercase tracking-wider">
+                  <ShieldCheck size={12} className="text-emerald-500" /> Verified
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-sm text-slate-500 font-semibold">
               {primaryPet ? `${primaryPet.breed} • ${primaryPet.age} Yrs • ${primaryPet.gender || 'Pet'}` : "Select or add a pet to get personalized partner matches and live care tracking."}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-purple-100">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-4 sm:pt-0 border-slate-100">
           {pets && pets.length > 1 && (
             <div className="relative">
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 border border-purple-200/60"
+                className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl transition-all flex items-center gap-2 border border-slate-200"
               >
                 <span>Switch Pet ({pets.length})</span>
                 <ChevronRight size={14} className={`transition-transform ${isDropdownOpen ? 'rotate-90' : ''}`} />
@@ -212,18 +212,18 @@ export const Dashboard = () => {
                     initial={{ opacity: 0, y: 5 }} 
                     animate={{ opacity: 1, y: 0 }} 
                     exit={{ opacity: 0, y: 5 }}
-                    className="absolute right-0 top-11 bg-white border border-purple-200 rounded-xl shadow-xl p-2 w-56 z-50 space-y-1"
+                    className="absolute right-0 top-12 bg-white border border-slate-200/60 rounded-2xl shadow-xl p-2 w-56 z-50 space-y-1"
                   >
                     {pets.map((p: any) => (
                       <button
                         key={p.id}
                         onClick={() => { setActivePetId(p.id); setIsDropdownOpen(false); }}
-                        className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all ${
-                          p.id === primaryPet?.id ? 'bg-purple-100 text-purple-900 font-black' : 'hover:bg-purple-50 text-slate-800'
+                        className={`w-full text-left px-4 py-3 rounded-xl flex items-center gap-3 text-sm transition-all ${
+                          p.id === primaryPet?.id ? 'bg-slate-50 text-slate-900 font-black' : 'hover:bg-slate-50 text-slate-600 font-semibold'
                         }`}
                       >
-                        <span className="w-2 h-2 rounded-full bg-purple-600 shrink-0" />
-                        <span className="truncate">{p.name} ({p.breed})</span>
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${p.id === primaryPet?.id ? 'bg-slate-900' : 'bg-slate-300'}`} />
+                        <span className="truncate">{p.name}</span>
                       </button>
                     ))}
                   </motion.div>
@@ -234,9 +234,9 @@ export const Dashboard = () => {
 
           <button
             onClick={() => { setPetToEdit(null); setIsAddPetModalOpen(true); }}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-xl transition-all flex items-center gap-1.5 shadow-md active:scale-95"
+            className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl transition-all flex items-center gap-2 shadow-[0_8px_30px_rgb(0,0,0,0.06)] active:scale-95"
           >
-            <Plus size={14} />
+            <Plus size={16} />
             <span>Add Pet</span>
           </button>
         </div>
@@ -247,47 +247,47 @@ export const Dashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 font-sans"
+          className="bg-white border border-slate-200/60 rounded-[32px] p-5 sm:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 font-sans"
         >
           {/* Left: Overall Status */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                 <path className="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
                 <motion.path
                   initial={{ strokeDasharray: "0, 100" }}
                   animate={{ strokeDasharray: `${petCompletion.percentage}, 100` }}
                   transition={{ duration: 1, ease: "easeOut" }}
-                  className={petCompletion.percentage === 100 ? "text-emerald-500" : "text-indigo-600"}
+                  className={petCompletion.percentage === 100 ? "text-emerald-500" : "text-blue-500"}
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"
                 />
               </svg>
-              <span className="absolute text-[11px] font-black text-slate-800">{petCompletion.percentage}%</span>
+              <span className="absolute text-xs font-black text-slate-900">{petCompletion.percentage}%</span>
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
                 Profile Completion
-                {petCompletion.percentage === 100 && <ShieldCheck size={14} className="text-emerald-500" />}
+                {petCompletion.percentage === 100 && <ShieldCheck size={16} className="text-emerald-500" />}
               </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 mt-1 font-medium">
                 {petCompletion.percentage === 100 ? "Fully prepared for check-ins." : "Missing details limit priority care."}
               </p>
             </div>
           </div>
 
           {/* Middle: Mini Category Indicators */}
-          <div className="flex items-center gap-2 sm:gap-4 flex-1 w-full lg:max-w-md px-1 sm:px-4 lg:border-l lg:border-slate-100">
+          <div className="flex items-center gap-3 sm:gap-5 flex-1 w-full lg:max-w-md px-1 sm:px-6 lg:border-l lg:border-slate-100">
             {(["basic", "health", "care", "security"] as const).map((cat) => {
               const catFields = petCompletion.fields.filter((f) => f.category === cat);
               const isComplete = catFields.filter((f) => f.filled).length === catFields.length;
               const catLabel = { basic: "Basic", health: "Medical", care: "Diet", security: "Safety" }[cat];
               return (
-                <div key={cat} className="flex-1 flex flex-col gap-1">
-                  <span className={`text-[9px] font-bold uppercase tracking-wider ${isComplete ? 'text-slate-700' : 'text-slate-400'}`}>
+                <div key={cat} className="flex-1 flex flex-col gap-1.5">
+                  <span className={`text-[10px] font-black uppercase tracking-widest ${isComplete ? 'text-slate-900' : 'text-slate-400'}`}>
                     {catLabel}
                   </span>
-                  <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
                     <div className={`h-full w-full rounded-full transition-all duration-700 ${isComplete ? "bg-emerald-500" : "bg-slate-200"}`} />
                   </div>
                 </div>
@@ -296,20 +296,20 @@ export const Dashboard = () => {
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-2 shrink-0 w-full lg:w-auto mt-2 lg:mt-0">
+          <div className="flex items-center gap-3 shrink-0 w-full lg:w-auto mt-4 lg:mt-0">
             <button
               onClick={() => { setPetToEdit(primaryPet); setIsAddPetModalOpen(true); }}
-              className={`flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
+              className={`flex-1 lg:flex-none px-6 py-3 rounded-xl text-xs font-black transition-all ${
                 petCompletion.percentage === 100
-                  ? "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100"
-                  : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
+                  ? "bg-slate-50 text-slate-900 border border-slate-200 hover:bg-slate-100"
+                  : "bg-blue-600 text-white hover:bg-blue-700 shadow-md"
               }`}
             >
-              {petCompletion.percentage === 100 ? "Update" : "Complete"}
+              {petCompletion.percentage === 100 ? "Update Details" : "Complete Profile"}
             </button>
             <button
               onClick={() => navigate(`/pet/${primaryPet.id}`)}
-              className="px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold transition-colors shadow-sm shrink-0"
+              className="px-6 py-3 bg-white border border-slate-200 text-slate-900 hover:bg-slate-50 rounded-xl text-xs font-black transition-all shadow-sm shrink-0"
             >
               View Profile
             </button>
@@ -319,205 +319,206 @@ export const Dashboard = () => {
 
       {/* Upcoming Vaccinations Alert Card */}
       {primaryPet && (
-        <div className="bg-white border border-purple-100 rounded-2xl p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-purple-100">
-            <Syringe className="text-purple-650 shrink-0" size={18} />
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-              Upcoming Vaccinations & Reminders
+        <div className="bg-white border border-slate-200/60 rounded-[32px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <div className="flex items-center gap-3 mb-4 pb-4 border-b border-slate-100">
+            <Syringe className="text-rose-500 shrink-0" size={20} />
+            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">
+              Upcoming Vaccinations
             </h3>
           </div>
           {upcomingVaccines.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {upcomingVaccines.map((vax) => {
                 const diffTime = new Date(vax.date).getTime() - new Date().getTime();
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 return (
-                  <div key={vax.id} className="p-3.5 bg-purple-50/40 border border-purple-200/50 rounded-xl flex items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
+                  <div key={vax.id} className="p-4 bg-rose-50/50 border border-rose-100/50 rounded-2xl flex items-center justify-between gap-4 text-sm">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-white text-rose-500 flex items-center justify-center font-bold shadow-sm">
                         💉
                       </div>
                       <div>
-                        <p className="font-bold text-slate-900">{vax.title || vax.name}</p>
-                        <p className="text-[10px] text-slate-500">
+                        <p className="font-black text-slate-900">{vax.title || vax.name}</p>
+                        <p className="text-xs font-bold text-slate-500 mt-0.5">
                           Due on {new Date(vax.date).toLocaleDateString("en-IN")} ({diffDays > 0 ? `in ${diffDays} days` : 'Overdue!'})
                         </p>
                       </div>
                     </div>
                     <button
                       onClick={() => navigate('/vaccinations')}
-                      className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-black text-[10px] rounded-lg transition-all shadow-2xs active:scale-95"
+                      className="px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-rose-500/20 active:scale-95"
                     >
-                      Update Record
+                      Update
                     </button>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="text-center py-4 text-xs font-medium text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-              🎉 No upcoming vaccinations. All immunizations up to date!
+            <div className="text-center py-6 text-sm font-semibold text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              🎉 All immunizations are up to date!
             </div>
           )}
         </div>
       )}
 
-      {/* 2. Amazon Lightning Deals Strip in Light Purple Theme */}
-      <div className="bg-purple-600 text-white p-3 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-black">
-        <div className="flex items-center gap-2">
-          <span className="bg-white text-purple-900 px-2 py-0.5 rounded uppercase tracking-wider text-[10px] animate-pulse shrink-0 font-black shadow-2xs">
-            ⚡ TODAY'S LIGHTNING DEAL
-          </span>
-          <span>Flat 20% OFF Boarding & Daycare Stays + Free First Vet Checkup</span>
-        </div>
-        <button 
-          onClick={() => navigate("/boarding")}
-          className="bg-white hover:bg-purple-50 text-purple-900 px-3.5 py-1 rounded-lg text-[11px] font-black transition-all shrink-0 shadow-xs"
-        >
-          Claim Coupon: GOUUJI20 →
-        </button>
-      </div>
-
-      {/* Gouuji VIP Subscription Plans Strip */}
-      <div className="bg-purple-950 text-white p-4 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-purple-800">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-lg shrink-0 shadow-sm">
-            👑
+      {/* 2. Promo / VIP Banners */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Lightning Deals Strip */}
+        <div className="bg-gradient-to-br from-amber-400 to-amber-500 text-slate-900 p-6 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col justify-between items-start gap-4 h-full relative overflow-hidden">
+          <Sparkles className="absolute -right-4 -top-4 text-amber-300 opacity-50 w-24 h-24" />
+          <div className="relative z-10">
+            <span className="bg-slate-900 text-white px-3 py-1 rounded-full uppercase tracking-widest text-[10px] animate-pulse font-black shadow-sm mb-3 inline-block">
+              ⚡ TODAY'S DEAL
+            </span>
+            <h3 className="font-black text-xl leading-tight">Flat 20% OFF Boarding & Free First Vet Checkup</h3>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm sm:text-base font-black text-white leading-tight">Gouuji VIP Subscription Plans</h3>
-              <span className="bg-purple-200 text-purple-950 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Save 20%</span>
+          <button 
+            onClick={() => navigate("/boarding")}
+            className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl text-xs font-black transition-all shadow-md relative z-10 mt-auto"
+          >
+            Claim: GOUUJI20
+          </button>
+        </div>
+
+        {/* Gouuji VIP Subscription Plans */}
+        <div className="bg-slate-900 text-white p-6 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col justify-between items-start gap-4 h-full relative overflow-hidden">
+          <div className="absolute -right-4 -bottom-4 text-white/5 text-9xl">👑</div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="text-xl font-black text-white leading-tight">Gouuji VIP</h3>
+              <span className="bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-widest">Save 20%</span>
             </div>
-            <p className="text-xs text-purple-200 font-medium mt-0.5">
+            <p className="text-sm text-slate-400 font-semibold max-w-[280px]">
               Get priority bookings, vet discounts & a dedicated personal care manager.
             </p>
           </div>
+          <button
+            onClick={() => navigate("/membership")}
+            className="bg-white hover:bg-slate-100 text-slate-900 font-black px-6 py-3 rounded-xl text-xs transition-all shadow-sm flex items-center gap-2 relative z-10 mt-auto"
+          >
+            <span>View Subscriptions</span>
+            <ChevronRight size={16} />
+          </button>
         </div>
-        <button
-          onClick={() => navigate("/membership")}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-black px-4 py-2 rounded-xl text-xs transition-all shrink-0 shadow-sm flex items-center gap-1.5"
-        >
-          <span>View Subscription Tiers</span>
-          <ChevronRight size={14} />
-        </button>
       </div>
 
-      {/* 3. VERIFIED 10 Assured Mega Category Grid in Light Purple */}
-      <div className="bg-white border border-purple-200 rounded-2xl p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-3 pb-2 border-b border-purple-100">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-ping" />
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-              Explore VERIFIED CARE™ Categories
+      {/* 3. VERIFIED 10 Assured Mega Category Grid */}
+      <div className="bg-white border border-slate-200/60 rounded-[32px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">
+              Explore Categories
             </h3>
           </div>
-          <span className="text-[11px] font-bold text-slate-400">Upfront Rates • Zero Hidden Charges</span>
+          <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Upfront Rates • Zero Hidden Charges</span>
         </div>
 
-        <div className="grid grid-cols-3 min-[400px]:grid-cols-4 sm:grid-cols-5 lg:grid-cols-10 gap-2 text-center">
+        <div className="grid grid-cols-3 min-[400px]:grid-cols-4 sm:grid-cols-5 lg:grid-cols-9 gap-3 text-center">
           {[
             { id: "boarding", icon: "🏨", label: "Boarding", badge: "TOP" },
-            { id: "grooming", icon: "🛁", label: "Grooming", badge: "20% OFF" },
+            { id: "grooming", icon: "🛁", label: "Grooming", badge: "DEALS" },
             { id: "daycare", icon: "🏡", label: "Daycare", badge: "PLAY" },
             { id: "walking", icon: "🐕", label: "Walking", badge: "GPS" },
             { id: "swimming", icon: "🏊", label: "Pool", badge: "HEATED" },
-            { id: "shop", icon: "🛍️", label: "Shop", badge: "DEALS" },
-            { id: "training", icon: "🎓", label: "Training", badge: "AGILITY" },
-            { id: "taxi", icon: "🚕", label: "Pet Cab", badge: "AC" },
+            { id: "shop", icon: "🛍️", label: "Shop", badge: "" },
+            { id: "training", icon: "🎓", label: "Training", badge: "" },
+            { id: "taxi", icon: "🚕", label: "Pet Cab", badge: "" },
             { id: "sitting", icon: "👨‍👩‍👧", label: "Sitting", badge: "HOME" }
           ].map((cat) => (
             <div
               key={cat.id}
               onClick={() => navigate(`/boarding?type=${cat.id}`)}
-              className="bg-purple-50 hover:bg-purple-100 border border-purple-200 hover:border-purple-400 rounded-xl p-2.5 cursor-pointer transition-all flex flex-col items-center justify-between group relative shadow-2xs hover:shadow-md"
+              className="bg-slate-50 border border-slate-100 hover:border-slate-300 rounded-2xl p-4 cursor-pointer transition-all flex flex-col items-center justify-between group relative shadow-sm hover:shadow-md"
             >
-              <span className="absolute -top-2 bg-purple-600 text-white text-[8px] font-black px-1.5 py-0.2 rounded shadow-xs">
-                {cat.badge}
-              </span>
-              <span className="text-xl sm:text-2xl my-1 group-hover:scale-110 transition-transform">{cat.icon}</span>
-              <span className="text-[10px] sm:text-[11px] font-black text-slate-800 group-hover:text-purple-700 truncate w-full">{cat.label}</span>
+              {cat.badge && (
+                <span className="absolute -top-2.5 bg-slate-900 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">
+                  {cat.badge}
+                </span>
+              )}
+              <span className="text-3xl my-2 group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
+              <span className="text-[11px] font-black text-slate-700 group-hover:text-slate-900 truncate w-full tracking-wide">{cat.label}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* 5. Amazon Orders Table: Live Stays & Upcoming Bookings in Purple/Pink Theme */}
-      <div className="bg-white border border-purple-100 rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-purple-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center font-black text-sm">
+      {/* 5. Orders Table: Live Stays & Upcoming Bookings */}
+      <div className="bg-white border border-slate-200/60 rounded-[32px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-lg shadow-sm">
               📋
             </div>
             <div>
-              <h3 className="text-sm font-black text-slate-900 leading-none">Your Orders & Active Stays</h3>
-              <p className="text-[11px] text-slate-500 font-medium mt-0.5">Track real-time check-ins, invoice bills, and health logs</p>
+              <h3 className="text-lg font-black text-slate-900 leading-none mb-1">Your Orders & Active Stays</h3>
+              <p className="text-xs text-slate-500 font-semibold">Track real-time check-ins, invoice bills, and health logs</p>
             </div>
           </div>
-          <span className="bg-purple-100 text-purple-800 font-bold text-xs px-3 py-1 rounded-full border border-purple-200">
+          <span className="bg-slate-100 text-slate-900 font-black text-xs px-4 py-2 rounded-xl border border-slate-200">
             {bookings.length} Order{bookings.length !== 1 ? 's' : ''}
           </span>
         </div>
 
         {bookings.length > 0 ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {bookings.map((booking: any) => {
               const status = booking.status || 'pending';
               const statusCfgMap: Record<string, any> = {
-                pending:     { label: 'Pending Confirmation', dot: 'bg-purple-500',   badge: 'bg-purple-50 text-purple-800 border-purple-200' },
-                confirmed:   { label: 'Confirmed & Reserved', dot: 'bg-purple-600',  badge: 'bg-purple-50 text-purple-900 border-purple-300 font-black' },
-                checked_in:  { label: '🟣 LIVE IN CARE NOW',   dot: 'bg-purple-700 animate-ping', badge: 'bg-purple-100 text-purple-950 border-purple-400 font-black' },
-                completed:   { label: 'Stay Completed',       dot: 'bg-purple-400',   badge: 'bg-purple-50/50 text-purple-700 border-purple-200' },
-                cancelled:   { label: 'Cancelled Order',      dot: 'bg-purple-800',    badge: 'bg-purple-100 text-purple-900 border-purple-300' },
+                pending:     { label: 'Pending Confirmation', dot: 'bg-amber-500',   badge: 'bg-amber-50 text-amber-700 border-amber-200' },
+                confirmed:   { label: 'Confirmed & Reserved', dot: 'bg-blue-500',  badge: 'bg-blue-50 text-blue-800 border-blue-200 font-black' },
+                checked_in:  { label: 'LIVE IN CARE NOW',   dot: 'bg-emerald-500 animate-ping', badge: 'bg-emerald-50 text-emerald-800 border-emerald-200 font-black' },
+                completed:   { label: 'Stay Completed',       dot: 'bg-slate-400',   badge: 'bg-slate-100 text-slate-600 border-slate-200' },
+                cancelled:   { label: 'Cancelled Order',      dot: 'bg-rose-500',    badge: 'bg-rose-50 text-rose-700 border-rose-200' },
               };
-              const statusCfg = statusCfgMap[status] || { label: status, dot: 'bg-purple-400', badge: 'bg-purple-50 text-purple-700 border-purple-200' };
+              const statusCfg = statusCfgMap[status] || { label: status, dot: 'bg-slate-400', badge: 'bg-slate-50 text-slate-700 border-slate-200' };
               const totalCost = (Number(booking.total_amount) || 0) + (Number(booking.extra_expenses) || 0);
 
               return (
-                <div key={booking.id} className="border border-purple-200 rounded-xl p-4 bg-purple-50/20 hover:bg-white transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 border border-purple-200 flex items-center justify-center font-black text-lg shrink-0">
+                <div key={booking.id} className="border border-slate-200/80 rounded-2xl p-5 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm hover:shadow-md">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-[16px] bg-white border border-slate-200 flex items-center justify-center font-black text-xl shrink-0 shadow-sm">
                       🏨
                     </div>
                     <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="text-xs font-black text-slate-900">
+                      <div className="flex flex-wrap items-center gap-3 mb-2">
+                        <span className="text-base font-black text-slate-900">
                           {booking.businesses?.name || "Luxury Pet Care Partner"}
                         </span>
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${statusCfg.badge}`}>
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-widest ${statusCfg.badge}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
                           {statusCfg.label}
                         </span>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
-                        <span className="flex items-center gap-1">
-                          <Calendar size={13} className="text-purple-400" />
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 font-semibold">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar size={16} className="text-slate-400" />
                           {new Date(booking.check_in || Date.now()).toLocaleDateString()} → {new Date(booking.check_out || Date.now()).toLocaleDateString()}
                         </span>
-                        <span>•</span>
-                        <span className="font-bold text-slate-700">Pet: {primaryPet?.name || "Pet"}</span>
+                        <span className="text-slate-300">•</span>
+                        <span className="text-slate-700">Pet: {primaryPet?.name || "Pet"}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 pt-3 md:pt-0 border-purple-100">
+                  <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 pt-4 md:pt-0 border-slate-200/60 w-full md:w-auto">
                     <div className="text-left md:text-right">
-                      <span className="text-[10px] font-bold text-slate-400 block uppercase">Order Total</span>
-                      <span className="text-sm font-black text-slate-900">₹{totalCost}</span>
+                      <span className="text-[10px] font-black text-slate-400 block uppercase tracking-widest mb-1">Total</span>
+                      <span className="text-xl font-black text-slate-900">₹{totalCost}</span>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 justify-end mt-2 md:mt-0">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => { setSelectedBookingForEdit(booking); setIsEditModalOpen(true); }}
-                        className="px-3.5 py-2 bg-white hover:bg-purple-50 border border-purple-300 text-purple-900 font-bold text-xs rounded-xl transition-all shadow-2xs"
+                        className="px-4 py-2.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-900 font-black text-xs rounded-xl transition-all shadow-sm active:scale-95"
                       >
-                        Manage / View
+                        Manage
                       </button>
                       <button
                         onClick={() => navigate(`/facility/${booking.business_id}`)}
-                        className="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm"
+                        className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-slate-900/10 active:scale-95"
                       >
-                        View Center
+                        View
                       </button>
                     </div>
                   </div>
@@ -526,20 +527,20 @@ export const Dashboard = () => {
             })}
           </div>
         ) : (
-          <div className="text-center py-10 bg-purple-50/30 rounded-xl border border-dashed border-purple-200">
-            <div className="w-12 h-12 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center mx-auto mb-3 text-xl font-black">
+          <div className="text-center py-12 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-4 text-2xl font-black shadow-sm">
               📦
             </div>
-            <h4 className="text-sm font-black text-slate-900 mb-1">No Active Bookings or Orders Yet</h4>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-              Explore our verified local directory above to book instant AC stays, grooming sessions, or emergency checkups.
+            <h4 className="text-lg font-black text-slate-900 mb-2">No Active Bookings</h4>
+            <p className="text-sm text-slate-500 font-medium max-w-md mx-auto mb-6">
+              Explore our verified local directory to book premium boarding, grooming, or emergency checkups.
             </p>
             <button
               onClick={() => navigate("/boarding")}
-              className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-xl transition-all shadow-md inline-flex items-center gap-1.5"
+              className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-black text-sm rounded-xl transition-all shadow-lg inline-flex items-center gap-2 active:scale-95"
             >
-              <span>Explore Verified Directory</span>
-              <ChevronRight size={14} />
+              <span>Explore Directory</span>
+              <ChevronRight size={16} />
             </button>
           </div>
         )}

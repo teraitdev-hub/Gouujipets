@@ -9,7 +9,8 @@ import { collection, addDoc, doc, setDoc, getDocs, query, where, limit, updateDo
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
 import { checkPasswordStrength } from "../../utils/security";
-import { GoogleMap, useLoadScript, Marker, Autocomplete } from "@react-google-maps/api";
+import { GoogleMap, Marker, Autocomplete } from "@react-google-maps/api";
+import { useMap } from "../../context/MapContext";
 
 const libraries: ("places")[] = ["places"];
 
@@ -35,10 +36,8 @@ export const PartnerLogin = () => {
 
   const [mapLocation, setMapLocation] = useState({ lat: 20.5937, lng: 78.9629 });
 
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
-    libraries,
-  });
+  const { isLoaded, loadError, authFailed } = useMap();
+  const mapAvailable = isLoaded && !loadError && !authFailed;
 
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
 
@@ -94,7 +93,7 @@ export const PartnerLogin = () => {
       const bizData = existingBizSnap.docs[0].data();
       if (bizData.status === "pending") {
         await signOut(auth);
-        throw new Error("Your registration is pending confirmation from the Admin. Once approved, you can log in through the notification link!");
+        throw new Error("Your registration is pending confirmation from the Admin. After approval you will get a mail, follow that mail to login to your portal.");
       } else if (bizData.status === "rejected" || bizData.status === "suspended") {
         await signOut(auth);
         throw new Error(`Your account has been ${bizData.status}. Please contact support.`);
@@ -220,7 +219,7 @@ export const PartnerLogin = () => {
             const pendingBiz = bizList.find(b => b.status === "pending");
             await signOut(auth);
             if (pendingBiz) {
-              setError("Your registration is still pending Admin approval. You will receive a notification once approved.");
+              setError("Your registration is still pending Admin approval. After approval you will get a mail, follow that mail to login to your portal.");
             } else {
               const statusStr = bizList[0].status || "pending";
               setError(`Your account has been ${statusStr}. Please contact support.`);
@@ -721,7 +720,7 @@ export const PartnerLogin = () => {
                   <div className="pt-2">
                     <label className="block text-xs font-bold text-slate-600 uppercase mb-2">Complete Address</label>
                     <div className="space-y-3">
-                      {isLoaded ? (
+                      {mapAvailable ? (
                         <Autocomplete
                           onLoad={(ac) => setAutocomplete(ac)}
                           onPlaceChanged={onPlaceChanged}
@@ -773,7 +772,7 @@ export const PartnerLogin = () => {
                       />
                     </div>
                     
-                    {isLoaded && (
+                    {mapAvailable && (
                       <div className="h-48 w-full rounded-xl overflow-hidden border border-slate-200 mt-3 shadow-inner">
                         <GoogleMap
                           mapContainerStyle={{ width: '100%', height: '100%' }}
@@ -887,13 +886,13 @@ export const PartnerLogin = () => {
             </div>
             <h3 className="text-2xl font-black text-slate-900 mb-2">Registration Submitted! 🎉</h3>
             <p className="text-slate-600 text-sm font-medium leading-relaxed mb-6">
-              Your business and facility registration has been submitted to the Admin for verification. Once the admin approves your account, you will receive an approval notification link to log in to your Partner Dashboard.
+              Your business and facility registration has been submitted to the Admin for verification. After approval you will get a mail, follow that mail to login to your portal.
             </p>
             <button
               onClick={() => {
                 setShowApprovalModal(false);
                 setIsLogin(true);
-                setSuccessMsg("Registration successful! Once approved by the Admin, you can log in below.");
+                setSuccessMsg("Registration successful! After approval you will get a mail, follow that mail to login to your portal.");
               }}
               className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm rounded-2xl shadow-lg shadow-violet-500/20 transition-all"
             >

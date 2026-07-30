@@ -23,6 +23,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   const [address, setAddress] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const onLoad = useCallback((autocomplete: google.maps.places.Autocomplete) => {
     autocompleteRef.current = autocomplete;
@@ -38,8 +39,10 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         
         setMapCenter(newPos);
         setMarkerPosition(newPos);
-        setAddress(place.formatted_address || place.name || "");
-        onLocationSelect({ lat, lng, address: place.formatted_address || place.name || "" });
+        const newAddress = place.formatted_address || place.name || "";
+        setAddress(newAddress);
+        if (inputRef.current) inputRef.current.value = newAddress;
+        onLocationSelect({ lat, lng, address: newAddress });
       }
     }
   };
@@ -50,10 +53,12 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
       if (status === "OK" && results && results[0]) {
         const formatted = results[0].formatted_address;
         setAddress(formatted);
+        if (inputRef.current) inputRef.current.value = formatted;
         onLocationSelect({ lat, lng, address: formatted });
       } else {
         const fallback = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
         setAddress(fallback);
+        if (inputRef.current) inputRef.current.value = fallback;
         onLocationSelect({ lat, lng, address: fallback });
       }
     });
@@ -141,18 +146,19 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     <div className="flex flex-col gap-4 relative w-full font-sans">
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 w-11/12 max-w-md flex gap-2">
         <div className="flex-1">
-          <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged}>
-            <div className="relative flex items-center">
-              <Search className="absolute left-3 text-gray-500" size={18} />
+          <div className="relative flex items-center w-full">
+            <Search className="absolute left-3 text-gray-500 z-10 pointer-events-none" size={18} />
+            <Autocomplete onLoad={onLoad} onPlaceChanged={onPlaceChanged} className="w-full">
               <input
+                ref={inputRef}
                 type="text"
                 placeholder="Search location..."
                 className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white/95 backdrop-blur-md shadow-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-600/50 text-sm text-gray-800"
-                value={address}
+                defaultValue={address}
                 onChange={(e) => setAddress(e.target.value)}
               />
-            </div>
-          </Autocomplete>
+            </Autocomplete>
+          </div>
         </div>
 
         <button

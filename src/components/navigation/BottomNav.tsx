@@ -25,33 +25,39 @@ export const BottomNav = () => {
     { name: "Account", path: "/profile", icon: User },
   ];
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-purple-200 pb-safe z-50 shadow-2xl font-sans">
-      <div className="flex items-center justify-around h-16 px-1">
-        {bottomNavItems.map((item) => (
-          <NavLink
-            key={item.name}
-            to={item.path}
-            end={item.path === "/"}
-            className={({ isActive }) =>
-              clsx(
-                "flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-all py-1",
-                isActive 
-                  ? "text-purple-700 font-black scale-105" 
-                  : "text-slate-400 hover:text-purple-600 font-medium"
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <item.icon size={19} className={isActive ? "stroke-[2.5]" : "stroke-[1.5]"} />
-                <span className="text-[10px] leading-tight truncate px-0.5">{item.name}</span>
-                {isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-600 mt-0.5" />
-                )}
-              </>
-            )}
-          </NavLink>
-        ))}
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-[100] pb-safe font-sans">
+      <div className="bg-white/85 backdrop-blur-2xl border-t border-slate-200/60 shadow-[0_-4px_24px_rgba(0,0,0,0.04)]">
+        <div className="flex items-center justify-around h-[68px] px-2 relative">
+          {bottomNavItems.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.path}
+              end={item.path === "/"}
+              className={({ isActive }) =>
+                clsx(
+                  "relative flex flex-col items-center justify-center w-full h-full min-h-[44px] transition-all duration-300",
+                  isActive 
+                    ? "text-primary" 
+                    : "text-slate-400 hover:text-slate-600"
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <div className={clsx("relative flex flex-col items-center justify-center transition-transform duration-300", isActive ? "-translate-y-1" : "")}>
+                    <item.icon size={22} className={clsx(isActive ? "stroke-[2.5]" : "stroke-[1.5]", "transition-all duration-300")} />
+                    <span className={clsx("text-[10px] font-bold tracking-wide transition-all duration-300 mt-1", isActive ? "opacity-100" : "opacity-0 h-0")}>
+                      {item.name}
+                    </span>
+                    {isActive && (
+                      <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                    )}
+                  </div>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
       </div>
     </div>
   );
