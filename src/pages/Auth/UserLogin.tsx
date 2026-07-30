@@ -258,11 +258,11 @@ export const UserLogin = () => {
       </div>
 
       {/* RIGHT SIDE - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative">
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-full max-w-md"
+          className="w-full max-w-md bg-white/60 sm:bg-transparent backdrop-blur-xl sm:backdrop-blur-none p-6 sm:p-0 rounded-[32px] sm:rounded-none border border-slate-200/60 sm:border-transparent shadow-2xl sm:shadow-none"
         >
           {/* Mobile Header (Hidden on Desktop) */}
           <div className="lg:hidden flex flex-col items-center text-center mb-8">
@@ -379,31 +379,39 @@ export const UserLogin = () => {
             )}
 
             <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 transition-colors">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 peer-focus:text-purple-600 transition-colors z-10">
                 <Mail size={20} />
               </div>
               <input 
                 type="text" 
+                id="login_email"
                 placeholder="Email Address or Phone Number"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
+                className="peer w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 pt-6 pb-2 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder-transparent shadow-sm"
                 required
               />
+              <label htmlFor="login_email" className="absolute left-12 top-4 text-sm font-semibold text-slate-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1.5 peer-focus:text-[10px] peer-focus:font-black peer-focus:uppercase peer-focus:tracking-widest peer-focus:text-purple-600 peer-valid:top-1.5 peer-valid:text-[10px] peer-valid:font-black peer-valid:uppercase peer-valid:tracking-widest cursor-text z-0">
+                Email Address or Phone
+              </label>
             </div>
 
             <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 transition-colors">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 peer-focus:text-purple-600 transition-colors z-10">
                 <Lock size={20} />
               </div>
               <input 
                 type="password" 
+                id="login_password"
                 placeholder="Password"
                 value={formData.password}
                 onChange={(e) => setFormData({...formData, password: e.target.value})}
-                className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
+                className="peer w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 pt-6 pb-2 font-bold text-slate-900 outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder-transparent shadow-sm"
                 required
               />
+              <label htmlFor="login_password" className="absolute left-12 top-4 text-sm font-semibold text-slate-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1.5 peer-focus:text-[10px] peer-focus:font-black peer-focus:uppercase peer-focus:tracking-widest peer-focus:text-purple-600 peer-valid:top-1.5 peer-valid:text-[10px] peer-valid:font-black peer-valid:uppercase peer-valid:tracking-widest cursor-text z-0">
+                Password
+              </label>
             </div>
 
             {isLogin && (

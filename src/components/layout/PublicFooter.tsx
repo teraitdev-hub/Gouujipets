@@ -3,14 +3,17 @@ import { Link } from "react-router-dom";
 
 export const PublicFooter = () => {
   return (
-    <footer className="bg-slate-950 text-slate-300 font-sans pt-16 pb-8 border-t border-purple-900/50">
+    <footer className="bg-gradient-to-b from-slate-950 via-[#0c0a1d] to-[#0a0818] text-slate-300 font-sans pt-20 pb-10 border-t border-purple-500/20 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
+        {/* Decorative gradient blobs */}
+        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[140px] pointer-events-none" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           
           {/* Brand Info */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2 text-left group inline-block">
-              <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center font-black text-white text-lg shadow-sm">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-purple-600/30">
                 G
               </div>
               <div className="leading-none">

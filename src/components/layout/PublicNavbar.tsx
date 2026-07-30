@@ -46,7 +46,7 @@ export const PublicNavbar = () => {
       }}
       animate={hidden ? "hidden" : "visible"}
       transition={{ duration: 0.35, ease: "easeInOut" }}
-      className="bg-white/85 backdrop-blur-2xl border-b border-slate-200/60 sticky top-0 z-[60] shadow-[0_4px_24px_rgba(0,0,0,0.02)] font-sans"
+      className="bg-white/70 backdrop-blur-3xl border-b border-white/40 sticky top-0 z-[60] shadow-[0_8px_32px_rgba(0,0,0,0.08)] font-sans"
     >
       {/* Main Header Row */}
       <div className="px-4 md:px-8 py-3 flex items-center justify-between gap-4 max-w-7xl mx-auto">
@@ -56,21 +56,21 @@ export const PublicNavbar = () => {
           onClick={() => navigate("/")}
           className="flex items-center gap-2 text-left group shrink-0"
         >
-          <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center font-black text-white text-lg shadow-sm group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-purple-600/30 group-hover:scale-110 transition-all duration-300">
             G
           </div>
           <div className="leading-none hidden sm:block">
             <span className="text-base font-black text-slate-900 tracking-tight block">
               Gouuji<span className="text-purple-600">Pets</span>
             </span>
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mt-0.5">
-              Verified Care
+            <span className="text-[9px] font-bold text-purple-500 uppercase tracking-widest block mt-0.5">
+              Premium Pet Care
             </span>
           </div>
         </button>
 
         {/* Center: Search & Location (Desktop) */}
-        <div className="hidden lg:flex flex-1 max-w-2xl items-center bg-slate-50 border border-slate-200 rounded-2xl p-1 shadow-inner focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all">
+        <div className="hidden lg:flex flex-1 max-w-2xl items-center bg-white/80 backdrop-blur-xl border border-slate-200/60 rounded-full p-1.5 shadow-sm focus-within:ring-4 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all hover:shadow-md">
           <div className="flex items-center gap-1.5 px-3 border-r border-slate-200 shrink-0 cursor-pointer">
             <MapPin size={14} className="text-purple-600" />
             <select
@@ -96,7 +96,7 @@ export const PublicNavbar = () => {
             />
             <button
               type="submit"
-              className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-xl shadow-sm transition-all ml-2"
+              className="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs rounded-full shadow-md shadow-purple-600/25 transition-all ml-2 hover:shadow-lg hover:scale-105 active:scale-95"
             >
               Search
             </button>
@@ -113,7 +113,7 @@ export const PublicNavbar = () => {
           {!isAuthenticated ? (
             <button
               onClick={openLoginModal}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-black text-xs transition-colors"
+              className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs transition-all shadow-md shadow-purple-600/25 hover:shadow-lg hover:scale-105 active:scale-95"
             >
               <User size={14} className="stroke-[2.5]" />
               <span>Sign In</span>
@@ -125,7 +125,7 @@ export const PublicNavbar = () => {
                 else if (user?.role === 'admin' || user?.role === 'superadmin') navigate("/admin/dashboard");
                 else navigate("/dashboard");
               }}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs transition-colors shadow-sm"
+              className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black text-xs transition-all shadow-md shadow-purple-600/25 hover:shadow-lg hover:scale-105 active:scale-95"
             >
               <User size={14} className="stroke-[2.5]" />
               <span>Dashboard</span>

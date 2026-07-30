@@ -219,7 +219,9 @@ export const FacilityDetails = () => {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 space-y-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-32 lg:pb-12 flex flex-col lg:flex-row gap-10">
+        {/* Main Content Column */}
+        <div className="flex-1 space-y-10">
         
         {/* Title & Quick Action Strip */}
         <div className="bg-white p-6 rounded-[32px] border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -581,10 +583,55 @@ export const FacilityDetails = () => {
             )}
           </div>
         </div>
+        </div>
+
+        {/* Desktop Sticky Booking Sidebar */}
+        <div className="hidden lg:block w-[380px] shrink-0">
+          <div className="sticky top-28 bg-white rounded-[32px] p-8 shadow-[0_20px_60px_-15px_rgb(0,0,0,0.1)] border border-slate-200/60 flex flex-col z-20">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-black uppercase tracking-widest text-slate-500">Starting Price</span>
+              <span className="flex items-center gap-1 text-sm font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">
+                <Star size={14} className="text-amber-500 fill-amber-500" />
+                {facility.rating}
+              </span>
+            </div>
+            
+            <div className="flex items-baseline gap-1.5 mb-6">
+              <span className="font-black text-4xl text-slate-900 tracking-tight">{formatRupee(facility.priceFrom || facility.price_per_night || 999)}</span>
+              <span className="text-slate-500 font-bold text-base">/ night</span>
+            </div>
+
+            {selectedServices.length > 0 && (
+              <div className="bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-200/60">
+                <p className="text-xs font-black text-slate-900 mb-2 uppercase tracking-wide">Selected Add-ons</p>
+                <div className="space-y-2">
+                  {selectedServices.map(srvId => {
+                    const s = services.find(x => x.id === srvId || x.name === srvId);
+                    return s ? (
+                      <div key={srvId} className="flex justify-between text-sm font-semibold text-slate-600">
+                        <span>{s.name}</span>
+                        <span className="text-slate-900 font-bold">{formatRupee(s.price || 499)}</span>
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
+
+            <button 
+              onClick={() => navigate(`/checkout/${facility.id}`, { state: { facility, selectedServices } })}
+              className="w-full bg-slate-900 hover:bg-purple-600 text-white font-black py-4 rounded-2xl transition-all shadow-[0_8px_20px_rgba(0,0,0,0.15)] active:scale-95 text-base flex items-center justify-center gap-2 cursor-pointer mt-auto"
+            >
+              Reserve Base Stay
+            </button>
+            <p className="text-center text-[11px] text-slate-500 font-bold mt-4">You won't be charged yet</p>
+          </div>
+        </div>
       </div>
 
       {/* Apple-Style Floating Bottom Booking Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-3xl border-t border-slate-200/60 p-4 sm:p-5 shadow-[0_-10px_40px_rgb(0,0,0,0.05)] z-50">
+      {/* Mobile/Tablet Apple-Style Floating Bottom Booking Bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/85 backdrop-blur-3xl border-t border-slate-200/60 p-4 sm:p-5 shadow-[0_-10px_40px_rgb(0,0,0,0.05)] z-50">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">

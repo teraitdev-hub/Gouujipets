@@ -158,49 +158,55 @@ export const Dashboard = () => {
   return (
     <PageTransition className="pb-24 max-w-6xl mx-auto space-y-6 font-sans px-4 sm:px-6 pt-6">
       
-      {/* 1. Header Profile & Active Pet Selector */}
-      <div className="bg-white border border-slate-200/60 rounded-[32px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
+      {/* 1. Premium Welcome Card */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 rounded-[32px] p-7 sm:p-8 shadow-[0_20px_60px_-15px_rgba(124,58,237,0.3)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-indigo-400/10 rounded-full blur-[60px] pointer-events-none" />
+        <div className="flex items-center gap-5 w-full sm:w-auto relative z-10">
           <div className="relative shrink-0">
             {primaryPet ? (
               <img 
                 src={primaryPet.photo_url || primaryPet.avatar_url || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=200"} 
                 alt={primaryPet.name} 
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-[20px] object-cover border-4 border-slate-50 shadow-sm"
+                className="w-18 h-18 sm:w-22 sm:h-22 rounded-2xl object-cover border-4 border-white/30 shadow-xl ring-2 ring-white/20"
               />
             ) : (
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-[20px] bg-slate-900 text-white flex items-center justify-center font-black text-3xl shadow-sm">
+              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-2xl bg-white/20 backdrop-blur-md text-white flex items-center justify-center font-black text-4xl shadow-xl ring-2 ring-white/20">
                 🐶
               </div>
             )}
-            <span className="absolute -bottom-2 -right-2 bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-md uppercase tracking-wider border border-white">
+            <span className="absolute -bottom-1 -right-1 bg-emerald-400 text-white text-[9px] font-black px-2 py-1 rounded-full shadow-lg uppercase tracking-wider border-2 border-white/30">
               ACTIVE
             </span>
           </div>
 
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
-                {primaryPet ? `${primaryPet.name}'s Dashboard` : `Welcome, ${user?.name || "Pet Parent"} 👋`}
+              <h2 className="text-xl sm:text-2xl font-black text-white leading-tight drop-shadow-sm">
+                {primaryPet ? `Welcome, ${user?.name || 'Pet Parent'} 👋` : `Welcome, ${user?.name || "Pet Parent"} 👋`}
               </h2>
               {primaryPet && (
-                <span className="bg-emerald-50 text-emerald-700 text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-100 uppercase tracking-wider">
-                  <ShieldCheck size={12} className="text-emerald-500" /> Verified
+                <span className="bg-white/20 backdrop-blur-md text-white text-[10px] font-black px-2.5 py-1 rounded-full flex items-center gap-1 border border-white/20 uppercase tracking-wider">
+                  <ShieldCheck size={12} className="text-emerald-300" /> Assured
                 </span>
               )}
             </div>
-            <p className="text-sm text-slate-500 font-semibold">
+            <p className="text-sm text-purple-100 font-medium">
               {primaryPet ? `${primaryPet.breed} • ${primaryPet.age} Yrs • ${primaryPet.gender || 'Pet'}` : "Select or add a pet to get personalized partner matches and live care tracking."}
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-4 sm:pt-0 border-slate-100">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end relative z-10">
           {pets && pets.length > 1 && (
             <div className="relative">
               <button 
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 text-slate-900 font-bold text-xs rounded-xl transition-all flex items-center gap-2 border border-slate-200"
+                className="px-4 py-2.5 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white font-bold text-xs rounded-xl transition-all flex items-center gap-2 border border-white/20"
               >
                 <span>Switch Pet ({pets.length})</span>
                 <ChevronRight size={14} className={`transition-transform ${isDropdownOpen ? 'rotate-90' : ''}`} />
@@ -234,13 +240,13 @@ export const Dashboard = () => {
 
           <button
             onClick={() => { setPetToEdit(null); setIsAddPetModalOpen(true); }}
-            className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl transition-all flex items-center gap-2 shadow-[0_8px_30px_rgb(0,0,0,0.06)] active:scale-95"
+            className="px-5 py-2.5 bg-white hover:bg-purple-50 text-purple-700 font-black text-xs rounded-xl transition-all flex items-center gap-2 shadow-lg active:scale-95"
           >
             <Plus size={16} />
             <span>Add Pet</span>
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* ── Ultra-Compact Profile Strength Banner ──────────────────────── */}
       {primaryPet && petCompletion && (
@@ -362,8 +368,8 @@ export const Dashboard = () => {
         </div>
       )}
 
-      {/* 2. Promo / VIP Banners */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* 2. Premium Promo Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Lightning Deals Strip */}
         <div className="bg-gradient-to-br from-amber-400 to-amber-500 text-slate-900 p-6 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col justify-between items-start gap-4 h-full relative overflow-hidden">
           <Sparkles className="absolute -right-4 -top-4 text-amber-300 opacity-50 w-24 h-24" />
@@ -382,11 +388,11 @@ export const Dashboard = () => {
         </div>
 
         {/* Gouuji VIP Subscription Plans */}
-        <div className="bg-slate-900 text-white p-6 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col justify-between items-start gap-4 h-full relative overflow-hidden">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="bg-gradient-to-br from-slate-900 via-[#1e1b4b] to-slate-900 text-white p-7 rounded-[32px] shadow-[0_20px_60px_-15px_rgba(30,27,75,0.3)] flex flex-col justify-between items-start gap-5 h-full relative overflow-hidden">
           <div className="absolute -right-4 -bottom-4 text-white/5 text-9xl">👑</div>
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-2">
-              <h3 className="text-xl font-black text-white leading-tight">Gouuji VIP</h3>
+              <h3 className="text-xl font-black text-white leading-tight">Gouuji VIP Subscription</h3>
               <span className="bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded-full uppercase tracking-widest">Save 20%</span>
             </div>
             <p className="text-sm text-slate-400 font-semibold max-w-[280px]">
@@ -395,20 +401,20 @@ export const Dashboard = () => {
           </div>
           <button
             onClick={() => navigate("/membership")}
-            className="bg-white hover:bg-slate-100 text-slate-900 font-black px-6 py-3 rounded-xl text-xs transition-all shadow-sm flex items-center gap-2 relative z-10 mt-auto"
+            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-black px-6 py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-purple-500/25 flex items-center gap-2 relative z-10 mt-auto hover:scale-105 active:scale-95"
           >
-            <span>View Subscriptions</span>
+            <span>View Subscription Tiers</span>
             <ChevronRight size={16} />
           </button>
-        </div>
+        </motion.div>
       </div>
 
-      {/* 3. VERIFIED 10 Assured Mega Category Grid */}
-      <div className="bg-white border border-slate-200/60 rounded-[32px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      {/* 3. Service Categories */}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="bg-white/80 backdrop-blur-xl border border-purple-100/40 rounded-[32px] p-6 sm:p-8 shadow-[0_8px_30px_rgba(124,58,237,0.05)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
           <div className="flex items-center gap-3">
-            <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">
-              Explore Categories
+            <h3 className="text-lg font-black text-slate-900 tracking-tight">
+              Explore Verified Care™ Categories
             </h3>
           </div>
           <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Upfront Rates • Zero Hidden Charges</span>
@@ -429,10 +435,10 @@ export const Dashboard = () => {
             <div
               key={cat.id}
               onClick={() => navigate(`/boarding?type=${cat.id}`)}
-              className="bg-slate-50 border border-slate-100 hover:border-slate-300 rounded-2xl p-4 cursor-pointer transition-all flex flex-col items-center justify-between group relative shadow-sm hover:shadow-md"
+              className="bg-gradient-to-br from-white to-purple-50/50 border border-purple-100/60 hover:border-purple-300 rounded-2xl p-4 cursor-pointer transition-all flex flex-col items-center justify-between group relative shadow-sm hover:shadow-lg hover:shadow-purple-500/10 hover:-translate-y-1"
             >
               {cat.badge && (
-                <span className="absolute -top-2.5 bg-slate-900 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">
+                <span className="absolute -top-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow-md shadow-purple-600/25">
                   {cat.badge}
                 </span>
               )}
@@ -441,10 +447,10 @@ export const Dashboard = () => {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      {/* 5. Orders Table: Live Stays & Upcoming Bookings */}
-      <div className="bg-white border border-slate-200/60 rounded-[32px] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      {/* 4. Orders & Active Stays */}
+      <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white/80 backdrop-blur-xl border border-purple-100/40 rounded-[32px] p-6 sm:p-8 shadow-[0_8px_30px_rgba(124,58,237,0.05)]">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-lg shadow-sm">
@@ -544,7 +550,7 @@ export const Dashboard = () => {
             </button>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Modals */}
       <AddPetModal isOpen={isAddPetModalOpen} onClose={() => { setIsAddPetModalOpen(false); setPetToEdit(null); }} petToEdit={petToEdit} />

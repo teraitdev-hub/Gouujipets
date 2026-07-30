@@ -16,6 +16,8 @@ import { db } from "../../lib/firebase";
 import { collection, query, where, getDocs, onSnapshot } from "firebase/firestore";
 import { ALL_CATEGORIES, getCategoryById } from "../../lib/serviceCategories";
 import { filterRealBusinesses } from "../../utils/filterRealBusinesses";
+import { useMap } from "../../context/MapContext";
+import { Autocomplete } from "@react-google-maps/api";
 
 export const PublicHome = () => {
   const navigate = useNavigate();
@@ -23,6 +25,8 @@ export const PublicHome = () => {
   const [searchLocation, setSearchLocation] = useState("Bangalore / Near Me");
   const [activeCategoryTab, setActiveCategoryTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+  const { isLoaded, loadError } = useMap();
   const [facilities, setFacilities] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState("All Bangalore");
@@ -101,7 +105,18 @@ export const PublicHome = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = searchQuery.trim() || activeCategoryTab;
-    navigate(`/boarding?query=${encodeURIComponent(q)}&category=${activeCategoryTab === 'all' ? '' : activeCategoryTab}`);
+    navigate(`/boarding?query=${encodeURIComponent(q)}&category=${activeCategoryTab === 'all' ? '' : activeCategoryTab}&location=${encodeURIComponent(searchLocation)}`);
+  };
+
+  const onPlaceChanged = () => {
+    if (autocomplete !== null) {
+      const place = autocomplete.getPlace();
+      if (place.formatted_address) {
+        setSearchLocation(place.formatted_address);
+      } else if (place.name) {
+        setSearchLocation(place.name);
+      }
+    }
   };
 
   const CoreCategories = [
@@ -136,78 +151,93 @@ export const PublicHome = () => {
   });
 
   return (
-    <PageTransition className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] font-sans overflow-x-hidden pb-20 md:pb-6 relative">
+    <PageTransition className="min-h-screen bg-[#fafbff] font-sans overflow-x-hidden pb-20 md:pb-6 relative">
       <PublicNavbar />
 
-      {/* ========== HERO SECTION (NEW & STUNNING) ========== */}
-      <section className="relative pt-12 pb-24 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden">
+      {/* ========== HERO SECTION (PREMIUM AIRBNB/APPLE TIER) ========== */}
+      <section className="relative pt-16 pb-28 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden">
         
-        {/* Subtle dynamic background blobs */}
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-400/20 rounded-full blur-[100px] pointer-events-none mix-blend-multiply" />
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-teal-300/20 rounded-full blur-[120px] pointer-events-none mix-blend-multiply" />
+        {/* Subtle dynamic background blobs for glassmorphism */}
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-purple-500/15 rounded-full blur-[120px] pointer-events-none mix-blend-multiply" />
+        <div className="absolute bottom-0 right-1/4 w-[700px] h-[700px] bg-teal-400/15 rounded-full blur-[140px] pointer-events-none mix-blend-multiply" />
         
-        <div className="relative z-10 max-w-5xl mx-auto text-center space-y-8">
-          <div className="bg-transparent p-6 sm:p-12 rounded-[40px] mx-auto max-w-4xl flex flex-col items-center">
+        <div className="relative z-10 max-w-6xl mx-auto text-center space-y-8">
+          <div className="bg-transparent p-6 sm:p-12 rounded-[40px] mx-auto max-w-5xl flex flex-col items-center">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ duration: 0.5, type: "spring" }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/95 backdrop-blur-xl border border-slate-200/60 text-slate-800 font-bold text-xs uppercase tracking-widest shadow-[0_4px_20px_rgba(0,0,0,0.05)] mb-8"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-slate-200/60 text-slate-800 font-bold text-xs uppercase tracking-widest shadow-sm mb-8"
             >
               <Sparkles size={14} className="text-purple-600" />
-              India's #1 Verified Pet Care Network
+              India's #1 Premium Pet Care Platform
             </motion.div>
             
             <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-              className="text-5xl sm:text-6xl md:text-7xl font-black text-slate-900 tracking-tight leading-[1.1]"
+              transition={{ duration: 0.7, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
+              className="text-5xl sm:text-7xl md:text-8xl font-black text-slate-900 tracking-tight leading-[1.05]"
             >
-              Find the Perfect <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">Care</span> <br className="hidden sm:block" /> for your Best Friend
+              Extraordinary Care <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-indigo-600 to-teal-500 text-glow">For Your Best Friend</span>
             </motion.h1>
             
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-sm sm:text-base text-slate-600 font-semibold max-w-2xl mx-auto mt-6"
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-base sm:text-xl text-slate-600 font-medium max-w-2xl mx-auto mt-8 leading-relaxed"
             >
-              Book verified boarding resorts, professional groomers, and 24/7 vets near you. Transparent pricing, instant booking, and peace of mind.
+              Book verified luxury boarding resorts, professional groomers, and 24/7 vets near you. Transparent pricing, instant booking, and absolute peace of mind.
             </motion.p>
           </div>
           
           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3, type: "spring", stiffness: 200, damping: 20 }}
-            className="pt-6 max-w-3xl mx-auto"
+            transition={{ duration: 0.8, delay: 0.3, type: "spring", stiffness: 150, damping: 25 }}
+            className="pt-4 max-w-4xl mx-auto"
           >
-            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-3 bg-white/95 backdrop-blur-xl p-3 rounded-[32px] border border-slate-200/60 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] focus-within:ring-4 focus-within:ring-purple-500/10 focus-within:border-purple-300 transition-all z-20 relative">
-              <div className="flex items-center w-full sm:w-auto flex-1 gap-3 px-5 py-3 border-b sm:border-b-0 sm:border-r border-slate-100">
-                <MapPin size={22} className="text-slate-400 shrink-0" />
-                <select
-                  value={searchLocation}
-                  onChange={(e) => setSearchLocation(e.target.value)}
-                  className="w-full bg-transparent text-slate-900 font-bold text-lg focus:outline-none appearance-none cursor-pointer"
-                >
-                  <option value="Bangalore / Near Me">Bangalore / Near Me</option>
-                  <option value="Indiranagar">Indiranagar</option>
-                  <option value="Koramangala">Koramangala</option>
-                  <option value="Whitefield">Whitefield</option>
-                </select>
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-center gap-3 glass-panel p-3 rounded-[40px] focus-within:ring-4 focus-within:ring-purple-500/20 focus-within:border-purple-300 transition-all z-20 relative">
+              <div className="flex items-center w-full sm:w-1/3 gap-3 px-5 py-4 border-b sm:border-b-0 sm:border-r border-slate-200/60">
+                <MapPin size={24} className="text-slate-400 shrink-0" />
+                {isLoaded ? (
+                  <Autocomplete
+                    onLoad={setAutocomplete}
+                    onPlaceChanged={onPlaceChanged}
+                    options={{ types: ['(regions)'], componentRestrictions: { country: 'in' } }}
+                    className="w-full"
+                  >
+                    <input
+                      type="text"
+                      placeholder="Where?"
+                      value={searchLocation}
+                      onChange={(e) => setSearchLocation(e.target.value)}
+                      className="w-full bg-transparent text-slate-900 font-bold text-lg focus:outline-none placeholder:text-slate-400 placeholder:font-medium"
+                    />
+                  </Autocomplete>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder="Loading map..."
+                    disabled
+                    className="w-full bg-transparent text-slate-400 font-medium text-lg focus:outline-none"
+                  />
+                )}
               </div>
-              <div className="flex items-center w-full flex-[2] gap-3 px-5 py-3">
-                <Search size={22} className="text-slate-400 shrink-0" />
+              <div className="flex items-center w-full sm:w-1/3 flex-[2] gap-3 px-5 py-4">
+                <Search size={24} className="text-slate-400 shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search resorts, groomers, vets..."
-                  className="w-full bg-transparent text-slate-900 font-medium text-lg focus:outline-none placeholder:text-slate-400"
+                  placeholder="Resorts, groomers, vets..."
+                  className="w-full bg-transparent text-slate-900 font-bold text-lg focus:outline-none placeholder:text-slate-400 placeholder:font-medium"
                 />
               </div>
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-black px-10 py-5 rounded-[24px] shadow-lg shadow-purple-600/25 transition-all shrink-0 text-lg">
+              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="w-full sm:w-auto bg-slate-900 hover:bg-purple-600 text-white font-black px-12 py-5 rounded-[32px] shadow-lg transition-all shrink-0 text-lg flex items-center justify-center gap-2">
+                <Search size={20} />
                 Search
               </motion.button>
             </form>
@@ -215,19 +245,31 @@ export const PublicHome = () => {
         </div>
       </section>
 
-      {/* ========== SIMPLIFIED CORE CATEGORIES ========== */}
-      <section className="py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="bg-white/60 backdrop-blur-md rounded-[32px] p-6 sm:p-10 border border-slate-200/80 shadow-sm relative overflow-hidden">
-          <div className="text-center mb-8 relative z-10">
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Our Core Services
+      {/* ========== PREMIUM CORE CATEGORIES ========== */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="bg-gradient-to-br from-white via-purple-50/30 to-indigo-50/40 backdrop-blur-md rounded-[40px] p-8 sm:p-12 border border-purple-100/50 shadow-[0_20px_60px_-15px_rgba(124,58,237,0.08)] relative overflow-hidden">
+          {/* Decorative blobs */}
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-purple-500/5 rounded-full blur-[80px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-indigo-500/5 rounded-full blur-[60px] pointer-events-none" />
+          
+          <div className="text-center mb-10 relative z-10">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100 text-purple-700 font-black text-[10px] uppercase tracking-widest mb-4">
+              <Sparkles size={12} />
+              8 Categories
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+              Explore Our Services
             </h2>
-            <p className="text-slate-600 font-semibold mt-2">Select a category to explore verified partners</p>
+            <p className="text-slate-500 font-medium mt-3 text-base">Tap any category to find verified professionals near you</p>
           </div>
 
-        <div className="flex overflow-x-auto gap-4 sm:gap-6 pb-6 pt-4 px-2 snap-x snap-mandatory custom-scrollbar">
+        <div className="flex overflow-x-auto gap-5 sm:gap-6 pb-6 pt-4 px-2 snap-x snap-mandatory">
           {CoreCategories.map((cat) => (
             <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: CoreCategories.indexOf(cat) * 0.05 }}
               whileHover={{ y: -5, scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               key={cat.id}
@@ -241,14 +283,14 @@ export const PublicHome = () => {
                   else navigate(`/${cat.id}`);
                 }
               }}
-              className={`snap-start shrink-0 w-64 relative bg-white/90 backdrop-blur-md rounded-[32px] p-6 border transition-all duration-300 cursor-pointer flex flex-col items-start z-10 shadow-[0_8px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_16px_32px_rgba(0,0,0,0.06)] ${
-                activeCategoryTab === cat.id ? "border-purple-600 ring-2 ring-purple-500/20 bg-purple-50/50" : "border-slate-200/60"
+              className={`snap-start shrink-0 w-72 relative bg-white rounded-[28px] p-7 border-2 transition-all duration-300 cursor-pointer flex flex-col items-start z-10 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(124,58,237,0.12)] ${
+                activeCategoryTab === cat.id ? "border-purple-500 ring-4 ring-purple-500/10 bg-gradient-to-br from-purple-50 to-indigo-50" : "border-transparent hover:border-purple-200"
               }`}
             >
-              <div className="w-16 h-16 rounded-[20px] bg-slate-50 flex items-center justify-center text-3xl mb-5 shadow-inner border border-slate-100">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 flex items-center justify-center text-3xl mb-5 shadow-sm border border-purple-100/60">
                 <span>{cat.icon}</span>
               </div>
-              <h3 className="font-black text-lg text-slate-900 mb-2">
+              <h3 className="font-black text-lg text-slate-900 mb-1.5">
                 {cat.title}
               </h3>
               <p className="text-sm font-medium text-slate-500 leading-relaxed">
@@ -294,9 +336,20 @@ export const PublicHome = () => {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="animate-pulse bg-slate-200/60 h-72 rounded-2xl border border-slate-200"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <div key={i} className="animate-pulse rounded-[28px] border border-slate-200/60 overflow-hidden bg-white">
+                <div className="h-56 bg-gradient-to-br from-slate-100 to-slate-200"></div>
+                <div className="p-4 space-y-3">
+                  <div className="h-4 bg-slate-200 rounded-lg w-3/4"></div>
+                  <div className="h-3 bg-slate-100 rounded-lg w-1/2"></div>
+                  <div className="flex gap-2 mt-2">
+                    <div className="h-6 bg-slate-100 rounded-md w-16"></div>
+                    <div className="h-6 bg-slate-100 rounded-md w-20"></div>
+                  </div>
+                  <div className="h-10 bg-slate-200 rounded-xl w-full mt-3"></div>
+                </div>
+              </div>
             ))}
           </div>
         ) : filteredFacilities.length === 0 ? (
@@ -314,7 +367,7 @@ export const PublicHome = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {filteredFacilities.map((facility, idx) => (
               <motion.div
                 key={facility.id || idx}
@@ -348,20 +401,24 @@ export const PublicHome = () => {
                   </div>
                 </div>
 
-                {/* Card Content & Specifications */}
-                <div className="p-3 flex-1 flex flex-col justify-between gap-1">
+                <div className="p-4 flex-1 flex flex-col justify-between gap-1">
                   <div>
-                    <h3 className="font-black text-slate-900 text-xs sm:text-sm group-hover:text-purple-600 transition-colors truncate">
-                      {facility.name}
-                    </h3>
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className="font-black text-slate-900 text-sm sm:text-base group-hover:text-purple-600 transition-colors truncate">
+                        {facility.name}
+                      </h3>
+                      <button className="text-slate-300 hover:text-rose-500 transition-colors">
+                        <HeartPulse size={18} />
+                      </button>
+                    </div>
                     
-                    <p className="text-[10px] font-semibold text-slate-500 flex items-center gap-0.5 mt-0.5">
-                      <MapPin size={10} className="text-slate-400 shrink-0" />
+                    <p className="text-xs font-semibold text-slate-500 flex items-center gap-1 mt-0.5">
+                      <MapPin size={12} className="text-slate-400 shrink-0" />
                       <span className="truncate">{typeof facility.address === 'string' ? facility.address : (facility.address?.city || 'Verified Area')}</span>
                     </p>
 
                     {/* Compact Amenities/Services badging */}
-                    <div className="flex flex-wrap gap-1 mt-2">
+                    <div className="flex flex-wrap gap-1 mt-3">
                       {(() => {
                         const sList = Array.isArray(facility.services_offered) && facility.services_offered.length > 0
                           ? facility.services_offered.map((s: any) => s.name || s)
@@ -370,8 +427,8 @@ export const PublicHome = () => {
                           : ['AC Suite', 'Vet On-Call', 'Play Area'];
                         
                         return sList.slice(0, 2).map((srv: string, i: number) => (
-                          <span key={i} className="bg-slate-50 text-slate-600 border border-slate-200/80 px-1.5 py-0.5 rounded text-[8px] font-semibold">
-                            ✔ {srv}
+                          <span key={i} className="bg-slate-100 text-slate-700 px-2 py-1 rounded-md text-[10px] font-bold">
+                            {srv}
                           </span>
                         ));
                       })()}
@@ -379,24 +436,26 @@ export const PublicHome = () => {
                   </div>
 
                   {/* Pricing and Action row */}
-                  <div className="mt-auto pt-2">
-                    <div className="flex items-baseline justify-between border-t border-slate-100 pt-2">
-                      <span className="text-[8px] text-slate-400 line-through font-semibold">{formatRupee(facility.mrpPrice)}</span>
-                      <div className="flex items-baseline gap-0.5">
-                        <span className="text-slate-900 font-bold text-[10px]">₹</span>
-                        <span className="text-xs sm:text-sm font-black text-slate-900">{facility.priceFrom}</span>
-                        <span className="text-[8px] text-slate-500 font-semibold">/day</span>
+                  <div className="mt-4 pt-3 border-t border-slate-100">
+                    <div className="flex items-baseline justify-between mb-3">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 line-through font-semibold leading-none">{formatRupee(facility.mrpPrice)}</span>
+                        <div className="flex items-baseline gap-1 mt-0.5">
+                          <span className="text-slate-900 font-bold text-xs">₹</span>
+                          <span className="text-lg font-black text-slate-900 leading-none">{facility.priceFrom}</span>
+                          <span className="text-[10px] text-slate-500 font-semibold">/night</span>
+                        </div>
                       </div>
                     </div>
 
                     {/* Single Row Actions */}
-                    <div className="flex items-center gap-1 mt-2.5" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => setShowContactModal(facility)}
-                        className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors"
+                        className="p-3 rounded-xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-200 text-slate-700 hover:text-purple-700 transition-all shadow-sm"
                         title="Call Now"
                       >
-                        <Phone size={16} />
+                        <Phone size={18} />
                       </button>
 
                       <button
@@ -406,17 +465,17 @@ export const PublicHome = () => {
                           const msg = `Hi ${facility.name}, I found you on GouujiPets and would like to inquire about boarding/services for my pet!`;
                           window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(msg)}`, '_blank');
                         }}
-                        className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors"
+                        className="p-3 rounded-xl bg-slate-50 hover:bg-[#25D366]/10 border border-slate-200 hover:border-[#25D366]/30 text-slate-700 hover:text-[#25D366] transition-all shadow-sm"
                         title="WhatsApp"
                       >
-                        <MessageCircle size={16} />
+                        <MessageCircle size={18} />
                       </button>
 
                       <button
                         onClick={(e) => { e.stopPropagation(); navigate(`/checkout/${facility.id || facility._id}`, { state: { facility } }) }}
-                        className="flex-1 py-3 bg-slate-900 hover:bg-purple-600 text-white font-black text-sm rounded-2xl transition-all shadow-md text-center flex items-center justify-center gap-1 active:scale-95"
+                        className="flex-1 py-3 bg-slate-900 hover:bg-purple-600 text-white font-black text-sm rounded-xl transition-all shadow-md text-center flex items-center justify-center gap-2 active:scale-95"
                       >
-                        <span>Book Stay</span>
+                        <span>Book</span>
                       </button>
                     </div>
                   </div>
@@ -464,29 +523,39 @@ export const PublicHome = () => {
       </section>
 
       {/* ========== WHY TRUST GOUUJIPETS (VERIFIED CARE Features) ========== */}
-      <section className="py-10 px-3 sm:px-6 max-w-7xl mx-auto">
-        <div className="bg-white/60 backdrop-blur-md rounded-[32px] p-6 sm:p-10 border border-slate-200/80 shadow-sm">
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 text-center mb-2">Why 50,000+ Pet Parents Trust Gouuji Assured™</h2>
-          <p className="text-xs sm:text-sm text-slate-600 font-semibold text-center max-w-xl mx-auto mb-8">Every facility on our platform undergoes a rigorous 42-point physical inspection before listing.</p>
+      <section className="py-16 px-3 sm:px-6 max-w-7xl mx-auto">
+        <div className="bg-gradient-to-br from-slate-900 via-purple-950 to-indigo-950 rounded-[40px] p-8 sm:p-14 border border-purple-500/20 shadow-[0_30px_80px_-20px_rgba(124,58,237,0.15)] relative overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
+          
+          <div className="relative z-10">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-purple-300 font-black text-[10px] uppercase tracking-widest mb-4 border border-white/10">
+              <ShieldCheck size={12} />
+              Gouuji Assured™
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-white mb-3">Why 50,000+ Pet Parents Trust Us</h2>
+            <p className="text-sm sm:text-base text-purple-200/70 font-medium max-w-xl mb-10">Every facility undergoes a rigorous 42-point physical inspection before listing.</p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { icon: ShieldCheck, title: "100% Background Checked", desc: "Every resort owner, groomer & vet doctor's credentials are verified physically.", color: "text-purple-600 bg-purple-50" },
-            { icon: Users, title: "Expert Care Managers", desc: "Dedicated professionals looking after your pet's needs round the clock.", color: "text-blue-600 bg-blue-50" },
-            { icon: CheckCircle2, title: "Instant Booking & Refund", desc: "Book suites right away with transparent pricing. Zero cancellation fees up to 24h before.", color: "text-emerald-600 bg-emerald-50" },
-            { icon: Award, title: "Verified Customer Reviews", desc: "Only pet parents who completed verified stays can submit ratings & testimonials.", color: "text-amber-600 bg-amber-50" },
-          ].map((item, i) => (
-            <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition-all shadow-xs">
-              <div>
-                <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center mb-3 border border-slate-200/60`}>
-                  <item.icon size={20} />
-                </div>
-                <h3 className="font-black text-slate-900 text-sm mb-1">{item.title}</h3>
-                <p className="text-xs text-slate-500 font-medium leading-relaxed">{item.desc}</p>
-              </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { icon: ShieldCheck, title: "100% Background Checked", desc: "Every resort owner, groomer & vet's credentials verified.", color: "text-purple-400 bg-purple-500/20 border-purple-500/30" },
+                { icon: Users, title: "Expert Care Managers", desc: "Dedicated professionals for round-the-clock care.", color: "text-blue-400 bg-blue-500/20 border-blue-500/30" },
+                { icon: CheckCircle2, title: "Instant Booking", desc: "Transparent pricing. Zero cancellation fees up to 24h.", color: "text-emerald-400 bg-emerald-500/20 border-emerald-500/30" },
+                { icon: Award, title: "Verified Reviews", desc: "Only completed verified stays can submit ratings.", color: "text-amber-400 bg-amber-500/20 border-amber-500/30" },
+              ].map((item, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10 flex flex-col justify-between hover:bg-white/10 transition-all group">
+                  <div>
+                    <div className={`w-12 h-12 rounded-2xl ${item.color} flex items-center justify-center mb-4 border`}>
+                      <item.icon size={22} />
+                    </div>
+                    <h3 className="font-black text-white text-sm mb-2">{item.title}</h3>
+                    <p className="text-xs text-purple-200/60 font-medium leading-relaxed">{item.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
         </div>
       </section>
 
