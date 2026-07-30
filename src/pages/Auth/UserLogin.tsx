@@ -108,6 +108,9 @@ export const UserLogin = () => {
 
     const finalEmail = validPhone ? `${loginIdentifier.replace(/[^0-9]/g, '')}@phone.gouuji.com` : loginIdentifier.toLowerCase();
 
+    // Ensure they log in/sign up as a customer, overriding any left-over partner role
+    localStorage.setItem('petpro_intended_role', 'customer');
+
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, finalEmail, formData.password);
