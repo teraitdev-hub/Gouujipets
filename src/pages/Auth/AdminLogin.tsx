@@ -29,7 +29,7 @@ export const AdminLogin = () => {
       } catch (authError: any) {
         // Automatically create the super admin account if it doesn't exist yet
         const cleanEmail = formData.email.trim().toLowerCase();
-        if ((authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential') && cleanEmail === 'rachanuthappa@gmail.com') {
+        if ((authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential') && (cleanEmail === 'rachanuthappa@gmail.com' || cleanEmail === 'superadmin@gouuji.com')) {
           const { createUserWithEmailAndPassword } = await import('firebase/auth');
           try {
             userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, formData.password);
@@ -59,7 +59,7 @@ export const AdminLogin = () => {
       const userEmail = (userCredential.user.email || formData.email).toLowerCase();
       
       let assignedRole = role;
-      if (!role || userEmail === 'rachanuthappa@gmail.com' || userEmail === 'admin@gouujipets.com') {
+      if (!role || userEmail === 'rachanuthappa@gmail.com' || userEmail === 'admin@gouujipets.com' || userEmail === 'superadmin@gouuji.com') {
         assignedRole = 'super_admin';
       } else if (userEmail === 'gouujipets@gmail.com' || userEmail === 'admin@gouuji.com' || userEmail.includes('admin')) {
         assignedRole = 'admin';
