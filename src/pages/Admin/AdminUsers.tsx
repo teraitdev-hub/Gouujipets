@@ -54,6 +54,27 @@ export const AdminUsers = () => {
           <button className="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600">
             <Filter size={18} />
           </button>
+          <button 
+            onClick={async () => {
+              if (window.confirm("Are you sure you want to delete ALL customers and partners? This action cannot be undone.")) {
+                try {
+                  const { deleteDoc } = await import('firebase/firestore');
+                  const targets = users.filter(u => u.role === 'customer' || u.role === 'partner');
+                  let count = 0;
+                  for (const u of targets) {
+                    await deleteDoc(doc(db, 'users', u.id));
+                    count++;
+                  }
+                  alert(`Successfully deleted ${count} old users.`);
+                } catch (e: any) {
+                  alert('Error deleting users: ' + e.message);
+                }
+              }
+            }}
+            className="px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-xl hover:bg-red-100 font-bold text-sm shadow-sm transition-colors"
+          >
+            Clear Customers & Partners
+          </button>
         </div>
       </div>
 
