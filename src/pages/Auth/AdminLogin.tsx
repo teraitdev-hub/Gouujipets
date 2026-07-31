@@ -25,18 +25,23 @@ export const AdminLogin = () => {
 
       let userCredential;
       try {
-        userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+        userCredential = await signInWithEmailAndPassword(auth, formData.email.trim(), formData.password);
       } catch (authError: any) {
         // Automatically create the super admin account if it doesn't exist yet
-        if ((authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential') && formData.email.toLowerCase() === 'rachanuthappa@gmail.com') {
+        const cleanEmail = formData.email.trim().toLowerCase();
+        if ((authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential') && cleanEmail === 'rachanuthappa@gmail.com') {
           const { createUserWithEmailAndPassword } = await import('firebase/auth');
           try {
-            userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, formData.password);
           } catch (createErr: any) {
-            throw new Error(createErr.message || 'Failed to create Super Admin account');
+            // If it says email already in use, then the user exists but they typed the WRONG password.
+            if (createErr.code === 'auth/email-already-in-use') {
+               throw new Error("Account exists, but password was incorrect. Please try again or use Forgot Password.");
+            }
+            throw new Error('Creation failed: ' + createErr.message);
           }
         } else {
-          throw new Error(authError.message || 'Authentication failed');
+          throw authError; // throw the original error object so outer catch works properly
         }
       }
 
