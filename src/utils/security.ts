@@ -10,7 +10,11 @@ import { z } from 'zod';
 // 1. Password Security
 // Requires minimum 8 characters, at least 1 uppercase, 1 lowercase, 1 number, and 1 special character.
 export const passwordSchema = z.string()
-  .min(6, { message: 'Password must be at least 6 characters long.' })
+  .min(8, { message: 'Password must be at least 8 characters long.' })
+  .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter.' })
+  .regex(/[a-z]/, { message: 'Password must contain at least one lowercase letter.' })
+  .regex(/[0-9]/, { message: 'Password must contain at least one number.' })
+  .regex(/[^A-Za-z0-9]/, { message: 'Password must contain at least one special character.' })
   .max(100, { message: 'Password is too long.' });
 
 export const checkPasswordStrength = (password: string) => {
@@ -22,6 +26,20 @@ export const checkPasswordStrength = (password: string) => {
     };
   }
   return { isStrong: true, errors: [] };
+};
+
+// Disposable Email Checker
+export const isDisposableEmail = (email: string): boolean => {
+  const disposableDomains = [
+    '10minutemail.com', 'tempmail.com', 'mailinator.com', 
+    'guerrillamail.com', 'yopmail.com', 'trashmail.com', 
+    'throwawaymail.com', 'temp-mail.org', 'getairmail.com', 
+    'tempmailaddress.com', 'mohmail.com', 'dispostable.com', 
+    'maildrop.cc'
+  ];
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (!domain) return false;
+  return disposableDomains.some(d => domain === d || domain.endsWith(`.${d}`));
 };
 
 // 2. Input Validation (Auth)

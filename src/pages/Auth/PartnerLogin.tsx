@@ -255,7 +255,14 @@ export const PartnerLogin = () => {
           if (pendingGoogleUser) {
             uid = pendingGoogleUser.uid;
           } else {
-            const userCredential = await createUserWithEmailAndPassword(auth, finalEmail, formData.password);
+            const { isDisposableEmail } = await import('../../utils/security');
+            if (isDisposableEmail(finalEmail)) {
+               setError("Temporary email addresses are not supported.");
+               setIsLoading(false);
+               return;
+            }
+            const { registerWithEmail } = await import('../../services/auth');
+            const userCredential = await registerWithEmail(finalEmail, formData.password, formData.name, 'partner');
             uid = userCredential.user.uid;
           }
           

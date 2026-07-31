@@ -5,7 +5,7 @@ import { PawPrint, Mail, Lock, ArrowRight, Loader2, Sparkles, CheckCircle2 } fro
 import { motion } from "framer-motion";
 import { checkPasswordStrength } from "../../utils/security";
 import { auth, db } from "../../lib/firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, getAdditionalUserInfo } from "firebase/auth";
 import type { ConfirmationResult } from "firebase/auth";
 import { collection, addDoc, getDocs, query, where, limit } from "firebase/firestore";
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
@@ -121,28 +121,31 @@ export const UserLogin = () => {
           navigate("/dashboard");
         }
       } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, finalEmail, formData.password);
-        await updateProfile(userCredential.user, { displayName: formData.name });
+        // Frontend validation for disposable emails
+        const { isDisposableEmail } = await import('../../utils/security');
+        if (isDisposableEmail(finalEmail)) {
+           setError("Temporary email addresses are not supported.");
+           setIsLoading(false);
+           return;
+        }
+
+        const { registerWithEmail } = await import('../../services/auth');
+        const userCredential = await registerWithEmail(finalEmail, formData.password, formData.name, 'customer');
         
-        if (formData.petName && userCredential.user) {
-          try {
-            await addDoc(collection(db, 'pets'), {
+        // Save pet data temporarily in local storage to be created upon full activation
+        if (formData.petName) {
+           localStorage.setItem('pending_pet_registration', JSON.stringify({
               name: formData.petName,
               species: formData.petType,
               breed: formData.petBreed,
-              owner_id: userCredential.user.uid,
-              gender: 'Male',
-              status: 'Healthy',
-              avatar_url: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=300'
-            });
-          } catch (petErr) {
-            console.error("Failed to add pet during signup", petErr);
-          }
+           }));
         }
         
         await useAuthStore.getState().loadUser();
-        navigate(intendedRoute || "/dashboard");
-        setIntendedRoute(null);
+        // Since it's a new email registration, they MUST verify email first. 
+        // useAuthStore will detect `needsEmailVerification` and set the state. 
+        // We let the App router (or we can navigate here) handle the redirection.
+        navigate('/verify-email');
       }
     } catch (err: any) {
       console.error("LOGIN ERROR DETAILS:", err);

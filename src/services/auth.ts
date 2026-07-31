@@ -14,9 +14,18 @@ import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, app, googleProvider } from "../lib/firebase";
 import type { UserProfile, UserRole } from "../types/user";
 
+import { isDisposableEmail, isValidEmail } from "../utils/security";
+
 // Email & Password Auth
 export const registerWithEmail = async (email: string, password: string, name: string, role: UserRole = 'customer') => {
   try {
+    if (!isValidEmail(email)) {
+      throw new Error("Invalid email format.");
+    }
+    if (isDisposableEmail(email)) {
+      throw new Error("Temporary email addresses are not supported.");
+    }
+
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
@@ -26,22 +35,10 @@ export const registerWithEmail = async (email: string, password: string, name: s
     // Send verification email
     await sendEmailVerification(user);
 
-    // Create user document in Firestore
-    const userProfile: Partial<UserProfile> = {
-      uid: user.uid,
-      name,
-      email,
-      role,
-      loginMethod: 'email',
-      isActive: true,
-      walletBalance: 0,
-      rewardPoints: 0,
-      notificationPreferences: { email: true, sms: true, push: true },
-      createdDate: new Date().toISOString(),
-      lastLogin: new Date().toISOString(),
-    };
-
-    await setDoc(doc(db, "users", user.uid), userProfile);
+    // We DO NOT create the user document in Firestore yet.
+    // The user must verify their email, then proceed to the CompleteRegistration 
+    // flow to provide Phone OTP and finalize the document creation.
+    
     return userCredential;
   } catch (error) {
     throw error;

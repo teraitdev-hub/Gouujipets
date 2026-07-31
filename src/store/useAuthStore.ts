@@ -11,6 +11,8 @@ export interface User {
   role?: 'customer' | 'partner' | 'admin' | 'super_admin' | string;
   full_name?: string;
   user_metadata?: Record<string, any>;
+  isRegistrationComplete?: boolean;
+  needsEmailVerification?: boolean;
   [key: string]: any;
 }
 
@@ -87,33 +89,52 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
           try {
             if (!userDocSnap.exists()) {
-              // Create missing user document!
+              // User signed in (e.g. via Google or Email/Password) but hasn't completed registration
               currentRole = intendedRole || 'customer';
-              await setDoc(userDocRef, {
-                role: currentRole,
-                email: firebaseUser.email || '',
-                full_name: firebaseUser.displayName || 'Unknown',
-                avatar_url: firebaseUser.photoURL || '',
-                loginMethod: firebaseUser.providerData.some(p => p.providerId === 'password') ? 'email' : 'google',
-                isActive: true,
-                walletBalance: 0,
-                rewardPoints: 0,
-                createdDate: new Date().toISOString(),
-                lastLogin: new Date().toISOString(),
-              });
+              const loginMethod = firebaseUser.providerData.some(p => p.providerId === 'password') ? 'email' : 'google';
               
-              if (currentRole === 'partner') {
-                const bizRef = doc(db, 'businesses', firebaseUser.uid);
-                await setDoc(bizRef, {
-                  owner_id: firebaseUser.uid,
-                  name: `${firebaseUser.displayName || 'My'}'s Facility`,
-                  type: 'boarding',
-                  address: "Address pending...",
-                  status: 'pending'
-                });
-              }
+              const partialUser: User = {
+                ...firebaseUser,
+                id: firebaseUser.uid,
+                email: firebaseUser.email || undefined,
+                emailVerified: firebaseUser.emailVerified,
+                role: currentRole,
+                full_name: firebaseUser.displayName || '',
+                name: firebaseUser.displayName || '',
+                phone: firebaseUser.phoneNumber || '',
+                photoUrl: firebaseUser.photoURL || '',
+                isRegistrationComplete: false,
+                needsEmailVerification: loginMethod === 'email' && !firebaseUser.emailVerified
+              };
+              
+              set({ isAuthenticated: true, user: partialUser, isLoading: false });
+              resolve();
+              return; // Exit early so we don't proceed to the normal user creation
             } else {
-              // Document exists, update it
+              // Document exists, check if email is verified for email users
+              const loginMethod = userData?.loginMethod || (firebaseUser.providerData.some(p => p.providerId === 'password') ? 'email' : 'google');
+              
+              if (loginMethod === 'email' && !firebaseUser.emailVerified) {
+                 // Needs email verification
+                 const partialUser: User = {
+                  ...firebaseUser,
+                  id: firebaseUser.uid,
+                  email: firebaseUser.email || undefined,
+                  emailVerified: firebaseUser.emailVerified,
+                  role: currentRole,
+                  full_name: userData?.full_name || firebaseUser.displayName || '',
+                  name: userData?.full_name || firebaseUser.displayName || '',
+                  phone: userData?.phone || firebaseUser.phoneNumber || '',
+                  photoUrl: userData?.avatar_url || firebaseUser.photoURL || '',
+                  isRegistrationComplete: true, // But needs email verification
+                  needsEmailVerification: true
+                 };
+                 set({ isAuthenticated: true, user: partialUser, isLoading: false });
+                 resolve();
+                 return;
+              }
+
+              // Normal flow for existing user
               if (intendedRole && intendedRole !== currentRole) {
                 await updateDoc(userDocRef, { role: intendedRole });
                 
