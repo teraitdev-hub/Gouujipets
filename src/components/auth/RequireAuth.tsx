@@ -5,7 +5,7 @@ import { UiverseLoader } from "../ui/UiverseLoader";
 
 interface RequireAuthProps {
   children: React.ReactNode;
-  allowedRoles?: ('customer' | 'partner' | 'admin' | 'superadmin')[];
+  allowedRoles?: ('customer' | 'partner' | 'admin' | 'superadmin' | 'super_admin')[];
 }
 
 export const RequireAuth = ({ children, allowedRoles }: RequireAuthProps) => {
@@ -41,7 +41,7 @@ export const RequireAuth = ({ children, allowedRoles }: RequireAuthProps) => {
   if (allowedRoles && user?.role && !allowedRoles.includes(user.role as any)) {
     if (user.role === 'partner') {
       return <Navigate to="/partner/dashboard" replace />;
-    } else if (user.role === 'admin' || user.role === 'superadmin') {
+    } else if (user.role === 'admin' || user.role === 'superadmin' || user.role === 'super_admin') {
       return <Navigate to="/admin/dashboard" replace />;
     } else {
       if (location.pathname.startsWith('/partner')) {

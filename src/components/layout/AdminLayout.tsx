@@ -14,7 +14,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user, isAuthenticated } = useAuthStore();
   const [adminSearch, setAdminSearch] = useState("");
 
-  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'superadmin')) {
+  if (!isAuthenticated || (user?.role !== 'admin' && user?.role !== 'superadmin' && user?.role !== 'super_admin')) {
     return <Navigate to="/login/admin" replace />;
   }
 

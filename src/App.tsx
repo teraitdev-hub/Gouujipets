@@ -121,7 +121,7 @@ function App() {
           <Route
             path="/admin/*"
             element={
-              <RequireAuth allowedRoles={['admin', 'superadmin']}>
+              <RequireAuth allowedRoles={['admin', 'superadmin', 'super_admin']}>
                 <AdminLayout>
                   <Routes>
                     <Route path="/" element={<Navigate to="dashboard" replace />} />
