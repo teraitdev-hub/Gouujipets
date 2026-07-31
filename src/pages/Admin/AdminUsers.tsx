@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { Users, Search, Filter, X } from "lucide-react";
 import { db } from "../../lib/firebase";
 import { collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export const AdminUsers = () => {
+  const { user } = useAuthStore();
+  const isSuper = user?.role === 'superadmin' || user?.role === 'super_admin';
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -200,12 +203,17 @@ export const AdminUsers = () => {
                 <select 
                   value={selectedUserForManage.role || "customer"} 
                   onChange={(e) => setSelectedUserForManage({ ...selectedUserForManage, role: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none cursor-pointer transition-all"
+                  disabled={!isSuper}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="customer">Customer / Pet Parent</option>
                   <option value="partner">Partner / Business Owner</option>
-                  <option value="admin">Administrator</option>
-                  <option value="superadmin">Super Administrator</option>
+                  {isSuper && (
+                    <>
+                      <option value="admin">Administrator</option>
+                      <option value="superadmin">Super Administrator</option>
+                    </>
+                  )}
                 </select>
               </div>
               <div className="space-y-1">

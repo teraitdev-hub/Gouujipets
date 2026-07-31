@@ -45,6 +45,14 @@ export const SuperAdminPortal = () => {
 
   const promoteToAdmin = async (email: string) => {
     if (!email) return;
+    
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("Invalid email format. Please enter a valid email address.");
+      return;
+    }
+
     try {
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('email', '==', email.toLowerCase()));
