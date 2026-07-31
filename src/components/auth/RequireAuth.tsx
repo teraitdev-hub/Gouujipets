@@ -29,6 +29,12 @@ export const RequireAuth = ({ children, allowedRoles }: RequireAuthProps) => {
     return <Navigate to="/login/user" state={{ from: location }} replace />;
   }
 
+  
+  // MANDATORY SECURITY INTERCEPTOR: All users must have a verified phone number
+  if (user && !user.phone && location.pathname !== '/auth/verify-phone') {
+    return <Navigate to="/auth/verify-phone" state={{ from: location }} replace />;
+  }
+
   if (allowedRoles && user?.role && !allowedRoles.includes(user.role as any)) {
     if (user.role === 'partner') {
       return <Navigate to="/partner/dashboard" replace />;

@@ -21,7 +21,16 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
   try {
     await db.collection("users").doc(user.uid).set(userProfile, { merge: true });
     // TODO: Send Welcome Email via SendGrid/Nodemailer here
+    
+    await db.collection('audit_logs').add({
+      action: 'USER_REGISTRATION',
+      user_id: user.uid,
+      email: user.email || "",
+      details: 'New user registered',
+      created_at: new Date().toISOString()
+    });
     console.log(`User profile created for ${user.uid}`);
+
   } catch (error) {
     console.error("Error creating user profile:", error);
   }
@@ -115,5 +124,41 @@ export const onUserRoleUpdate = functions.firestore
         created_at: new Date().toISOString()
       });
     }
+    return null;
+  });
+
+// 6. Audit Trigger: Auth Events (Registration and Login)
+export const onUserUpdate = functions.firestore
+  .document("users/{userId}")
+  .onUpdate(async (change, context) => {
+    const newData = change.after.data();
+    const previousData = change.before.data();
+    
+    const logs = [];
+    
+    // Check if login time changed
+    if (newData.lastLogin !== previousData.lastLogin) {
+      logs.push(db.collection('audit_logs').add({
+        action: 'USER_LOGIN',
+        user_id: context.params.userId,
+        email: newData.email,
+        details: 'User logged in successfully',
+        created_at: new Date().toISOString(),
+        ip_address: 'Logged via client', // IP isn't available in firestore trigger without client sending it
+        platform: 'Web/Mobile' 
+      }));
+    }
+
+    // Check if phone was verified/linked
+    if (newData.phone && !previousData.phone) {
+      logs.push(db.collection('audit_logs').add({
+        action: 'PHONE_VERIFICATION_COMPLETED',
+        user_id: context.params.userId,
+        details: `Phone ${newData.phone} linked to account`,
+        created_at: new Date().toISOString()
+      }));
+    }
+
+    await Promise.all(logs);
     return null;
   });
