@@ -54,8 +54,10 @@ service cloud.firestore {
         || isSuperAdmin()
       );
       
-      // Users can create their initial profile
-      allow create: if isOwner(userId);
+      // Users can create their initial profile (must include required fields)
+      allow create: if isOwner(userId) &&
+        request.resource.data.keys().hasAll(['uid', 'role', 'phone']) &&
+        request.resource.data.uid == userId;
       
       // Only Super Admins can delete users
       allow delete: if isSuperAdmin();

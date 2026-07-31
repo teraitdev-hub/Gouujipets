@@ -72,3 +72,5 @@ export const sanitizeText = (text: string) => {
   // Basic XSS protection: replace < and >
   return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 };
+
+export const isValidEmail = (email: string) => /^[^s@]+@[^s@]+\.[^s@]+$/.test(email);

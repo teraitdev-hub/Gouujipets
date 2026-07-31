@@ -27,7 +27,8 @@ import { FacilityDetails } from "./pages/FacilityDetails/FacilityDetails";
 import { Contact } from "./pages/Contact/Contact";
 import { Profile } from "./pages/Profile/Profile";
 import { UserLogin } from "./pages/Auth/UserLogin";
-import { CompleteVerification } from "./pages/Auth/CompleteVerification";
+import { CompleteRegistration } from "./pages/Auth/CompleteRegistration";
+import { VerifyEmail } from "./pages/Auth/VerifyEmail";
 import { PartnerLogin } from "./pages/Auth/PartnerLogin";
 import { AdminLogin } from "./pages/Auth/AdminLogin";
 import { ForgotPassword } from "./pages/Auth/ForgotPassword";
@@ -96,7 +97,8 @@ function App() {
           <Route path="/" element={<PublicHome />} />
           <Route path="/splash" element={<Splash />} />
           <Route path="/login/user" element={<UserLogin />} />
-        <Route path="/auth/verify-phone" element={<CompleteVerification />} />
+          <Route path="/complete-registration" element={<CompleteRegistration />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/partner/login" element={<PartnerLogin />} />
           <Route path="/login/admin" element={<AdminLogin />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

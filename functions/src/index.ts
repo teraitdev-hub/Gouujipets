@@ -4,35 +4,24 @@ import * as admin from "firebase-admin";
 admin.initializeApp();
 const db = admin.firestore();
 
-// 1. Auth Trigger: Create user profile on signup
+// 1. Auth Trigger: Create audit log on signup
 export const onUserCreate = functions.auth.user().onCreate(async (user) => {
-  const userProfile = {
-    uid: user.uid,
-    email: user.email || "",
-    name: user.displayName || "New User",
-    phone: user.phoneNumber || "",
-    role: "customer",
-    walletBalance: 0,
-    rewardPoints: 0,
-    createdDate: new Date().toISOString(),
-    isActive: true,
-  };
-
   try {
-    await db.collection("users").doc(user.uid).set(userProfile, { merge: true });
-    // TODO: Send Welcome Email via SendGrid/Nodemailer here
+    // We intentionally DO NOT create the Firestore 'users' document here anymore.
+    // That responsibility belongs to the CompleteRegistration flow to ensure 
+    // phone numbers and necessary details are provided before the account is active.
     
     await db.collection('audit_logs').add({
-      action: 'USER_REGISTRATION',
+      action: 'USER_REGISTRATION_STARTED',
       user_id: user.uid,
       email: user.email || "",
-      details: 'New user registered',
+      details: 'New user auth account created (pending full registration)',
       created_at: new Date().toISOString()
     });
-    console.log(`User profile created for ${user.uid}`);
+    console.log(`User auth created for ${user.uid}, pending profile completion.`);
 
   } catch (error) {
-    console.error("Error creating user profile:", error);
+    console.error("Error creating auth log:", error);
   }
 });
 

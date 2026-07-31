@@ -232,6 +232,12 @@ export const AdminBusinesses = () => {
                           <button onClick={() => handleUpdateStatus(facility.id, 'rejected', facility.owner_id)} className="px-3 py-1 bg-red-100 text-red-700 hover:bg-red-200 text-[10px] font-black rounded w-full sm:w-auto text-center">
                             Reject
                           </button>
+                          <button 
+                            onClick={() => setSelectedBizForManage(facility)}
+                            className="px-3 py-1 bg-purple-100 text-purple-700 hover:bg-purple-200 text-[10px] font-black rounded w-full sm:w-auto text-center"
+                          >
+                            View Details
+                          </button>
                         </div>
                       ) : (
                         <button 

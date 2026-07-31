@@ -640,7 +640,7 @@ export const AdminDashboard = () => {
                             onClick={() => inspectPartnerDetails(b)}
                             className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white font-black text-[10px] rounded-lg transition-all shadow-2xs inline-block"
                           >
-                            Inspect Ledger
+                            {b.status === 'pending' ? 'View Details' : 'Inspect Ledger'}
                           </button>
                         </td>
                       </tr>
@@ -662,8 +662,34 @@ export const AdminDashboard = () => {
                     onClick={() => setSelectedPartnerBiz(null)}
                     className="text-purple-500 font-bold text-xs"
                   >
-                    ✕ Close Audit
+                    ✕ Close Details
                   </button>
+                </div>
+
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <h4 className="text-xs font-black text-slate-800 uppercase mb-3">Registration Details</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div><span className="font-bold text-slate-500">Business Name:</span> <span className="font-medium">{selectedPartnerBiz.name}</span></div>
+                    <div><span className="font-bold text-slate-500">Facility Type:</span> <span className="font-medium capitalize">{selectedPartnerBiz.type || 'boarding'}</span></div>
+                    <div><span className="font-bold text-slate-500">Services Offered:</span> <span className="font-medium">{(selectedPartnerBiz.services || []).join(', ')}</span></div>
+                    <div><span className="font-bold text-slate-500">Full Address:</span> <span className="font-medium">{selectedPartnerBiz.address || 'N/A'}</span></div>
+                    <div><span className="font-bold text-slate-500">GST Number:</span> <span className="font-medium">{selectedPartnerBiz.gstNumber || 'N/A'}</span></div>
+                    <div><span className="font-bold text-slate-500">Owner Name:</span> <span className="font-medium">{selectedPartnerBiz.owner_details?.full_name || 'N/A'}</span></div>
+                    <div><span className="font-bold text-slate-500">Owner Phone:</span> <span className="font-medium">{selectedPartnerBiz.owner_details?.phone || 'N/A'}</span></div>
+                    <div><span className="font-bold text-slate-500">Owner Email:</span> <span className="font-medium">{selectedPartnerBiz.owner_details?.email || 'N/A'}</span></div>
+                  </div>
+                  {selectedPartnerBiz.certificates && selectedPartnerBiz.certificates.length > 0 && (
+                    <div className="mt-4">
+                      <span className="font-bold text-slate-500 text-xs">Uploaded Certificates / IDs:</span>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedPartnerBiz.certificates.map((certUrl: string, idx: number) => (
+                          <a key={idx} href={certUrl} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 bg-purple-100 text-purple-700 hover:bg-purple-200 font-bold text-[10px] uppercase rounded-lg transition-colors">
+                            View Document {idx + 1}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
