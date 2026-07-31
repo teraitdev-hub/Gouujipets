@@ -69,14 +69,17 @@ export const AdminLogin = () => {
 
       if (assignedRole !== role) {
         role = assignedRole;
-        import('firebase/firestore').then(({ setDoc }) => {
-          setDoc(docRef, {
+        try {
+          const { setDoc } = await import('firebase/firestore');
+          await setDoc(docRef, {
             full_name: userData?.full_name || 'Super Admin',
             email: userEmail,
             role: role,
             created_at: userData?.created_at || new Date().toISOString()
-          }, { merge: true }).catch(console.error);
-        });
+          }, { merge: true });
+        } catch (dbErr) {
+          console.error("Failed to set admin role in DB", dbErr);
+        }
       }
 
       if (role !== 'admin' && role !== 'super_admin' && role !== 'superadmin') {
