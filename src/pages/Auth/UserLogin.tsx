@@ -152,13 +152,26 @@ export const UserLogin = () => {
       if (err.code === "auth/email-already-in-use" || err.message?.includes("email-already-in-use")) {
         // Try sign-in if password was entered
         try {
-          await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
+          const userCredential = await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
+          const uid = userCredential.user.uid;
+          
+          // They successfully authenticated but the outer block failed to register them.
+          // Since they are logging in from the register form, auto-repair their missing Firestore user doc
+          const { setDoc, doc } = await import('firebase/firestore');
+          await setDoc(doc(db, "users", uid), {
+            full_name: formData.name || "Customer",
+            email: finalEmail,
+            role: "customer",
+            loginMethod: 'email',
+            created_at: new Date().toISOString()
+          }, { merge: true });
+
           await useAuthStore.getState().loadUser();
           navigate(intendedRoute || "/dashboard");
           setIntendedRoute(null);
         } catch (signInErr) {
           setIsLogin(true);
-          setError("An account with this email already exists. We switched you to the 'Sign In' tab뿯½뿯₽”please enter your password to sign in.");
+          setError("An account with this email already exists. We switched you to the 'Sign In' tab—please enter your password to sign in.");
         }
       } else if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.message?.includes("invalid-credential")) {
         try {

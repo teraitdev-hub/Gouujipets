@@ -314,10 +314,56 @@ export const PartnerLogin = () => {
           await signOut(auth);
           setPendingGoogleUser(null);
           setShowApprovalModal(true);
+          await signOut(auth);
+          setPendingGoogleUser(null);
+          setShowApprovalModal(true);
         } catch (regErr: any) {
           if (regErr.code === "auth/email-already-in-use") {
-            setIsLogin(true);
-            setError("This email is already registered. We've switched you to Sign In. Please enter your password to log in, or use 'Forgot?' to reset it.");
+            try {
+              // Try to sign in. If it succeeds, it means they are an existing auth user missing a firestore document (e.g. after a wipe)
+              const userCredential = await signInWithEmailAndPassword(auth, finalEmail, formData.password);
+              const uid = userCredential.user.uid;
+              
+              // Proceed to create their missing documents using the registration form data
+              await setDoc(doc(db, "users", uid), {
+                full_name: formData.name,
+                phone: validPhone ? loginIdentifier : formData.phone,
+                email: pendingGoogleUser ? pendingGoogleUser.email : (validPhone ? '' : loginIdentifier),
+                role: "partner",
+                loginMethod: pendingGoogleUser ? 'google' : 'email'
+              }, { merge: true });
+
+              const bizRef = await addDoc(collection(db, "businesses"), {
+                owner_id: uid,
+                name: formData.businessName || `${formData.name}'s Facility`,
+                type: facilityTypes[0] || "boarding",
+                services: facilityTypes,
+                address: `${formData.street}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
+                latitude: lat, // from outer scope
+                longitude: lng, // from outer scope
+                certificates: [], // skip certs for recovery
+                status: "pending",
+                created_at: new Date().toISOString()
+              });
+
+              await addDoc(collection(db, "admin_notifications"), {
+                title: "New Partner Registration Pending",
+                message: `${formData.name} registered a new facility (${facilityTypes.join(", ")}) requiring admin verification.`,
+                business_id: bizRef.id,
+                owner_id: uid,
+                type: "partner_registration",
+                read: false,
+                created_at: new Date().toISOString()
+              });
+
+              await signOut(auth);
+              setPendingGoogleUser(null);
+              setShowApprovalModal(true);
+            } catch (recoveryErr) {
+               // If sign in fails, standard flow
+               setIsLogin(true);
+               setError("This email is already registered. We've switched you to Sign In. Please enter your password to log in, or use 'Forgot?' to reset it.");
+            }
           } else {
             setError(regErr.message || "Registration failed.");
           }
