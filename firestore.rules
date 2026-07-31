@@ -23,14 +23,16 @@ service cloud.firestore {
         getUserData().role == 'super_admin' ||
         request.auth.token.email == 'admin@gouujipets.com' ||
         request.auth.token.email == 'admin@example.com' ||
-        request.auth.token.email == 'admin@gmail.com'
+        request.auth.token.email == 'admin@gmail.com' ||
+        request.auth.token.email == 'rachanuthappa@gmail.com'
       );
     }
     
     function isSuperAdmin() {
       return isAuthenticated() && (
         getUserData().role == 'super_admin' ||
-        request.auth.token.email == 'admin@gouujipets.com'
+        request.auth.token.email == 'admin@gouujipets.com' ||
+        request.auth.token.email == 'rachanuthappa@gmail.com'
       );
     }
     

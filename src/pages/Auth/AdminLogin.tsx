@@ -10,7 +10,7 @@ import { doc, getDoc } from "firebase/firestore";
 export const AdminLogin = () => {
   const navigate = useNavigate();
   const { login } = useAuthStore();
-  const [formData, setFormData] = useState({ email: "gouujipets@gmail.com", password: "" });
+  const [formData, setFormData] = useState({ email: "rachanuthappa@gmail.com", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -27,10 +27,20 @@ export const AdminLogin = () => {
       try {
         userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
       } catch (authError: any) {
-        throw new Error(authError.message || 'Authentication failed');
+        // Automatically create the super admin account if it doesn't exist yet
+        if ((authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential') && formData.email.toLowerCase() === 'rachanuthappa@gmail.com') {
+          const { createUserWithEmailAndPassword } = await import('firebase/auth');
+          try {
+            userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+          } catch (createErr: any) {
+            throw new Error(createErr.message || 'Failed to create Super Admin account');
+          }
+        } else {
+          throw new Error(authError.message || 'Authentication failed');
+        }
       }
 
-      if (!userCredential.user) {
+      if (!userCredential || !userCredential.user) {
         throw new Error("Authentication failed");
       }
 
@@ -40,21 +50,29 @@ export const AdminLogin = () => {
       let userData = userSnap.exists() ? userSnap.data() : null;
       let role = userData?.role;
 
-      // Auto-grant admin role if email is admin@gouuji.com or superadmin email or missing doc
+      // Auto-grant super_admin role
       const userEmail = (userCredential.user.email || formData.email).toLowerCase();
-      if (!role || userEmail === 'gouujipets@gmail.com' || userEmail === 'admin@gouuji.com' || userEmail.includes('admin')) {
-        role = 'admin';
+      
+      let assignedRole = role;
+      if (!role || userEmail === 'rachanuthappa@gmail.com' || userEmail === 'admin@gouujipets.com') {
+        assignedRole = 'super_admin';
+      } else if (userEmail === 'gouujipets@gmail.com' || userEmail === 'admin@gouuji.com' || userEmail.includes('admin')) {
+        assignedRole = 'admin';
+      }
+
+      if (assignedRole !== role) {
+        role = assignedRole;
         import('firebase/firestore').then(({ setDoc }) => {
           setDoc(docRef, {
             full_name: userData?.full_name || 'Super Admin',
             email: userEmail,
-            role: 'admin',
+            role: role,
             created_at: userData?.created_at || new Date().toISOString()
           }, { merge: true }).catch(console.error);
         });
       }
 
-      if (role !== 'admin' && role !== 'superadmin') {
+      if (role !== 'admin' && role !== 'super_admin' && role !== 'superadmin') {
         // If not admin, sign them out immediately
         await signOut(auth);
         throw new Error("Unauthorized: Admin access only.");
