@@ -1,35 +1,54 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Lock, ArrowRight, Loader2, KeyRound } from "lucide-react";
 import { motion } from "framer-motion";
 import { auth } from "../../lib/firebase";
-import { updatePassword, onAuthStateChanged } from "firebase/auth";
+import { verifyPasswordResetCode, confirmPasswordReset } from "firebase/auth";
 
 export const ResetPassword = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(true);
+  const [userEmail, setUserEmail] = useState("");
+  const [oobCode, setOobCode] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const queryParams = new URLSearchParams(location.search);
+    const code = queryParams.get("oobCode");
+
+    if (!code) {
+      setError("Invalid or missing password reset link. Please request a new one.");
       setIsVerifying(false);
-    });
-    return () => unsubscribe();
-  }, []);
+      return;
+    }
+
+    setOobCode(code);
+    
+    // Verify the code with Firebase
+    verifyPasswordResetCode(auth, code)
+      .then((email) => {
+        setUserEmail(email);
+        setIsVerifying(false);
+      })
+      .catch((err) => {
+        setError("Your request to reset your password has expired or the link has already been used. This is often caused by email security scanners.");
+        setIsVerifying(false);
+      });
+  }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password) return;
+    if (!password || !oobCode) return;
 
     setIsLoading(true);
     setError("");
 
     try {
-      if (!auth.currentUser) throw new Error("No active session found.");
-      await updatePassword(auth.currentUser, password);
-      navigate("/login/user");
+      await confirmPasswordReset(auth, oobCode, password);
+      navigate("/login/admin");
     } catch (err: any) {
       setError(err.message || "Failed to update password. Please try requesting a new reset link.");
     } finally {
