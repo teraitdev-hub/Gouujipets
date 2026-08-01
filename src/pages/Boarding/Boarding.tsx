@@ -296,7 +296,7 @@ export const Boarding = () => {
             ))}
           </div>
         ) : filteredFacilities.length > 0 ? (
-          <div className="flex flex-col border border-slate-200 rounded-sm bg-white overflow-hidden">
+          <div className="flex flex-col gap-3">
             {filteredFacilities.map((facility, index) => (
               <motion.div
                 key={facility.id}
@@ -304,7 +304,7 @@ export const Boarding = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
                 onClick={() => navigate(`/facility/${facility.id}`, { state: { facility, selectedServices: selectedServicesFilter } })}
-                className="group cursor-pointer bg-white border-b border-slate-200 last:border-0 hover:bg-slate-50 transition-colors duration-200 flex flex-row relative"
+                className="group cursor-pointer bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:bg-slate-50 transition-colors duration-200 flex flex-row relative"
               >
                 {/* Image */}
                 <div className="w-[88px] sm:w-28 shrink-0 relative bg-slate-50 overflow-hidden flex self-stretch min-h-[72px] sm:min-h-[64px]">
