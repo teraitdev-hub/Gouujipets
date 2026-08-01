@@ -333,22 +333,6 @@ export const Boarding = () => {
                         <span className="text-[8px] text-slate-500 font-medium hidden sm:inline">120 Ratings</span>
                       </div>
                       <div className="hidden sm:block w-px h-2.5 bg-slate-200"></div>
-                      <div className="flex flex-wrap gap-1">
-                        {(() => {
-                          const typeStr = facility.type || 'Boarding';
-                          const types = typeStr.split(',').map((t: string) => t.trim()).filter(Boolean);
-                          return types.map((t: string, idx: number) => {
-                            const catInfo = getCategoryById(t.toLowerCase());
-                            return (
-                              <div key={idx} className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-[8px] font-black tracking-tight uppercase flex items-center gap-0.5 border border-purple-200">
-                                {catInfo ? <catInfo.icon size={8} className="shrink-0" /> : <CheckCircle size={8} className="shrink-0" />}
-                                <span>{catInfo ? catInfo.name : t}</span>
-                              </div>
-                            );
-                          });
-                        })()}
-                      </div>
-                      <div className="hidden sm:block w-px h-2.5 bg-slate-200"></div>
                       <div className="flex items-center gap-0.5 text-[9px] font-medium text-slate-600 min-w-0">
                         <MapPin size={9} className="shrink-0 text-slate-400" />
                         <span className="truncate max-w-[100px] sm:max-w-[120px] lg:max-w-none">{typeof facility.address === 'string' ? facility.address : (facility.address?.city || 'Verified Location')}</span>
@@ -381,6 +365,23 @@ export const Boarding = () => {
                           });
                         })()}
                       </div>
+                    </div>
+                    
+                    {/* Category Tags Row (Below Ratings) */}
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {(() => {
+                        const typeStr = facility.type || 'Boarding';
+                        const types = typeStr.split(',').map((t: string) => t.trim()).filter(Boolean);
+                        return types.map((t: string, idx: number) => {
+                          const catInfo = getCategoryById(t.toLowerCase());
+                          return (
+                            <div key={idx} className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-[8px] font-black tracking-tight uppercase flex items-center gap-0.5 border border-purple-200">
+                              {catInfo ? <catInfo.icon size={8} className="shrink-0" /> : <CheckCircle size={8} className="shrink-0" />}
+                              <span>{catInfo ? catInfo.name : t}</span>
+                            </div>
+                          );
+                        });
+                      })()}
                     </div>
                   </div>
                   
