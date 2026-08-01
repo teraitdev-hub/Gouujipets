@@ -1,4 +1,5 @@
 import { type ReactNode, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { PartnerSidebar } from "../navigation/PartnerSidebar";
 import { Menu, Search, ShieldCheck, Sparkles, Star, Phone } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -14,6 +15,7 @@ export const PartnerLayout = ({ children }: PartnerLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [businessName, setBusinessName] = useState<string | null>(null);
   const [businessCategory, setBusinessCategory] = useState<string | null>(null);
@@ -115,13 +117,16 @@ export const PartnerLayout = ({ children }: PartnerLayoutProps) => {
               <NotificationBell />
             </div>
 
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-2 border-purple-200 bg-purple-600 flex items-center justify-center text-white font-black text-sm shadow-md overflow-hidden shrink-0">
+            <button
+              onClick={() => navigate("/partner/profile")}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border-2 border-purple-200 bg-purple-600 flex items-center justify-center text-white font-black text-sm shadow-md overflow-hidden shrink-0 cursor-pointer hover:ring-2 hover:ring-purple-300 transition-all"
+            >
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Business" className="w-full h-full object-cover" />
               ) : (
-                <span>{(businessName || user?.full_name || "GP").substring(0, 1).toUpperCase()}</span>
+                businessName ? businessName.charAt(0) : "P"
               )}
-            </div>
+            </button>
           </div>
         </header>
 
