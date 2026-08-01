@@ -2,6 +2,7 @@ import { type ReactNode, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Sidebar } from "../navigation/Sidebar";
 import { BottomNav } from "../navigation/BottomNav";
+import { ServiceQuickLinks } from "../navigation/ServiceQuickLinks";
 import { Menu } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 
@@ -55,6 +56,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               : "p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full"
           }`}
         >
+          <ServiceQuickLinks />
           <div className="relative z-10">{children}</div>
         </main>
       </div>

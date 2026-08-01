@@ -13,12 +13,16 @@ const publicNavItems = [
 export const PublicBottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { openLoginModal } = useAuthStore();
+  const { isAuthenticated, openLoginModal } = useAuthStore();
 
   const handleAction = (e: React.MouseEvent, item: any) => {
+    e.preventDefault();
     if (item.action === "login") {
-      e.preventDefault();
-      openLoginModal();
+      if (isAuthenticated) {
+        navigate(item.name === "Profile" ? "/profile" : "/pets");
+      } else {
+        openLoginModal();
+      }
     } else {
       navigate(item.path);
     }

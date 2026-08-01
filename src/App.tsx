@@ -56,6 +56,7 @@ import { PartnerEmployees } from "./pages/Partner/PartnerEmployees";
 import { RefundPolicy } from "./pages/Legal/RefundPolicy";
 import { PrivacyPolicy } from "./pages/Legal/PrivacyPolicy";
 import { TermsOfService } from "./pages/Legal/TermsOfService";
+import { ServiceQuickLinks } from "./components/navigation/ServiceQuickLinks";
 
 import { AdminSettings } from "./pages/Admin/AdminSettings";
 
@@ -63,6 +64,7 @@ import { AdminSettings } from "./pages/Admin/AdminSettings";
 const PublicLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col">
     <PublicNavbar />
+    <ServiceQuickLinks />
     <main className="flex-1">
       {children}
     </main>
