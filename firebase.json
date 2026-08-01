@@ -26,10 +26,12 @@
   },
   "firestore": {
     "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
+    "indexes": "firestore.indexes.json",
+    "database": "(default)"
   },
   "storage": {
-    "rules": "storage.rules"
+    "rules": "storage.rules",
+    "bucket": "gouujipets.firebasestorage.app"
   },
   "functions": {
     "source": "functions"
@@ -40,6 +42,7 @@
     "ignore": [
       "node_modules",
       ".git"
-    ]
+    ],
+    "alwaysDeployFromSource": true
   }
 }
