@@ -258,28 +258,7 @@ export const Boarding = () => {
           </button>
         </div>
 
-        {/* VERIFIED Quick Filter Pills in Light Purple */}
-        <div className="mt-2.5 flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-bold -mx-2.5 px-2.5 sm:mx-0 sm:px-0">
-          <span className="text-purple-700 font-extrabold text-[11px] uppercase tracking-wider shrink-0 mr-1">Quick Filters:</span>
-          {[
-            { label: "⭐ Top Rated (4.8+)", filter: "4.8" },
-            { label: "⚡ 24/7 Emergency", filter: "24/7" },
-            { label: "❄️ AC Deluxe Rooms", filter: "AC" },
-            { label: "🏥 Vet On-Call", filter: "Vet" },
-            { label: "🛡️ Verified Partner", filter: "Verified" }
-          ].map((item, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                const keyword = item.filter;
-                setSearchQuery(prev => prev.includes(keyword) ? prev.replace(keyword, "").trim() : `${prev} ${keyword}`.trim());
-              }}
-              className="bg-white hover:bg-purple-100 text-purple-900 px-3 py-1 rounded-full text-[11px] shrink-0 border border-purple-200 transition-all shadow-2xs font-bold"
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+
 
         {/* Active Required Services Bar */}
         {selectedServicesFilter.length > 0 && (
@@ -334,14 +313,20 @@ export const Boarding = () => {
                     alt={facility.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute top-1 left-1 bg-white/95 backdrop-blur-md px-1 py-0.5 rounded-sm flex items-center gap-0.5 shadow-sm border border-slate-200">
+                  <div className="absolute top-1 left-1 flex flex-row flex-wrap gap-1 w-[calc(100%-8px)] overflow-hidden">
                     {(() => {
-                      const catInfo = getCategoryById(facility.type?.toLowerCase());
-                      return catInfo ? (
-                        <><catInfo.icon size={8} className="text-purple-600" /><span className="text-[8px] font-black text-purple-950 uppercase tracking-tight">{catInfo.name}</span></>
-                      ) : (
-                        <><CheckCircle size={8} className="text-purple-600" /><span className="text-[8px] font-black text-purple-950 uppercase tracking-tight">{facility.type || 'Boarding'}</span></>
-                      );
+                      const typeStr = facility.type || 'Boarding';
+                      const types = typeStr.split(',').map((t: string) => t.trim()).filter(Boolean);
+                      
+                      return types.map((t: string, idx: number) => {
+                        const catInfo = getCategoryById(t.toLowerCase());
+                        return (
+                          <div key={idx} className="bg-white/95 backdrop-blur-md px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm border border-slate-200 max-w-full">
+                            {catInfo ? <catInfo.icon size={8} className="text-purple-600 shrink-0" /> : <CheckCircle size={8} className="text-purple-600 shrink-0" />}
+                            <span className="text-[8px] font-black text-purple-950 uppercase tracking-tight truncate">{catInfo ? catInfo.name : t}</span>
+                          </div>
+                        );
+                      });
                     })()}
                   </div>
 
