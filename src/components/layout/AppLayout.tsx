@@ -5,7 +5,6 @@ import { BottomNav } from "../navigation/BottomNav";
 import { ServiceQuickLinks } from "../navigation/ServiceQuickLinks";
 import { PublicNavbar } from "./PublicNavbar";
 import { Menu } from "lucide-react";
-import { NotificationBell } from "./NotificationBell";
 import { useAuthStore } from "../../store/useAuthStore";
 
 interface AppLayoutProps {
@@ -56,8 +55,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
             </div>
             
             <div className="flex items-center gap-3">
-              <NotificationBell />
-              <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
+              <div className="flex items-center gap-2">
                 <button 
                   onClick={() => navigate("/profile")}
                   className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-black text-xs shadow-sm overflow-hidden hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer shrink-0"

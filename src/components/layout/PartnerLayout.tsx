@@ -5,7 +5,6 @@ import { Menu, Search, ShieldCheck, Sparkles, Star, Phone } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { db } from "../../lib/firebase";
 import { collection, query, where, limit, getDocs } from "firebase/firestore";
-import { NotificationBell } from "./NotificationBell";
 
 interface PartnerLayoutProps {
   children: ReactNode;
@@ -111,10 +110,6 @@ export const PartnerLayout = ({ children }: PartnerLayoutProps) => {
             <div className="hidden sm:flex items-center gap-1.5 bg-green-50 px-2.5 py-1.5 rounded-lg border border-green-200 text-[11px] font-bold text-green-700 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
               <span>Live Stays</span>
-            </div>
-
-            <div className="shrink-0">
-              <NotificationBell />
             </div>
 
             <button

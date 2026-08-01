@@ -3,7 +3,6 @@ import { AdminSidebar } from "../navigation/AdminSidebar";
 import { Menu, Search, ShieldCheck } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 import { Navigate } from "react-router-dom";
-import { NotificationBell } from "./NotificationBell";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -61,8 +60,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
           </div>
           
           <div className="flex items-center gap-3">
-            <NotificationBell />
-            <div className="flex items-center gap-2 pl-3 border-l border-purple-200">
+            <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-xs shadow-sm border border-purple-400">
                 SA
               </div>

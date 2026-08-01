@@ -11,6 +11,13 @@ export const PublicNavbar = () => {
   const [selectedLocation, setSelectedLocation] = useState("Bangalore / Near Me");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const getInitial = () => {
+    if (user?.name) return user.name.charAt(0).toUpperCase();
+    if (user?.full_name) return user.full_name.charAt(0).toUpperCase();
+    if (user?.email) return user.email.charAt(0).toUpperCase();
+    return "U";
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -102,14 +109,18 @@ export const PublicNavbar = () => {
           ) : (
             <button
               onClick={() => {
-                if (user?.role === 'partner') navigate("/partner/dashboard");
-                else if (user?.role === 'admin' || user?.role === 'superadmin') navigate("/admin/dashboard");
-                else navigate("/dashboard");
+                if (user?.role === 'partner') navigate("/partner/profile");
+                else if (user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'super_admin') navigate("/admin/dashboard");
+                else navigate("/profile");
               }}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs transition-colors shadow-sm"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-sm overflow-hidden hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer shrink-0"
+              title="My Profile"
             >
-              <User size={14} className="stroke-[2.5]" />
-              <span>Dashboard</span>
+              {user?.photoUrl ? (
+                <img src={user.photoUrl} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                getInitial()
+              )}
             </button>
           )}
 
