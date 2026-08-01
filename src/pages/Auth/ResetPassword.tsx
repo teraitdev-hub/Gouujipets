@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { Lock, ArrowRight, Loader2, KeyRound } from "lucide-react";
 import { motion } from "framer-motion";
 import { auth } from "../../lib/firebase";
-import { verifyPasswordResetCode, confirmPasswordReset } from "firebase/auth";
+import { verifyPasswordResetCode, confirmPasswordReset, updatePassword, onAuthStateChanged } from "firebase/auth";
 
 export const ResetPassword = () => {
   const navigate = useNavigate();
@@ -18,6 +18,20 @@ export const ResetPassword = () => {
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const code = queryParams.get("oobCode");
+    const method = queryParams.get("method");
+
+    if (method === "phone") {
+      // User verified via OTP, wait for auth state
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setIsVerifying(false);
+        } else {
+          setError("Authentication session not found. Please verify your phone number again.");
+          setIsVerifying(false);
+        }
+      });
+      return () => unsubscribe();
+    }
 
     if (!code) {
       setError("Invalid or missing password reset link. Please request a new one.");
@@ -41,14 +55,25 @@ export const ResetPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password || !oobCode) return;
+    const queryParams = new URLSearchParams(location.search);
+    const method = queryParams.get("method");
+
+    if (method === "phone") {
+      if (!password || !auth.currentUser) return;
+    } else {
+      if (!password || !oobCode) return;
+    }
 
     setIsLoading(true);
     setError("");
 
     try {
-      await confirmPasswordReset(auth, oobCode, password);
-      navigate("/login/admin");
+      if (method === "phone" && auth.currentUser) {
+        await updatePassword(auth.currentUser, password);
+      } else if (oobCode) {
+        await confirmPasswordReset(auth, oobCode, password);
+      }
+      navigate("/login/user");
     } catch (err: any) {
       setError(err.message || "Failed to update password. Please try requesting a new reset link.");
     } finally {
