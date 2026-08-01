@@ -313,27 +313,6 @@ export const Boarding = () => {
                     alt={facility.name}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute top-1 left-1 flex flex-row flex-wrap gap-1 w-[calc(100%-8px)] overflow-hidden">
-                    {(() => {
-                      const typeStr = facility.type || 'Boarding';
-                      const types = typeStr.split(',').map((t: string) => t.trim()).filter(Boolean);
-                      
-                      return types.map((t: string, idx: number) => {
-                        const catInfo = getCategoryById(t.toLowerCase());
-                        return (
-                          <div key={idx} className="bg-white/95 backdrop-blur-md px-1.5 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm border border-slate-200 max-w-full">
-                            {catInfo ? <catInfo.icon size={8} className="text-purple-600 shrink-0" /> : <CheckCircle size={8} className="text-purple-600 shrink-0" />}
-                            <span className="text-[8px] font-black text-purple-950 uppercase tracking-tight truncate">{catInfo ? catInfo.name : t}</span>
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-
-                  <div className="absolute bottom-1 left-1 bg-white/95 backdrop-blur-md px-1 py-0.5 rounded-sm flex items-center gap-0.5 shadow-sm border border-slate-200">
-                    <Star size={8} className="text-purple-600 fill-purple-600" />
-                    <span className="text-[9px] font-black text-purple-950">{facility.rating}</span>
-                  </div>
                 </div>
                 
                 {/* Content - Justdial Inspired Ultra Thin Mobile Optimized */}
@@ -347,6 +326,22 @@ export const Boarding = () => {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5">
+                      <div className="flex flex-wrap gap-1">
+                        {(() => {
+                          const typeStr = facility.type || 'Boarding';
+                          const types = typeStr.split(',').map((t: string) => t.trim()).filter(Boolean);
+                          return types.map((t: string, idx: number) => {
+                            const catInfo = getCategoryById(t.toLowerCase());
+                            return (
+                              <div key={idx} className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-[8px] font-black tracking-tight uppercase flex items-center gap-0.5 border border-purple-200">
+                                {catInfo ? <catInfo.icon size={8} className="shrink-0" /> : <CheckCircle size={8} className="shrink-0" />}
+                                <span>{catInfo ? catInfo.name : t}</span>
+                              </div>
+                            );
+                          });
+                        })()}
+                      </div>
+                      <div className="hidden sm:block w-px h-2.5 bg-slate-200"></div>
                       <div className="flex items-center gap-1">
                         <span className="bg-green-600 text-white px-1.5 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5">
                           {facility.rating} <Star size={8} className="fill-white" />
