@@ -57,31 +57,22 @@ import { RefundPolicy } from "./pages/Legal/RefundPolicy";
 import { PrivacyPolicy } from "./pages/Legal/PrivacyPolicy";
 import { TermsOfService } from "./pages/Legal/TermsOfService";
 import { ServiceQuickLinks } from "./components/navigation/ServiceQuickLinks";
+import { BottomNav } from "./components/navigation/BottomNav";
 
 import { AdminSettings } from "./pages/Admin/AdminSettings";
 
-// A simple wrapper for public pages that need the PublicNavbar
 const PublicLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user } = useAuthStore();
-  
-  if (isAuthenticated && user?.role === 'customer') {
-    return (
-      <PetProvider>
-        <AppLayout>
-          {children}
-        </AppLayout>
-      </PetProvider>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col pb-16 md:pb-0">
       <PublicNavbar />
       <ServiceQuickLinks />
       <main className="flex-1">
         {children}
       </main>
       <PublicFooter />
+      {isAuthenticated && <BottomNav />}
     </div>
   );
 };
