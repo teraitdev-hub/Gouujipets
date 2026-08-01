@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { PawPrint, Mail, Lock, ArrowRight, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
@@ -11,16 +11,16 @@ import { collection, addDoc, getDocs, query, where, limit } from "firebase/fires
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
 
 const SERVICE_INFO: Record<string, { title: string, desc: string, icon: string }> = {
-  boarding: { title: "Pet Boarding", desc: "A safe, comfortable, and loving home away from home for your pets. Our trusted boarding partners provide clean accommodations, personalized care, nutritious meals, regular exercise, and 24/7 supervision to ensure your pet feels happy and secure while you're away.", icon: "뿯½Ÿ뿯½뿯½" },
-  daycare: { title: "Pet Daycare", desc: "Give your pet a fun and active day filled with supervised play, socialization, exercise, and plenty of attention. Perfect for busy pet parents who want their pets to stay engaged and cared for throughout the day.", icon: "뿯½ŸŒž" },
-  grooming: { title: "Grooming & Spa", desc: "Keep your pet looking and feeling their best with professional grooming services, including bathing, hair trimming, nail clipping, ear cleaning, coat brushing, dental hygiene, and relaxing spa treatments.", icon: "뿯½Ÿ’‡" },
-  veterinary: { title: "Veterinary Care", desc: "Connect with experienced veterinarians for routine health checkups, vaccinations, preventive care, medical consultations, diagnostics, emergency treatment, and personalized health advice to keep your pet healthy.", icon: "뿯½Ÿ뿯½뿯½" },
-  training: { title: "Pet Training", desc: "Professional trainers help pets develop good behavior, obedience, social skills, and confidence through customized training programs designed for puppies, adult pets, and pets with behavioral challenges.", icon: "뿯½ŸŽ“" },
-  walking: { title: "Dog Walking", desc: "Reliable dog walkers provide safe and enjoyable walks that help your dog stay active, healthy, mentally stimulated, and happy뿯½뿯₽”even when you're busy.", icon: "뿯½Ÿš뿯½" },
-  transportation: { title: "Pet Transportation", desc: "Convenient and secure pickup and drop-off services ensure your pet travels safely between your home, boarding center, grooming salon, veterinary clinic, or daycare facility.", icon: "뿯½Ÿš—" },
-  shop: { title: "Pet Shop", desc: "Shop premium pet food, treats, toys, accessories, grooming products, healthcare essentials, and other pet supplies from trusted brands뿯½뿯₽”all in one place.", icon: "뿯½Ÿ›뿯½뿯½뿯½뿯½" },
-  health_tracking: { title: "Pet Health Tracking", desc: "Maintain a complete digital health profile with vaccination records, medical history, medications, weight tracking, appointment reminders, and wellness reports뿯½뿯₽”all accessible anytime.", icon: "뿯½Ÿ“뿯½" },
-  default: { title: "Welcome to Goujji Pets", desc: "Join India's #1 verified pet care marketplace. Find trusted pet care providers, compare services, view availability, book instantly, make secure payments, and manage all your reservations through a single platform.", icon: "뿯½œ뿯½" }
+  boarding: { title: "Pet Boarding", desc: "A safe, comfortable, and loving home away from home for your pets. Our trusted boarding partners provide clean accommodations, personalized care, nutritious meals, regular exercise, and 24/7 supervision to ensure your pet feels happy and secure while you're away.", icon: "δ┐»┬╜┼╕δ┐»┬╜δ┐»┬╜" },
+  daycare: { title: "Pet Daycare", desc: "Give your pet a fun and active day filled with supervised play, socialization, exercise, and plenty of attention. Perfect for busy pet parents who want their pets to stay engaged and cared for throughout the day.", icon: "δ┐»┬╜┼╕┼Æ┼╛" },
+  grooming: { title: "Grooming & Spa", desc: "Keep your pet looking and feeling their best with professional grooming services, including bathing, hair trimming, nail clipping, ear cleaning, coat brushing, dental hygiene, and relaxing spa treatments.", icon: "δ┐»┬╜┼╕ΓÇÖΓÇí" },
+  veterinary: { title: "Veterinary Care", desc: "Connect with experienced veterinarians for routine health checkups, vaccinations, preventive care, medical consultations, diagnostics, emergency treatment, and personalized health advice to keep your pet healthy.", icon: "δ┐»┬╜┼╕δ┐»┬╜δ┐»┬╜" },
+  training: { title: "Pet Training", desc: "Professional trainers help pets develop good behavior, obedience, social skills, and confidence through customized training programs designed for puppies, adult pets, and pets with behavioral challenges.", icon: "δ┐»┬╜┼╕┼╜ΓÇ£" },
+  walking: { title: "Dog Walking", desc: "Reliable dog walkers provide safe and enjoyable walks that help your dog stay active, healthy, mentally stimulated, and happyδ┐»┬╜δ┐»Γé╜ΓÇ¥even when you're busy.", icon: "δ┐»┬╜┼╕┼íδ┐»┬╜" },
+  transportation: { title: "Pet Transportation", desc: "Convenient and secure pickup and drop-off services ensure your pet travels safely between your home, boarding center, grooming salon, veterinary clinic, or daycare facility.", icon: "δ┐»┬╜┼╕┼íΓÇö" },
+  shop: { title: "Pet Shop", desc: "Shop premium pet food, treats, toys, accessories, grooming products, healthcare essentials, and other pet supplies from trusted brandsδ┐»┬╜δ┐»Γé╜ΓÇ¥all in one place.", icon: "δ┐»┬╜┼╕ΓÇ║δ┐»┬╜δ┐»┬╜δ┐»┬╜δ┐»┬╜" },
+  health_tracking: { title: "Pet Health Tracking", desc: "Maintain a complete digital health profile with vaccination records, medical history, medications, weight tracking, appointment reminders, and wellness reportsδ┐»┬╜δ┐»Γé╜ΓÇ¥all accessible anytime.", icon: "δ┐»┬╜┼╕ΓÇ£δ┐»┬╜" },
+  default: { title: "Welcome to Goujji Pets", desc: "Join India's #1 verified pet care marketplace. Find trusted pet care providers, compare services, view availability, book instantly, make secure payments, and manage all your reservations through a single platform.", icon: "δ┐»┬╜┼ôδ┐»┬╜" }
 };
 
 export const UserLogin = () => {
@@ -171,7 +171,7 @@ export const UserLogin = () => {
           setIntendedRoute(null);
         } catch (signInErr) {
           setIsLogin(true);
-          setError("An account with this email already exists. We switched you to the 'Sign In' tab—please enter your password to sign in.");
+          setError("An account with this email already exists. We switched you to the 'Sign In' tabΓÇöplease enter your password to sign in.");
         }
       } else if (err.code === "auth/invalid-credential" || err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.message?.includes("invalid-credential")) {
         try {
@@ -297,7 +297,7 @@ export const UserLogin = () => {
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl font-medium text-sm border border-red-100 flex items-start gap-3">
-              <span className="text-red-500 mt-0.5">뿯½š뿯½뿯½뿯½뿯½</span>
+              <span className="text-red-500 mt-0.5">δ┐»┬╜┼íδ┐»┬╜δ┐»┬╜δ┐»┬╜δ┐»┬╜</span>
               {error}
             </div>
           )}
@@ -329,7 +329,7 @@ export const UserLogin = () => {
                 onClick={() => { setShowOtpInput(false); setConfirmationResult(null); }}
                 className="w-full bg-white text-slate-600 font-bold py-3 rounded-2xl transition-all mt-2"
               >
-                Change Mobile Number
+                Change Phone Number
               </button>
             </form>
           ) : (
@@ -406,32 +406,30 @@ export const UserLogin = () => {
             </div>
 
             
-            {!isPhone(formData.email) && (
-              <div>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 transition-colors">
-                    <Lock size={20} />
-                  </div>
-                  <input 
-                    type="password" 
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
-                    required
-                  />
+            <div>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 transition-colors">
+                  <Lock size={20} />
                 </div>
-                {!isLogin && formData.password.length > 0 && (
-                  <div className="mt-2 text-xs">
-                    <div className={`flex items-center gap-1 ${formData.password.length >= 8 ? 'text-green-600' : 'text-slate-400'}`}>• Minimum 8 characters</div>
-                    <div className={`flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 uppercase letter</div>
-                    <div className={`flex items-center gap-1 ${/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 lowercase letter</div>
-                    <div className={`flex items-center gap-1 ${/[0-9]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 number</div>
-                    <div className={`flex items-center gap-1 ${/[^A-Za-z0-9]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 special character</div>
-                  </div>
-                )}
+                <input 
+                  type="password" 
+                  placeholder="Password (Leave empty if using Phone Number)"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
+                  required={!isPhone(formData.email)}
+                />
               </div>
-            )}
+              {!isLogin && formData.password.length > 0 && (
+                <div className="mt-2 text-xs">
+                  <div className={`flex items-center gap-1 ${formData.password.length >= 8 ? 'text-green-600' : 'text-slate-400'}`}>ΓÇó Minimum 8 characters</div>
+                  <div className={`flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>ΓÇó At least 1 uppercase letter</div>
+                  <div className={`flex items-center gap-1 ${/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>ΓÇó At least 1 lowercase letter</div>
+                  <div className={`flex items-center gap-1 ${/[0-9]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>ΓÇó At least 1 number</div>
+                  <div className={`flex items-center gap-1 ${/[^A-Za-z0-9]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>ΓÇó At least 1 special character</div>
+                </div>
+              )}
+            </div>
 
 
             {isLogin && (

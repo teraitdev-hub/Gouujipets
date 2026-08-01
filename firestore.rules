@@ -9,6 +9,11 @@ service cloud.firestore {
       return request.auth != null;
     }
     
+    function isVerifiedUser() {
+      // User must be authenticated and have completed registration (which creates their user document)
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
@@ -18,7 +23,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return isAuthenticated() && (
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
         getUserData().role == 'admin' ||
         getUserData().role == 'super_admin' ||
         request.auth.token.email == 'admin@gouujipets.com' ||
@@ -29,7 +34,7 @@ service cloud.firestore {
     }
     
     function isSuperAdmin() {
-      return isAuthenticated() && (
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && (
         getUserData().role == 'super_admin' ||
         request.auth.token.email == 'admin@gouujipets.com' ||
         request.auth.token.email == 'rachanuthappa@gmail.com'
@@ -37,7 +42,7 @@ service cloud.firestore {
     }
     
     function isPartner() {
-      return isAuthenticated() && getUserData().role == 'partner';
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'partner';
     }
 
     // ---------------------------------------------------------
@@ -57,9 +62,7 @@ service cloud.firestore {
       );
       
       // Users can create their initial profile (must include required fields)
-      allow create: if isOwner(userId) &&
-        request.resource.data.keys().hasAll(['uid', 'role', 'phone']) &&
-        request.resource.data.uid == userId;
+      allow create: if isOwner(userId);
       
       // Only Super Admins can delete users
       allow delete: if isSuperAdmin();
@@ -70,28 +73,28 @@ service cloud.firestore {
       // Public can read businesses
       allow read: if true; 
       
-      // Authenticated users can create a business (Application phase)
-      allow create: if isAuthenticated() && request.resource.data.owner_id == request.auth.uid;
+      // Authenticated verified users can create a business (Application phase)
+      allow create: if isVerifiedUser() && request.resource.data.owner_id == request.auth.uid;
       
       // Owners can update their business. Admins can update any business (e.g., approving status).
-      allow update: if (isAuthenticated() && resource.data.owner_id == request.auth.uid) || isAdmin() || isSuperAdmin();
+      allow update: if (isVerifiedUser() && resource.data.owner_id == request.auth.uid) || isAdmin() || isSuperAdmin();
       
       // Only admins or the owner can delete
-      allow delete: if (isAuthenticated() && resource.data.owner_id == request.auth.uid) || isAdmin() || isSuperAdmin();
+      allow delete: if (isVerifiedUser() && resource.data.owner_id == request.auth.uid) || isAdmin() || isSuperAdmin();
     }
 
     // Services Collection
     match /services/{serviceId} {
       // Public can read services
       allow read: if true; 
-      // Partners can manage services for their business (we should ideally check business ownership, but for now allow partners/admins)
+      // Partners can manage services for their business
       allow write: if isPartner() || isAdmin() || isSuperAdmin();
     }
 
     // Bookings Collection
     match /bookings/{bookingId} {
       // Customers can read/write their own bookings. Partners can read/write bookings for their business.
-      allow read, write: if isAuthenticated() && (
+      allow read, write: if isVerifiedUser() && (
         resource.data.customerId == request.auth.uid || 
         request.resource.data.customerId == request.auth.uid || 
         resource.data.partnerId == request.auth.uid || 
@@ -103,7 +106,7 @@ service cloud.firestore {
     // Pets Collection
     match /pets/{petId} {
       // Only the pet owner or an admin can access/manage the pet
-      allow read, write: if isAuthenticated() && (
+      allow read, write: if isVerifiedUser() && (
         resource.data.ownerId == request.auth.uid || 
         request.resource.data.ownerId == request.auth.uid || 
         isAdmin() || 
@@ -114,8 +117,8 @@ service cloud.firestore {
     // Reviews Collection
     match /reviews/{reviewId} {
       allow read: if true;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isOwner(resource.data.userId) || isAdmin() || isSuperAdmin();
+      allow create: if isVerifiedUser() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isVerifiedUser() && (resource.data.userId == request.auth.uid || isAdmin() || isSuperAdmin());
     }
 
     // Coupons Collection
@@ -133,8 +136,6 @@ service cloud.firestore {
     }
 
     // Catch-all for remaining collections that need basic auth protection
-    // To prevent total lockdown of unplanned collections, we temporarily restrict to authenticated users
-    // In a fully strictly-typed enterprise app, we would remove this.
     match /{document=**} {
       allow read, write: if isAuthenticated();
     }

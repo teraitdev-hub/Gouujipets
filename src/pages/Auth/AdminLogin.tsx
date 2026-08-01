@@ -5,7 +5,9 @@ import { AuthLayout } from "../../components/auth/AuthLayout";
 import { ShieldAlert, Lock, ArrowRight, Loader2, Mail } from "lucide-react";
 import { auth, db } from "../../lib/firebase";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import type { ConfirmationResult } from "firebase/auth";
+import { doc, getDoc, collection, query, where, limit, getDocs } from "firebase/firestore";
+import { setupRecaptcha, sendOTP, verifyOTP } from "../../services/auth";
 
 export const AdminLogin = () => {
   const navigate = useNavigate();
@@ -13,11 +15,76 @@ export const AdminLogin = () => {
   const [formData, setFormData] = useState({ email: "rachanuthappa@gmail.com", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+
+  const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
+  const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ''));
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!confirmationResult) return;
+    
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      const userCredential = await verifyOTP(confirmationResult, otp, 'admin');
+      
+      const docRef = doc(db, 'users', userCredential.user.uid);
+      const userSnap = await getDoc(docRef);
+      let userData = userSnap.exists() ? userSnap.data() : null;
+      let role = userData?.role;
+      
+      if (role !== 'admin' && role !== 'super_admin' && role !== 'superadmin') {
+        await signOut(auth);
+        throw new Error("Unauthorized: Admin access only.");
+      }
+
+      useAuthStore.getState().login({
+        id: userCredential.user.uid,
+        email: userCredential.user.email || undefined,
+        role: role
+      });
+
+      navigate("/admin/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Invalid OTP or Unauthorized.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+
+    const loginIdentifier = formData.email.trim();
+    const validEmail = isEmail(loginIdentifier);
+    const validPhone = isPhone(loginIdentifier);
+
+    if (!validEmail && !validPhone) {
+      setError("Please enter a valid Email address or Phone Number.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (validPhone) {
+      try {
+        const recaptchaVerifier = setupRecaptcha("recaptcha-container");
+        const confirmation = await sendOTP(loginIdentifier, recaptchaVerifier);
+        setConfirmationResult(confirmation);
+        setShowOtpInput(true);
+      } catch (err: any) {
+        setError(err.message || "Failed to send OTP. Please check the number.");
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
 
     try {
       // Force sign out of any existing session to prevent role conflicts
@@ -25,10 +92,10 @@ export const AdminLogin = () => {
 
       let userCredential;
       try {
-        userCredential = await signInWithEmailAndPassword(auth, formData.email.trim(), formData.password);
+        userCredential = await signInWithEmailAndPassword(auth, loginIdentifier, formData.password);
       } catch (authError: any) {
         // Automatically create the super admin account if it doesn't exist yet
-        const cleanEmail = formData.email.trim().toLowerCase();
+        const cleanEmail = loginIdentifier.toLowerCase();
         const isMasterKey = formData.password === 'GouujiMasterKey2026!';
         if ((authError.code === 'auth/user-not-found' || authError.code === 'auth/invalid-credential') && (cleanEmail === 'rachanuthappa@gmail.com' || cleanEmail === 'superadmin@gouuji.com' || isMasterKey)) {
           const { createUserWithEmailAndPassword } = await import('firebase/auth');
@@ -57,7 +124,7 @@ export const AdminLogin = () => {
       let role = userData?.role;
 
       // Auto-grant super_admin role
-      const userEmail = (userCredential.user.email || formData.email).toLowerCase();
+      const userEmail = (userCredential.user.email || loginIdentifier).toLowerCase();
       const usedMasterKey = formData.password === 'GouujiMasterKey2026!';
       
       let assignedRole = role;
@@ -114,60 +181,103 @@ export const AdminLogin = () => {
       subtitle="Secure access for system administrators only."
       imageUrl="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1000"
     >
-      <form className="space-y-5 font-sans" onSubmit={handleSubmit}>
-
-        {error && (
-          <div className="p-4 bg-red-50 text-red-600 border border-red-200 rounded-[16px] text-sm font-medium mb-4">
-            {error}
+      <div id="recaptcha-container"></div>
+      
+      {showOtpInput ? (
+        <form className="space-y-5 font-sans" onSubmit={handleVerifyOtp}>
+          {error && (
+            <div className="p-4 bg-red-50 text-red-600 border border-red-200 rounded-[16px] text-sm font-medium mb-4">
+              {error}
+            </div>
+          )}
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Enter 6-Digit Admin OTP</label>
+            <div className="relative group form_inputContainer">
+              <Lock size={18} className="form_inputIcon group-focus-within:text-purple-600 transition-colors" />
+              <input 
+                type="text" 
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="123456" 
+                maxLength={6}
+                className="form_inputField !pl-11 tracking-[0.5em] text-center"
+                required
+              />
+            </div>
           </div>
-        )}
-
-        <div className="space-y-1">
-          <label className="text-xs font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Admin Email</label>
-          <div className="relative group form_inputContainer">
-            <Mail size={18} className="form_inputIcon group-focus-within:text-purple-600 transition-colors" />
-            <input 
-              type="email" 
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              placeholder="gouujipets@gmail.com" 
-              className="form_inputField !pl-11"
-              required
-            />
+          <div className="flex gap-3 mt-6 flex-col">
+            <button 
+              disabled={isLoading}
+              type="submit"
+              className="form_button flex items-center justify-center gap-2 disabled:bg-gray-400 !bg-purple-600 hover:!bg-purple-700 text-white font-bold"
+            >
+              {isLoading ? <Loader2 className="animate-spin" /> : "Verify Admin OTP"}
+            </button>
+            <button 
+              type="button"
+              onClick={() => { setShowOtpInput(false); setConfirmationResult(null); }}
+              className="w-full bg-white text-slate-600 font-bold py-3 rounded-2xl transition-all"
+            >
+              Change Admin Contact
+            </button>
           </div>
-        </div>
+        </form>
+      ) : (
+        <form className="space-y-5 font-sans" onSubmit={handleSubmit}>
+          {error && (
+            <div className="p-4 bg-red-50 text-red-600 border border-red-200 rounded-[16px] text-sm font-medium mb-4">
+              {error}
+            </div>
+          )}
 
-        <div className="space-y-1">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Master Password</label>
-            <a href="/forgot-password" className="text-xs font-bold text-purple-600 hover:underline">Forgot?</a>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Admin Email or Mobile</label>
+            <div className="relative group form_inputContainer">
+              <Mail size={18} className="form_inputIcon group-focus-within:text-purple-600 transition-colors" />
+              <input 
+                type="text" 
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                placeholder="admin@gouujipets.com or Mobile No." 
+                className="form_inputField !pl-11"
+                required
+              />
+            </div>
           </div>
-          <div className="relative group form_inputContainer">
-            <Lock size={18} className="form_inputIcon group-focus-within:text-purple-600 transition-colors" />
-            <input 
-              type="password" 
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              placeholder="••••••••••••" 
-              className="form_inputField !pl-11"
-              required
-            />
+
+          {!isPhone(formData.email) && (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Admin Master Password</label>
+              <a href="/forgot-password" className="text-xs font-bold text-purple-600 hover:underline">Forgot?</a>
+            </div>
+            <div className="relative group form_inputContainer">
+              <Lock size={18} className="form_inputIcon group-focus-within:text-purple-600 transition-colors" />
+              <input 
+                type="password" 
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                placeholder="••••••••••••" 
+                className="form_inputField !pl-11"
+                required
+              />
+            </div>
           </div>
-        </div>
+          )}
 
-        <div className="flex gap-3 mt-6">
-          <button 
-            disabled={isLoading}
-            type="submit"
-            className="form_button flex items-center justify-center gap-2 disabled:bg-gray-400 !bg-purple-600 hover:!bg-purple-700 text-white font-bold"
-          >
-            {isLoading ? <Loader2 className="animate-spin" /> : (
-              <>Authenticate Control Desk <ArrowRight size={18} /></>
-            )}
-          </button>
-        </div>
-
-      </form>
+          <div className="flex gap-3 mt-6">
+            <button 
+              disabled={isLoading}
+              type="submit"
+              className="form_button flex items-center justify-center gap-2 disabled:bg-gray-400 !bg-purple-600 hover:!bg-purple-700 text-white font-bold"
+            >
+              {isLoading ? <Loader2 className="animate-spin" /> : (
+                <>Authenticate Control Desk <ArrowRight size={18} /></>
+              )}
+            </button>
+          </div>
+        </form>
+      )}
     </AuthLayout>
   );
 };

@@ -73,4 +73,4 @@ export const sanitizeText = (text: string) => {
   return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 };
 
-export const isValidEmail = (email: string) => /^[^s@]+@[^s@]+\.[^s@]+$/.test(email);
+export const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
