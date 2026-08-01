@@ -63,6 +63,16 @@ import { AdminSettings } from "./pages/Admin/AdminSettings";
 
 const PublicLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, user } = useAuthStore();
+  
+  if (isAuthenticated && user?.role === 'customer') {
+    return (
+      <PetProvider>
+        <AppLayout>
+          {children}
+        </AppLayout>
+      </PetProvider>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col pb-16 md:pb-0">
@@ -72,7 +82,6 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => {
         {children}
       </main>
       <PublicFooter />
-      {isAuthenticated && <BottomNav />}
     </div>
   );
 };
@@ -101,7 +110,7 @@ function App() {
           {/* =========================================
               ZONE 1: PUBLIC PORTAL 
              ========================================= */}
-          <Route path="/" element={<PublicHome />} />
+          <Route path="/" element={<PublicLayout><PublicHome /></PublicLayout>} />
           <Route path="/splash" element={<Splash />} />
           <Route path="/login/user" element={<UserLogin />} />
           <Route path="/complete-registration" element={<CompleteRegistration />} />

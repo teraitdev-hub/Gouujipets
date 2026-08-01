@@ -1,9 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { PageTransition } from "../../components/layout/PageTransition";
-import { PublicNavbar } from "../../components/layout/PublicNavbar";
-import { PublicFooter } from "../../components/layout/PublicFooter";
-import { PublicBottomNav } from "../../components/navigation/PublicBottomNav";
-import { ServiceQuickLinks } from "../../components/navigation/ServiceQuickLinks";
 import {
   Search, MapPin, Star, ShieldCheck, HeartPulse, ChevronRight,
   Sparkles, Award, Video, Clock, CheckCircle2, Building2, Leaf,
@@ -137,9 +132,8 @@ export const PublicHome = () => {
   });
 
   return (
-    <PageTransition className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] font-sans overflow-x-hidden pb-20 md:pb-6 relative">
-      <PublicNavbar />
-      <ServiceQuickLinks />
+    <div className="font-sans">
+      <main className="min-h-screen relative bg-[#f1f5f9]">
 
       {/* ========== HERO SECTION (NEW & STUNNING) ========== */}
       <section className="relative pt-10 pb-16 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden border-b border-slate-200/60">
@@ -608,9 +602,8 @@ export const PublicHome = () => {
         )}
       </AnimatePresence>
 
-      <PublicFooter />
-      <PublicBottomNav />
-    </PageTransition>
+      </main>
+    </div>
   );
 };
 
