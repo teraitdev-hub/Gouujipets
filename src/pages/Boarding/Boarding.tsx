@@ -304,7 +304,7 @@ export const Boarding = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
                 onClick={() => navigate(`/facility/${facility.id}`, { state: { facility, selectedServices: selectedServicesFilter } })}
-                className="group cursor-pointer bg-white border border-slate-300 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 flex flex-row relative"
+                className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-row relative"
               >
                 {/* Image */}
                 <div className="w-[88px] sm:w-28 shrink-0 relative bg-slate-50 overflow-hidden flex self-stretch min-h-[72px] sm:min-h-[64px]">
@@ -326,6 +326,13 @@ export const Boarding = () => {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-0.5">
+                      <div className="flex items-center gap-1">
+                        <span className="bg-green-600 text-white px-1.5 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5">
+                          {facility.rating} <Star size={8} className="fill-white" />
+                        </span>
+                        <span className="text-[8px] text-slate-500 font-medium hidden sm:inline">120 Ratings</span>
+                      </div>
+                      <div className="hidden sm:block w-px h-2.5 bg-slate-200"></div>
                       <div className="flex flex-wrap gap-1">
                         {(() => {
                           const typeStr = facility.type || 'Boarding';
@@ -340,13 +347,6 @@ export const Boarding = () => {
                             );
                           });
                         })()}
-                      </div>
-                      <div className="hidden sm:block w-px h-2.5 bg-slate-200"></div>
-                      <div className="flex items-center gap-1">
-                        <span className="bg-green-600 text-white px-1.5 py-0.5 rounded text-[8px] font-bold flex items-center gap-0.5">
-                          {facility.rating} <Star size={8} className="fill-white" />
-                        </span>
-                        <span className="text-[8px] text-slate-500 font-medium hidden sm:inline">120 Ratings</span>
                       </div>
                       <div className="hidden sm:block w-px h-2.5 bg-slate-200"></div>
                       <div className="flex items-center gap-0.5 text-[9px] font-medium text-slate-600 min-w-0">
