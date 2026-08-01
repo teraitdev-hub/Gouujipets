@@ -25,7 +25,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     location.pathname.startsWith("/facility");
 
   return (
-    <div className="h-[100dvh] bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] text-slate-900 flex overflow-hidden relative font-sans">
+    <div className="h-[100dvh] w-full max-w-[100vw] bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] text-slate-900 flex overflow-hidden relative font-sans">
       <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden pb-16 md:pb-0">

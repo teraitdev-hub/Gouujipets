@@ -34,7 +34,7 @@ export const BottomNav = () => {
             end={item.path === "/"}
             className={({ isActive }) =>
               clsx(
-                "flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-all py-1",
+                "flex flex-col items-center justify-center w-full min-w-0 h-full space-y-0.5 transition-all py-1",
                 isActive 
                   ? "text-purple-700 font-black scale-105" 
                   : "text-slate-400 hover:text-purple-600 font-medium"
@@ -43,8 +43,8 @@ export const BottomNav = () => {
           >
             {({ isActive }) => (
               <>
-                <item.icon size={19} className={isActive ? "stroke-[2.5]" : "stroke-[1.5]"} />
-                <span className="text-[10px] leading-tight truncate px-0.5">{item.name}</span>
+                <item.icon size={19} className={clsx("shrink-0", isActive ? "stroke-[2.5]" : "stroke-[1.5]")} />
+                <span className="text-[10px] leading-tight truncate px-0.5 w-full text-center">{item.name}</span>
                 {isActive && (
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-600 mt-0.5" />
                 )}
