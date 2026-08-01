@@ -107,36 +107,40 @@ export const Veterinary = () => {
   return (
     <PageTransition className="pb-16 max-w-7xl mx-auto px-2.5 sm:px-6">
       
-      {/* Header & Search — scrolls cleanly with the page */}
-      <div className="pt-3 pb-3 bg-white relative z-30 border-b border-gray-100 mb-3">
-        <h1 className="text-xl sm:text-2xl font-black text-gray-900 mb-2 flex items-center gap-1.5">
-          <Stethoscope className="text-purple-600" size={22} />
-          Veterinary Clinics
-        </h1>
+      {/* Hero Banner & Search Header in Light Purple Color */}
+      <div className="pt-3 pb-3 bg-purple-50/60 relative z-30 border-b border-purple-200 mb-3 px-3 rounded-2xl shadow-2xs mt-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-2.5 gap-2">
+          <div>
+            <div className="text-[10px] font-black text-purple-700 uppercase tracking-widest flex items-center gap-1 mb-0.5">
+              <Stethoscope size={12} className="text-purple-600" /> Top-Rated Veterinary Experts
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-purple-950 tracking-tight">Verified Vet Clinics & Hospitals</h1>
+          </div>
+        </div>
         
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
-            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-600" />
             <input 
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by clinic name or area..." 
-              className="w-full h-10 pl-9 pr-3 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 focus:bg-white transition-all shadow-inner outline-none"
+              placeholder="Search by clinic name, doctor, or area..." 
+              className="w-full h-10 pl-9 pr-3 bg-white border border-purple-200 rounded-xl text-xs font-bold text-purple-950 placeholder:text-purple-400 focus:ring-2 focus:ring-purple-400 focus:border-purple-600 transition-all shadow-inner outline-none"
             />
           </div>
           
-          <div className="relative shrink-0 flex items-center bg-slate-50 border border-gray-200 rounded-xl px-3 h-10 shadow-2xs hover:border-purple-500 transition-colors hover:bg-white">
+          <div className="relative shrink-0 flex items-center bg-white border border-purple-200 rounded-xl px-3 h-10 shadow-2xs hover:border-purple-400 transition-colors">
             <Calendar size={14} className="text-purple-600 mr-2" />
             <input 
               type="date" 
               value={searchDate}
               onChange={(e) => setSearchDate(e.target.value)}
-              className="bg-transparent border-none text-xs font-extrabold text-gray-800 outline-none cursor-pointer"
+              className="bg-transparent border-none text-xs font-extrabold text-purple-950 outline-none cursor-pointer"
             />
           </div>
 
-          <button className="h-10 px-4 rounded-xl bg-purple-900 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 hover:bg-purple-950 transition-all shadow-2xs active:scale-95 shrink-0">
+          <button className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 shrink-0 relative">
             <Filter size={14} /> Filters
           </button>
         </div>

@@ -217,23 +217,37 @@ export const Grooming = () => {
       {/* Main Content Area */}
       <div className="flex-1 space-y-12">
         
-        {/* Hero Banner */}
-        <div className="relative rounded-[32px] overflow-hidden bg-gradient-to-br from-purple-900 to-purple-900 text-white p-8 md:p-12 shadow-xl border border-white/10">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 blur-3xl rounded-full translate-y-1/2 -translate-x-1/2"></div>
-          
-          <div className="relative z-10 max-w-lg">
-            <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-wider mb-4 border border-white/20">
-              Summer Specials
-            </span>
-            <h1 className="text-4xl md:text-5xl font-black mb-4 leading-tight">
-              Pamper your pet<br/>with the best.
-            </h1>
-            <p className="text-purple-100 font-medium mb-8 text-lg">
-              Explore our premium catalogue of certified groomers, trainers, and pet sitters. Book your slot today.
-            </p>
+      {/* Hero Banner & Search Header in Light Purple Color */}
+      <div className="pt-3 pb-3 bg-purple-50/60 relative z-30 border-b border-purple-200 mb-3 px-3 rounded-2xl shadow-2xs mt-2">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-2.5 gap-2">
+          <div>
+            <div className="text-[10px] font-black text-purple-700 uppercase tracking-widest flex items-center gap-1 mb-0.5">
+              <Scissors size={12} className="text-purple-600" /> Premium Pet Grooming
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-purple-950 tracking-tight">Top Certified Pet Stylists</h1>
           </div>
         </div>
+        
+        <div className="flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-600" />
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by spa name, style, or area..." 
+              className="w-full h-10 pl-9 pr-3 bg-white border border-purple-200 rounded-xl text-xs font-bold text-purple-950 placeholder:text-purple-400 focus:ring-2 focus:ring-purple-400 focus:border-purple-600 transition-all shadow-inner outline-none"
+            />
+          </div>
+          
+          <button 
+            onClick={() => setIsSidebarOpen(true)}
+            className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs active:scale-95 shrink-0 relative"
+          >
+            <Filter size={14} /> Filters
+          </button>
+        </div>
+      </div>
 
         {/* Top Controls */}
         <div className="flex items-center justify-between pb-4 border-b border-gray-200">
