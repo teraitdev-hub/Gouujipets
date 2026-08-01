@@ -61,16 +61,30 @@ import { ServiceQuickLinks } from "./components/navigation/ServiceQuickLinks";
 import { AdminSettings } from "./pages/Admin/AdminSettings";
 
 // A simple wrapper for public pages that need the PublicNavbar
-const PublicLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col">
-    <PublicNavbar />
-    <ServiceQuickLinks />
-    <main className="flex-1">
-      {children}
-    </main>
-    <PublicFooter />
-  </div>
-);
+const PublicLayout = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, user } = useAuthStore();
+  
+  if (isAuthenticated && user?.role === 'customer') {
+    return (
+      <PetProvider>
+        <AppLayout>
+          {children}
+        </AppLayout>
+      </PetProvider>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col">
+      <PublicNavbar />
+      <ServiceQuickLinks />
+      <main className="flex-1">
+        {children}
+      </main>
+      <PublicFooter />
+    </div>
+  );
+};
 
 function App() {
   const location = useLocation();
