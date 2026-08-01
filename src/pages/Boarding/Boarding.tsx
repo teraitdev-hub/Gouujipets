@@ -368,14 +368,14 @@ export const Boarding = () => {
                     </div>
                     
                     {/* Category Tags Row (Below Ratings) */}
-                    <div className="flex flex-wrap gap-1 mt-1.5">
+                    <div className="flex flex-nowrap overflow-x-auto gap-1 mt-1 sm:mt-1.5 pb-0.5 w-full [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                       {(() => {
                         const typeStr = facility.type || 'Boarding';
                         const types = typeStr.split(',').map((t: string) => t.trim()).filter(Boolean);
                         return types.map((t: string, idx: number) => {
                           const catInfo = getCategoryById(t.toLowerCase());
                           return (
-                            <div key={idx} className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-[8px] font-black tracking-tight uppercase flex items-center gap-0.5 border border-purple-200">
+                            <div key={idx} className="bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded text-[8px] font-black tracking-tight uppercase flex items-center gap-0.5 border border-purple-200 shrink-0 whitespace-nowrap">
                               {catInfo ? <catInfo.icon size={8} className="shrink-0" /> : <CheckCircle size={8} className="shrink-0" />}
                               <span>{catInfo ? catInfo.name : t}</span>
                             </div>
