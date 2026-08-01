@@ -225,14 +225,14 @@ export const PartnerLogin = () => {
         }
       } else {
         // ===== REGISTER FLOW =====
+        let lat = 20.5937;
+        let lng = 78.9629;
         try {
           if (certificates.length === 0) {
           setError("Please upload at least one business license or government ID.");
           setIsLoading(false);
           return;
         }
-        let lat = 20.5937;
-          let lng = 78.9629;
           try {
             const addressStr = `${formData.street}, ${formData.city}, ${formData.state}, ${formData.pincode}`;
             const geocodeRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressStr)}`);
