@@ -193,30 +193,30 @@ export const CompleteRegistration = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 py-12">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 py-8 sm:py-12 font-sans">
       <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
         
         {/* Header */}
-        <div className="bg-gradient-to-br from-purple-900 to-indigo-900 p-8 text-white relative">
+        <div className="bg-gradient-to-br from-purple-900 to-indigo-900 p-6 sm:p-8 text-white relative">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-          <h1 className="text-3xl font-black mb-2 relative z-10">Complete Registration</h1>
-          <p className="text-purple-100 font-medium relative z-10">Just a few more details to activate your account.</p>
+          <h1 className="text-2xl sm:text-3xl font-black mb-2 relative z-10">Complete Registration</h1>
+          <p className="text-purple-100 font-medium relative z-10 text-sm sm:text-base">Just a few more details to activate your account.</p>
           
           {/* Progress Steps */}
-          <div className="flex items-center gap-4 mt-8 relative z-10">
-            <div className={`flex items-center gap-2 ${step >= 1 ? 'text-white' : 'text-purple-300/50'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${step >= 1 ? 'bg-purple-500 text-white' : 'bg-purple-900/50'}`}>1</div>
-              <span className="font-semibold text-sm">Phone Verification</span>
+          <div className="flex items-center gap-2 sm:gap-4 mt-6 sm:mt-8 relative z-10">
+            <div className={`flex items-center gap-1.5 sm:gap-2 ${step >= 1 ? 'text-white' : 'text-purple-300/50'}`}>
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 ${step >= 1 ? 'bg-purple-500 text-white' : 'bg-purple-900/50'}`}>1</div>
+              <span className="font-semibold text-[10px] sm:text-sm uppercase tracking-wider sm:normal-case sm:tracking-normal">Phone<span className="hidden sm:inline"> Verification</span></span>
             </div>
-            <div className="h-px w-12 bg-purple-700"></div>
-            <div className={`flex items-center gap-2 ${step >= 2 ? 'text-white' : 'text-purple-300/50'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${step >= 2 ? 'bg-purple-500 text-white' : 'bg-purple-900/50'}`}>2</div>
-              <span className="font-semibold text-sm">Profile Details</span>
+            <div className="h-px flex-1 sm:w-12 bg-purple-700 max-w-[40px]"></div>
+            <div className={`flex items-center gap-1.5 sm:gap-2 ${step >= 2 ? 'text-white' : 'text-purple-300/50'}`}>
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 ${step >= 2 ? 'bg-purple-500 text-white' : 'bg-purple-900/50'}`}>2</div>
+              <span className="font-semibold text-[10px] sm:text-sm uppercase tracking-wider sm:normal-case sm:tracking-normal">Profile<span className="hidden sm:inline"> Details</span></span>
             </div>
           </div>
         </div>
 
-        <div className="p-8">
+        <div className="p-5 sm:p-8">
           {error && (
             <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm font-semibold border border-red-100">
               {error}
@@ -243,7 +243,7 @@ export const CompleteRegistration = () => {
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         placeholder="e.g. 9876543210"
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all font-medium"
+                        className="w-full pl-11 pr-4 py-3 sm:py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all font-medium text-base sm:text-sm min-h-[48px]"
                         required
                       />
                     </div>

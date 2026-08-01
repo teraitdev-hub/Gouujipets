@@ -182,7 +182,7 @@ export const LoginModal = () => {
                       placeholder="• • • • • •"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      className="w-full bg-slate-50 border border-purple-300 rounded-2xl px-5 py-3.5 font-black outline-none focus:ring-2 focus:ring-purple-600/30 focus:border-purple-600 transition-all text-center tracking-[0.5em] text-xl shadow-inner"
+                      className="w-full bg-slate-50 border border-purple-300 rounded-2xl px-5 py-3.5 font-black outline-none focus:ring-2 focus:ring-purple-600/30 focus:border-purple-600 transition-all text-center tracking-[0.5em] text-xl sm:text-2xl shadow-inner min-h-[48px]"
                       maxLength={6}
                       autoFocus
                       required
@@ -210,7 +210,7 @@ export const LoginModal = () => {
                 ) : (
                   <form onSubmit={handleSendOtp} className="space-y-4">
                     <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 font-bold text-sm">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 font-bold text-base sm:text-sm">
                         +91
                       </div>
                       <input 
@@ -218,7 +218,7 @@ export const LoginModal = () => {
                         placeholder="Enter 10-digit mobile number"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-3.5 font-bold outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all text-slate-900 placeholder:text-slate-400 placeholder:font-medium text-sm shadow-inner"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-3.5 sm:py-4 font-bold outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all text-slate-900 placeholder:text-slate-400 placeholder:font-medium text-base sm:text-sm shadow-inner min-h-[48px]"
                         maxLength={10}
                         required
                         autoFocus

@@ -82,9 +82,9 @@ export const AdminUsers = () => {
       </div>
 
       <div className="bg-white rounded-[24px] border border-slate-200 shadow-sm overflow-hidden animate-fade-in">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead>
+        <div className="overflow-x-hidden md:overflow-x-auto p-4 md:p-0">
+          <table className="w-full text-left border-collapse min-w-full md:min-w-[800px] block md:table">
+            <thead className="hidden md:table-header-group">
               <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500">
                 <th className="p-4 font-black">User Details</th>
                 <th className="p-4 font-black text-center">Role</th>
@@ -93,27 +93,31 @@ export const AdminUsers = () => {
                 <th className="p-4 font-black text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
+            <tbody className="text-sm block md:table-row-group">
               {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500 font-bold">
+                <tr className="block md:table-row">
+                  <td colSpan={5} className="block md:table-cell p-8 text-center text-slate-500 font-bold">
                     Loading users...
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500 font-bold">
+                <tr className="block md:table-row">
+                  <td colSpan={5} className="block md:table-cell p-8 text-center text-slate-500 font-bold">
                     No users found.
                   </td>
                 </tr>
               ) : (
                 filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="p-4">
-                      <div className="font-black text-slate-900">{user.full_name || user.name || 'Unnamed User'}</div>
-                      <div className="text-xs text-slate-500">{user.email || 'No email provided'}</div>
+                  <tr key={user.id} className="block md:table-row hover:bg-slate-50/50 transition-colors mb-4 md:mb-0 bg-white border border-slate-200 md:border-b md:border-x-0 md:border-t-0 rounded-2xl md:rounded-none overflow-hidden shadow-sm md:shadow-none">
+                    <td className="flex justify-between items-center md:table-cell p-4 md:p-4 border-b border-slate-50 md:border-0">
+                      <div className="md:hidden font-black text-xs text-slate-400 uppercase tracking-wider">User</div>
+                      <div className="text-right md:text-left">
+                        <div className="font-black text-slate-900">{user.full_name || user.name || 'Unnamed User'}</div>
+                        <div className="text-xs text-slate-500">{user.email || 'No email provided'}</div>
+                      </div>
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="flex justify-between items-center md:table-cell p-4 md:p-4 border-b border-slate-50 md:border-0 md:text-center">
+                      <div className="md:hidden font-black text-xs text-slate-400 uppercase tracking-wider">Role</div>
                       <span className={`inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
                         user.role === 'admin' || user.role === 'superadmin' ? 'bg-purple-600 text-white shadow-sm' :
                         user.role === 'partner' ? 'bg-purple-100 text-purple-700' :
@@ -122,10 +126,12 @@ export const AdminUsers = () => {
                         {user.role || 'customer'}
                       </span>
                     </td>
-                    <td className="p-4 text-slate-600 font-medium text-sm">
+                    <td className="flex justify-between items-center md:table-cell p-4 md:p-4 border-b border-slate-50 md:border-0 text-slate-600 font-medium text-sm">
+                      <div className="md:hidden font-black text-xs text-slate-400 uppercase tracking-wider">Joined</div>
                       {user.created_at || user.createdDate ? new Date(user.created_at || user.createdDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="flex justify-between items-center md:table-cell p-4 md:p-4 border-b border-slate-50 md:border-0 md:text-center">
+                      <div className="md:hidden font-black text-xs text-slate-400 uppercase tracking-wider">Status</div>
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${
                         (user.status || 'active') === 'active' ? 'text-emerald-700 bg-emerald-50 border border-emerald-200' : 'text-red-700 bg-red-50 border border-red-200'
                       }`}>
@@ -133,10 +139,10 @@ export const AdminUsers = () => {
                         {user.status || 'active'}
                       </span>
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="flex justify-end items-center md:table-cell p-4 md:p-4 md:text-right bg-slate-50 md:bg-transparent">
                       <button 
                         onClick={() => setSelectedUserForManage(user)}
-                        className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 text-xs font-black rounded-lg transition-all shadow-sm"
+                        className="px-4 py-2 min-h-[48px] md:min-h-0 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 text-xs font-black rounded-xl transition-all shadow-sm w-full md:w-auto"
                       >
                         Manage
                       </button>

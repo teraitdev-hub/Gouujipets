@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { db } from "../../lib/firebase";
 import { collection, query, where, getDocs, limit, documentId, onSnapshot } from "firebase/firestore";
 import { useAuthStore } from "../../store/useAuthStore";
-import { Users, Search, Phone, Mail, Calendar, IndianRupee, Loader2, BookOpen, Clock, CheckCircle } from "lucide-react";
+import { Users, Search, Phone, Mail, Calendar, IndianRupee, Loader2, BookOpen, Clock, CheckCircle, ChevronRight } from "lucide-react";
 import { fetchJournalEntries } from "../../utils/dbFallback";
 import type { JournalEntry } from "../../utils/dbFallback";
 
@@ -147,9 +147,9 @@ export const PartnerCustomers = () => {
         </div>
       ) : (
         <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
+          <div className="overflow-x-hidden md:overflow-x-auto p-4 md:p-0">
+            <table className="w-full text-left border-collapse min-w-full md:min-w-[800px] block md:table">
+              <thead className="hidden md:table-header-group">
                 <tr className="bg-gray-50/50 text-xs uppercase tracking-wider text-gray-500 border-b border-gray-100">
                   <th className="p-4 font-bold">Customer Details</th>
                   <th className="p-4 font-bold">Contact</th>
@@ -159,14 +159,18 @@ export const PartnerCustomers = () => {
                   <th className="p-4 font-bold text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="text-sm">
+              <tbody className="text-sm block md:table-row-group">
                 {filteredCustomers.map(cust => (
-                  <tr key={cust.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="p-4">
-                      <div className="font-bold text-gray-900">{cust.full_name}</div>
-                      <div className="text-xs text-gray-500 font-mono mt-0.5">{cust.id.slice(0, 8)}</div>
+                  <tr key={cust.id} className="block md:table-row mb-4 md:mb-0 bg-white border border-gray-200 md:border-b md:border-x-0 md:border-t-0 rounded-2xl md:rounded-none overflow-hidden hover:bg-gray-50/50 transition-colors shadow-sm md:shadow-none">
+                    <td className="flex justify-between items-center md:table-cell p-4 border-b border-gray-50 md:border-0">
+                      <div className="md:hidden font-black text-xs text-slate-400 uppercase tracking-wider">Customer</div>
+                      <div className="text-right md:text-left">
+                        <div className="font-bold text-gray-900">{cust.full_name}</div>
+                        <div className="text-xs text-gray-500 font-mono mt-0.5">{cust.id.slice(0, 8)}</div>
+                      </div>
                     </td>
-                    <td className="p-4">
+                    <td className="flex flex-col md:table-cell p-4 border-b border-gray-50 md:border-0 items-end md:items-start">
+                      <div className="md:hidden font-black text-xs text-slate-400 uppercase tracking-wider mb-2 w-full text-left">Contact</div>
                       <div className="flex items-center gap-1.5 text-gray-600 mb-1">
                         <Mail size={14} className="text-gray-400" /> {cust.email}
                       </div>
@@ -174,24 +178,27 @@ export const PartnerCustomers = () => {
                         <Phone size={14} className="text-gray-400" /> {cust.phone || "No phone"}
                       </div>
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="flex justify-between items-center md:table-cell p-4 border-b border-gray-50 md:border-0 md:text-center">
+                      <div className="md:hidden font-black text-xs text-slate-400 uppercase tracking-wider">Bookings</div>
                       <span className="bg-purple-50 text-purple-700 px-3 py-1 rounded-full font-bold">
                         {cust.totalBookings}
                       </span>
                     </td>
-                    <td className="p-4 text-right">
-                      <span className="font-black text-purple-600 flex items-center justify-end gap-0.5">
+                    <td className="flex justify-between items-center md:table-cell p-4 border-b border-gray-50 md:border-0 md:text-right">
+                      <div className="md:hidden font-black text-xs text-slate-400 uppercase tracking-wider">Lifetime Value</div>
+                      <span className="font-black text-purple-600 flex items-center gap-0.5">
                         <IndianRupee size={14} strokeWidth={2.5} />
                         {cust.totalSpent.toLocaleString("en-IN")}
                       </span>
                     </td>
-                    <td className="p-4">
+                    <td className="flex justify-between items-center md:table-cell p-4 border-b border-gray-50 md:border-0">
+                      <div className="md:hidden font-black text-xs text-slate-400 uppercase tracking-wider">Last Visit</div>
                       <div className="flex items-center gap-1.5 text-gray-600">
                         <Calendar size={14} className="text-gray-400" />
                         {cust.lastVisit ? new Date(cust.lastVisit).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "N/A"}
                       </div>
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="flex justify-end items-center md:table-cell p-4 md:text-right bg-slate-50 md:bg-transparent">
                       <button 
                         onClick={async () => {
                           setSelectedCustomer(cust);
@@ -211,9 +218,9 @@ export const PartnerCustomers = () => {
                             setIsLoadingLedger(false);
                           }
                         }}
-                        className="px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 text-xs font-black rounded-lg transition-all flex items-center gap-1.5 ml-auto"
+                        className="px-4 py-2 min-h-[48px] md:min-h-0 bg-white hover:bg-gray-100 text-gray-900 border border-gray-200 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors w-full md:w-auto"
                       >
-                        <BookOpen size={13} /> View Ledger
+                        View Ledger <ChevronRight size={14} />
                       </button>
                     </td>
                   </tr>

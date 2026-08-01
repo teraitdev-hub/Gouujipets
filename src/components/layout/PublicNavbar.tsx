@@ -125,85 +125,113 @@ export const PublicNavbar = () => {
 
 
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-white border-t border-slate-100 overflow-hidden"
-          >
-            <div className="p-4 space-y-4">
-              <form onSubmit={handleSearch} className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                  <MapPin size={16} className="text-purple-600 ml-1" />
-                  <select
-                    value={selectedLocation}
-                    onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="bg-transparent text-slate-700 text-sm font-bold focus:outline-none w-full"
-                  >
-                    <option value="Bangalore / Near Me">Bangalore</option>
-                    <option value="Indiranagar">Indiranagar</option>
-                  </select>
-                </div>
-                <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                  <Search size={16} className="text-slate-400 ml-1" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search pets..."
-                    className="w-full bg-transparent text-slate-900 text-sm focus:outline-none"
-                  />
-                </div>
-                <button type="submit" className="w-full py-2.5 bg-purple-600 text-white font-black rounded-xl text-sm">
-                  Search Directory
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] lg:hidden"
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+              className="fixed inset-y-0 left-0 w-[85vw] max-w-[320px] bg-white z-[101] lg:hidden shadow-2xl flex flex-col"
+            >
+              <div className="flex items-center justify-between p-4 border-b border-slate-100 shrink-0">
+                <span className="font-black text-lg text-slate-900 flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center font-black text-white text-sm">
+                    G
+                  </div>
+                  Menu
+                </span>
+                <button 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600"
+                >
+                  <X size={20} />
                 </button>
-              </form>
-
-              <div className="grid grid-cols-2 gap-2">
-                {navLinks.map((item) => (
-                  <button
-                    key={item.label}
-                    onClick={() => { navigate(item.path); setIsMobileMenuOpen(false); }}
-                    className="py-2 px-3 bg-slate-50 rounded-lg text-left text-sm font-bold text-slate-700 hover:bg-slate-100"
-                  >
-                    {item.label}
-                  </button>
-                ))}
               </div>
 
-              {!isAuthenticated ? (
-                <div className="space-y-2 pt-2 border-t border-slate-100">
-                  <button
-                    onClick={() => { openLoginModal(); setIsMobileMenuOpen(false); }}
-                    className="w-full py-3 bg-purple-600 text-white font-black rounded-xl text-sm shadow-sm"
-                  >
-                    Customer Sign In
+              <div className="p-4 space-y-5 overflow-y-auto custom-scrollbar flex-1">
+                <form onSubmit={handleSearch} className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                    <MapPin size={18} className="text-purple-600 ml-1" />
+                    <select
+                      value={selectedLocation}
+                      onChange={(e) => setSelectedLocation(e.target.value)}
+                      className="bg-transparent text-slate-700 text-base font-bold focus:outline-none w-full min-h-[32px]"
+                    >
+                      <option value="Bangalore / Near Me">Bangalore</option>
+                      <option value="Indiranagar">Indiranagar</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                    <Search size={18} className="text-slate-400 ml-1" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search pets..."
+                      className="w-full bg-transparent text-slate-900 text-base focus:outline-none min-h-[32px]"
+                    />
+                  </div>
+                  <button type="submit" className="w-full py-3.5 bg-purple-600 text-white font-black rounded-xl text-base min-h-[48px]">
+                    Search Directory
                   </button>
-                  <button
-                    onClick={() => { navigate("/partner/login"); setIsMobileMenuOpen(false); }}
-                    className="w-full py-3 bg-slate-900 text-white font-black rounded-xl text-sm shadow-sm"
-                  >
-                    Partner Portal Login
-                  </button>
+                </form>
+
+                <div className="space-y-1">
+                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest px-1 mb-2">Services</h4>
+                  {navLinks.map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => { navigate(item.path); setIsMobileMenuOpen(false); }}
+                      className="w-full py-3.5 px-4 bg-transparent rounded-xl text-left text-base font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center justify-between min-h-[48px]"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
                 </div>
-              ) : (
-                <button
-                  onClick={() => { 
-                    if (user?.role === 'partner') navigate("/partner/dashboard");
-                    else if (user?.role === 'admin' || user?.role === 'superadmin') navigate("/admin/dashboard");
-                    else navigate("/dashboard"); 
-                    setIsMobileMenuOpen(false); 
-                  }}
-                  className="w-full py-3 bg-purple-600 text-white font-black rounded-xl text-sm shadow-sm mt-2"
-                >
-                  Go to Dashboard
-                </button>
-              )}
-            </div>
-          </motion.div>
+              </div>
+
+              <div className="p-4 border-t border-slate-100 bg-slate-50 shrink-0">
+                {!isAuthenticated ? (
+                  <div className="space-y-3">
+                    <button
+                      onClick={() => { openLoginModal(); setIsMobileMenuOpen(false); }}
+                      className="w-full py-3.5 bg-purple-600 text-white font-black rounded-xl text-base shadow-sm min-h-[48px]"
+                    >
+                      Customer Sign In
+                    </button>
+                    <button
+                      onClick={() => { navigate("/partner/login"); setIsMobileMenuOpen(false); }}
+                      className="w-full py-3.5 bg-slate-900 text-white font-black rounded-xl text-base shadow-sm min-h-[48px]"
+                    >
+                      Partner Portal Login
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { 
+                      if (user?.role === 'partner') navigate("/partner/dashboard");
+                      else if (user?.role === 'admin' || user?.role === 'superadmin') navigate("/admin/dashboard");
+                      else navigate("/dashboard"); 
+                      setIsMobileMenuOpen(false); 
+                    }}
+                    className="w-full py-3.5 bg-purple-600 text-white font-black rounded-xl text-base shadow-sm min-h-[48px]"
+                  >
+                    Go to Dashboard
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>
