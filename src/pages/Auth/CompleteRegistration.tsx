@@ -43,7 +43,12 @@ export const CompleteRegistration = () => {
         }));
       } catch (e) {}
     }
-  }, []);
+    
+    // Skip phone verification if phone is already linked
+    if (user?.phone || auth.currentUser?.phoneNumber) {
+      setStep(2);
+    }
+  }, [user]);
 
   useEffect(() => {
     let timer: any;
@@ -141,7 +146,7 @@ export const CompleteRegistration = () => {
         email: auth.currentUser.email || '',
         phone: auth.currentUser.phoneNumber || phoneNumber,
         role: role,
-        loginMethod: auth.currentUser.providerData.some(p => p.providerId === 'google.com') ? 'google' : 'email',
+        loginMethod: auth.currentUser.providerData.some(p => p.providerId === 'google.com') ? 'google' : auth.currentUser.providerData.some(p => p.providerId === 'phone') ? 'phone' : 'email',
         isActive: true,
         walletBalance: 0,
         rewardPoints: 0,

@@ -171,6 +171,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             name: userData?.full_name || firebaseUser.displayName || '',
             phone: userData?.phone || firebaseUser.phoneNumber || '',
             photoUrl: userData?.avatar_url || firebaseUser.photoURL || '',
+            isRegistrationComplete: true,
           };
 
           set({ isAuthenticated: true, user, isLoading: false });
