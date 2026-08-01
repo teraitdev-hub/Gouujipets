@@ -91,13 +91,106 @@ export const UserLogin = () => {
     const validEmail = isEmail(loginIdentifier);
     const validPhone = isPhone(loginIdentifier);
 
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useAuthStore } from "../../store/useAuthStore";
+import { PawPrint, Mail, Lock, ArrowRight, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { checkPasswordStrength } from "../../utils/security";
+import { auth, db } from "../../lib/firebase";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile, getAdditionalUserInfo } from "firebase/auth";
+import type { ConfirmationResult } from "firebase/auth";
+import { collection, addDoc, getDocs, query, where, limit } from "firebase/firestore";
+import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
+
+const SERVICE_INFO: Record<string, { title: string, desc: string, icon: string }> = {
+  boarding: { title: "Pet Boarding", desc: "A safe, comfortable, and loving home away from home for your pets. Our trusted boarding partners provide clean accommodations, personalized care, nutritious meals, regular exercise, and 24/7 supervision to ensure your pet feels happy and secure while you're away.", icon: "뿯½Ÿ뿯½뿯½" },
+  daycare: { title: "Pet Daycare", desc: "Give your pet a fun and active day filled with supervised play, socialization, exercise, and plenty of attention. Perfect for busy pet parents who want their pets to stay engaged and cared for throughout the day.", icon: "뿯½ŸŒž" },
+  grooming: { title: "Grooming & Spa", desc: "Keep your pet looking and feeling their best with professional grooming services, including bathing, hair trimming, nail clipping, ear cleaning, coat brushing, dental hygiene, and relaxing spa treatments.", icon: "뿯½Ÿ’‡" },
+  veterinary: { title: "Veterinary Care", desc: "Connect with experienced veterinarians for routine health checkups, vaccinations, preventive care, medical consultations, diagnostics, emergency treatment, and personalized health advice to keep your pet healthy.", icon: "뿯½Ÿ뿯½뿯½" },
+  training: { title: "Pet Training", desc: "Professional trainers help pets develop good behavior, obedience, social skills, and confidence through customized training programs designed for puppies, adult pets, and pets with behavioral challenges.", icon: "뿯½ŸŽ“" },
+  walking: { title: "Dog Walking", desc: "Reliable dog walkers provide safe and enjoyable walks that help your dog stay active, healthy, mentally stimulated, and happy뿯½뿯₽”even when you're busy.", icon: "뿯½Ÿš뿯½" },
+  transportation: { title: "Pet Transportation", desc: "Convenient and secure pickup and drop-off services ensure your pet travels safely between your home, boarding center, grooming salon, veterinary clinic, or daycare facility.", icon: "뿯½Ÿš—" },
+  shop: { title: "Pet Shop", desc: "Shop premium pet food, treats, toys, accessories, grooming products, healthcare essentials, and other pet supplies from trusted brands뿯½뿯₽”all in one place.", icon: "뿯½Ÿ›뿯½뿯½뿯½뿯½" },
+  health_tracking: { title: "Pet Health Tracking", desc: "Maintain a complete digital health profile with vaccination records, medical history, medications, weight tracking, appointment reminders, and wellness reports뿯½뿯₽”all accessible anytime.", icon: "뿯½Ÿ“뿯½" },
+  default: { title: "Welcome to Goujji Pets", desc: "Join India's #1 verified pet care marketplace. Find trusted pet care providers, compare services, view availability, book instantly, make secure payments, and manage all your reservations through a single platform.", icon: "뿯½œ뿯½" }
+};
+
+export const UserLogin = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, intendedRoute, setIntendedRoute, isAuthenticated, user } = useAuthStore();
+  const [isLogin, setIsLogin] = useState(true);
+  
+  const searchParams = new URLSearchParams(location.search);
+  const serviceKey = searchParams.get('service')?.toLowerCase() || '';
+  const serviceInfo = SERVICE_INFO[serviceKey] || SERVICE_INFO.default;
+
+  // Set intended route based on service query param on mount
+  useEffect(() => {
+    if (serviceKey && !intendedRoute) {
+      if (serviceKey === 'health_tracking') setIntendedRoute('/health');
+      else if (serviceKey === 'shop') setIntendedRoute('/shop');
+      else if (serviceKey === 'daycare') setIntendedRoute('/boarding?type=daycare');
+      else setIntendedRoute(`/${serviceKey}`);
+    }
+  }, [serviceKey, intendedRoute, setIntendedRoute]);
+
+  // Auto-redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'partner') navigate('/partner/dashboard');
+      else if (user.role === 'admin' || user.role === 'superadmin') navigate('/admin/dashboard');
+      else navigate(intendedRoute || '/dashboard');
+    }
+  }, [isAuthenticated, user, navigate, intendedRoute]);
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "", 
+    password: "",
+    phone: "", 
+    petName: "",
+    petBreed: "",
+    petType: "Dog"
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+
+  const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
+  const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ''));
+
+  const handleGoogleLogin = async () => {
+    try {
+      setError("");
+      await loginWithGoogle('customer');
+      await useAuthStore.getState().loadUser();
+      navigate(intendedRoute || '/dashboard');
+      setIntendedRoute(null);
+    } catch (err: any) {
+      setError(err.message || "Google Login failed or was cancelled.");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    const loginIdentifier = formData.email.trim();
+    const validEmail = isEmail(loginIdentifier);
+    const validPhone = isPhone(loginIdentifier);
+
     if (!validEmail && !validPhone) {
       setError("Please enter a valid Email address or Phone Number.");
       setIsLoading(false);
       return;
     }
 
-    if (!isLogin) {
+    if (!isLogin && !validPhone) {
       const passwordCheck = checkPasswordStrength(formData.password);
       if (!passwordCheck.isStrong) {
         setError(passwordCheck.errors.join(" "));
@@ -106,7 +199,21 @@ export const UserLogin = () => {
       }
     }
 
-    const finalEmail = validPhone ? `${loginIdentifier.replace(/[^0-9]/g, '')}@phone.gouuji.com` : loginIdentifier.toLowerCase();
+    if (validPhone) {
+      try {
+        const recaptchaVerifier = setupRecaptcha("recaptcha-container");
+        const confirmation = await sendOTP(loginIdentifier, recaptchaVerifier);
+        setConfirmationResult(confirmation);
+        setShowOtpInput(true);
+      } catch (err: any) {
+        setError(err.message || "Failed to send OTP. Please check the number.");
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    const finalEmail = loginIdentifier.toLowerCase();
 
     try {
       if (isLogin) {
@@ -203,7 +310,29 @@ export const UserLogin = () => {
     setError("");
     
     try {
-      await verifyOTP(confirmationResult, otp, 'customer');
+      const userCredential = await verifyOTP(confirmationResult, otp, 'customer');
+      
+      if (!isLogin) {
+        // Set user name since verifyOTP creates a generic "User" name
+        const { doc, setDoc } = await import('firebase/firestore');
+        await setDoc(doc(db, "users", userCredential.user.uid), {
+          full_name: formData.name || "Customer",
+          phone: formData.email.trim(),
+          email: "",
+          role: "customer",
+          loginMethod: 'phone'
+        }, { merge: true });
+
+        // Save pet data temporarily in local storage to be created upon full activation
+        if (formData.petName) {
+           localStorage.setItem('pending_pet_registration', JSON.stringify({
+              name: formData.petName,
+              species: formData.petType,
+              breed: formData.petBreed,
+           }));
+        }
+      }
+
       await useAuthStore.getState().loadUser();
       
       if (intendedRoute) {
@@ -347,8 +476,6 @@ export const UserLogin = () => {
                   />
                 </div>
                 
-                {/* Removed Phone OTP Input */}
-
                 <div className="pt-4 pb-2">
                   <h3 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2">Pet Registration <span className="text-red-500">*</span></h3>
                   <p className="text-xs text-slate-500 mt-1">Please register your pet to continue.</p>
@@ -406,30 +533,32 @@ export const UserLogin = () => {
             </div>
 
             
-            <div>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 transition-colors">
-                  <Lock size={20} />
+            {!isPhone(formData.email) && (
+              <div>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-purple-600 transition-colors">
+                    <Lock size={20} />
+                  </div>
+                  <input 
+                    type="password" 
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
+                    required
+                  />
                 </div>
-                <input 
-                  type="password" 
-                  placeholder="Password (Leave empty if using Phone Number)"
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
-                  required={!isPhone(formData.email)}
-                />
+                {!isLogin && formData.password.length > 0 && (
+                  <div className="mt-2 text-xs">
+                    <div className={`flex items-center gap-1 ${formData.password.length >= 8 ? 'text-green-600' : 'text-slate-400'}`}>• Minimum 8 characters</div>
+                    <div className={`flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 uppercase letter</div>
+                    <div className={`flex items-center gap-1 ${/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 lowercase letter</div>
+                    <div className={`flex items-center gap-1 ${/[0-9]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 number</div>
+                    <div className={`flex items-center gap-1 ${/[^A-Za-z0-9]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 special character</div>
+                  </div>
+                )}
               </div>
-              {!isLogin && formData.password.length > 0 && (
-                <div className="mt-2 text-xs">
-                  <div className={`flex items-center gap-1 ${formData.password.length >= 8 ? 'text-green-600' : 'text-slate-400'}`}>• Minimum 8 characters</div>
-                  <div className={`flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 uppercase letter</div>
-                  <div className={`flex items-center gap-1 ${/[a-z]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 lowercase letter</div>
-                  <div className={`flex items-center gap-1 ${/[0-9]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 number</div>
-                  <div className={`flex items-center gap-1 ${/[^A-Za-z0-9]/.test(formData.password) ? 'text-green-600' : 'text-slate-400'}`}>• At least 1 special character</div>
-                </div>
-              )}
-            </div>
+            )}
 
 
             {isLogin && (
@@ -437,6 +566,7 @@ export const UserLogin = () => {
                 <Link to="/forgot-password" className="text-sm font-bold text-purple-600 hover:text-purple-700 hover:underline">Forgot Password?</Link>
               </div>
             )}
+
 
             <button 
               type="submit" 
