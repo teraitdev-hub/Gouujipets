@@ -47,17 +47,17 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
           </div>
         </header>
 
-        <main
-          className={`flex-1 overflow-y-auto bg-transparent relative ${
+        <main className="flex-1 overflow-y-auto bg-transparent relative">
+          <ServiceQuickLinks />
+          <div className={`relative z-10 ${
             location.pathname.startsWith("/boarding") ||
             location.pathname.startsWith("/facility") ||
             location.pathname === "/"
               ? "p-0"
               : "p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full"
-          }`}
-        >
-          <ServiceQuickLinks />
-          <div className="relative z-10">{children}</div>
+          }`}>
+            {children}
+          </div>
         </main>
       </div>
 
