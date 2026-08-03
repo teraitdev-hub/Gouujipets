@@ -159,7 +159,9 @@ export const AdminLogin = () => {
       useAuthStore.getState().login({
         id: userCredential.user.uid,
         email: userCredential.user.email || undefined,
-        role: role
+        role: role,
+        isRegistrationComplete: true,
+        needsEmailVerification: false
       });
 
       // Navigate to dashboard
