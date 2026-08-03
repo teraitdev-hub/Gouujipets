@@ -94,7 +94,15 @@ export const PartnerLayout = ({ children }: PartnerLayoutProps) => {
           </div>
 
           {/* Universal Booking & Guest Quick Search */}
-          <div className="hidden lg:flex flex-1 max-w-md mx-6 relative">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                window.location.href = `/partner/dashboard?query=${encodeURIComponent(searchQuery)}`;
+              }
+            }}
+            className="hidden lg:flex flex-1 max-w-md mx-6 relative"
+          >
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-600" />
             <input
               type="text"
@@ -103,7 +111,7 @@ export const PartnerLayout = ({ children }: PartnerLayoutProps) => {
               placeholder="Search active guests, pet names, phone numbers..."
               className="w-full h-10 pl-10 pr-4 bg-purple-50/50 border border-purple-200 rounded-xl text-sm font-medium text-purple-950 placeholder:text-purple-400 focus:outline-none focus:border-purple-600 focus:ring-2 focus:ring-purple-600/20 transition-all shadow-inner"
             />
-          </div>
+          </form>
 
           {/* Right: Live Status + Notification + Avatar */}
           <div className="flex items-center gap-2 sm:gap-4 shrink-0">

@@ -48,7 +48,17 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
           </div>
 
           {/* Universal Admin Quick-Search Bar */}
-          <div className="hidden lg:flex flex-1 max-w-md mx-6 relative">
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (adminSearch.trim()) {
+                // In a real app this might filter local state or navigate to a search page.
+                // Here we navigate to the admin dashboard with the query parameter.
+                window.location.href = `/admin/dashboard?query=${encodeURIComponent(adminSearch)}`;
+              }
+            }}
+            className="hidden lg:flex flex-1 max-w-md mx-6 relative"
+          >
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-600" />
             <input
               type="text"
@@ -57,7 +67,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
               placeholder="Quick search centers, owners, phone numbers, invoice IDs..."
               className="w-full h-9 pl-9 pr-4 bg-white border border-purple-200 rounded-xl text-xs font-medium text-purple-950 placeholder:text-purple-400 focus:outline-none focus:border-purple-600 transition-all shadow-inner"
             />
-          </div>
+          </form>
           
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
