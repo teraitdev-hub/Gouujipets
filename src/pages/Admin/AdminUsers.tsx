@@ -21,6 +21,14 @@ export const AdminUsers = () => {
 
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Strict email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newAdmin.email)) {
+      setCreateError("Please enter a valid email address.");
+      return;
+    }
+
     setIsCreating(true);
     setCreateError("");
     try {
