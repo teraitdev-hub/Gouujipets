@@ -88,7 +88,7 @@ export const Checkout = () => {
   const checkOut = checkOutDate && checkOutTime ? `${checkOutDate}T${checkOutTime}` : "";
   const [selectedPets, setSelectedPets] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState("card");
-  const [paymentType, setPaymentType] = useState<"full" | "advance">("advance");
+  const [paymentType, setPaymentType] = useState<"full" | "advance" | "paylater">("advance");
   const [customAdvance, setCustomAdvance] = useState<string>("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [petToEditInModal, setPetToEditInModal] = useState<any>(null);
@@ -285,7 +285,7 @@ export const Checkout = () => {
         pet_count: selectedPets.length,
         pet_ids: selectedPets,
         total_amount: grandTotal(),
-        total_paid: paymentType === "advance" ? (customAdvance ? Number(customAdvance) : grandTotal() / 2) : grandTotal(),
+        total_paid: paymentType === "advance" ? (customAdvance ? Number(customAdvance) : grandTotal() / 2) : (paymentType === "paylater" ? 0 : grandTotal()),
         payment_method: paymentMethod,
         selected_services: selectedServices.map((id: string) => services.find((s: any) => s.id === id)).filter(Boolean),
         status: "pending",
@@ -308,7 +308,7 @@ export const Checkout = () => {
       });
 
       // Automate Journal Entry for Partner Revenue
-      const paidAmount = paymentType === "advance" ? (customAdvance ? Number(customAdvance) : grandTotal() / 2) : grandTotal();
+      const paidAmount = paymentType === "advance" ? (customAdvance ? Number(customAdvance) : grandTotal() / 2) : (paymentType === "paylater" ? 0 : grandTotal());
       if (paidAmount > 0) {
         await createJournalEntry({
           business_id: facility.id,
@@ -869,6 +869,17 @@ export const Checkout = () => {
                   <span className="font-extrabold text-brand-700 text-xs">{formatRupee(customAdvance ? Number(customAdvance) : grandTotal() / 2)}</span>
                 )}
               </label>
+
+              <label className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-all ${paymentType === 'paylater' ? 'border-brand-600 bg-brand-50/60' : 'border-slate-200/80 hover:border-slate-300'}`}>
+                <div className="flex items-center gap-2">
+                  <input type="radio" name="paymentType" checked={paymentType === 'paylater'} onChange={() => setPaymentType('paylater')} className="accent-brand-600 w-3.5 h-3.5" />
+                  <div>
+                    <span className="font-extrabold text-slate-900 text-xs block">Pay at Facility</span>
+                    <span className="text-[10px] text-slate-500">Book now, pay later</span>
+                  </div>
+                </div>
+                <span className="font-extrabold text-brand-700 text-xs">₹0</span>
+              </label>
             </div>
 
             <hr className="border-slate-100 my-2.5" />
@@ -877,7 +888,7 @@ export const Checkout = () => {
               <span className="font-extrabold text-xs text-slate-900">Total to Pay Now</span>
               <span className="text-base sm:text-lg font-black text-slate-900 flex items-center">
                 <IndianRupee size={15} strokeWidth={2.5} className="text-slate-700" />
-                {(paymentType === "advance" ? (customAdvance ? Number(customAdvance) : grandTotal() / 2) : grandTotal()).toLocaleString("en-IN")}
+                {(paymentType === "advance" ? (customAdvance ? Number(customAdvance) : grandTotal() / 2) : (paymentType === "paylater" ? 0 : grandTotal())).toLocaleString("en-IN")}
               </span>
             </div>
 
@@ -891,6 +902,7 @@ export const Checkout = () => {
               text={
                 isProcessing ? "Processing..."
                 : isBoardingFull ? "Fully Booked"
+                : paymentType === "paylater" ? "Book Now (Pay at Facility)"
                 : `Pay ${formatRupee(paymentType === "advance" ? (customAdvance ? Number(customAdvance) : grandTotal() / 2) : grandTotal())} Now`
               }
             />
