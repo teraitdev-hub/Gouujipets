@@ -14,6 +14,7 @@ import { usePet } from "../../context/PetContext";
 import { useRazorpay } from "../../hooks/useRazorpay"; // kept for future live payment integration
 import { UiverseButton } from "../../components/ui/UiverseButton";
 import { UiverseLoader } from "../../components/ui/UiverseLoader";
+import { AddPetModal } from "../../components/pets/AddPetModal";
 import { Map, Marker } from "@vis.gl/react-google-maps";
 
 const containerStyle = {
