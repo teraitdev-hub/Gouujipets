@@ -10,6 +10,8 @@ export const AdminUsers = () => {
   const { user } = useAuthStore();
   const isSuper = user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'super_admin';
   const [users, setUsers] = useState<any[]>([]);
+  const [businesses, setBusinesses] = useState<any[]>([]);
+  const [pets, setPets] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserForManage, setSelectedUserForManage] = useState<any | null>(null);
@@ -63,23 +65,52 @@ export const AdminUsers = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    const q = query(collection(db, 'users'));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setUsers(data || []);
+    const unsubUsers = onSnapshot(query(collection(db, 'users')), (snapshot) => {
+      setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       setIsLoading(false);
     }, (error) => {
       console.error("Error listening to users:", error);
       setIsLoading(false);
     });
+
+    const unsubBiz = onSnapshot(query(collection(db, 'businesses')), (snapshot) => {
+      setBusinesses(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+
+    const unsubPets = onSnapshot(query(collection(db, 'pets')), (snapshot) => {
+      setPets(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
     
-    return () => unsubscribe();
+    return () => {
+      unsubUsers();
+      unsubBiz();
+      unsubPets();
+    };
   }, []);
 
-  const filteredUsers = users.filter(u => {
+  const enrichedUsers = users.map(u => {
+    if (u.role === 'partner') {
+      const bizs = businesses.filter(b => b.owner_id === u.id);
+      return { ...u, businesses: bizs };
+    }
+    if (u.role === 'customer') {
+      const userPets = pets.filter(p => p.owner_id === u.id);
+      return { ...u, pets: userPets };
+    }
+    return u;
+  });
+
+  const filteredUsers = enrichedUsers.filter(u => {
     const q = searchQuery.toLowerCase();
     const name = u.full_name || u.name || '';
-    return name.toLowerCase().includes(q) || (u.email && u.email.toLowerCase().includes(q));
+    const email = u.email || '';
+    const petNames = u.pets?.map((p: any) => p.name).join(' ') || '';
+    const bizNames = u.businesses?.map((b: any) => b.name || b.shop_name).join(' ') || '';
+    
+    return name.toLowerCase().includes(q) || 
+           email.toLowerCase().includes(q) ||
+           petNames.toLowerCase().includes(q) ||
+           bizNames.toLowerCase().includes(q);
   });
 
   return (
@@ -172,6 +203,16 @@ export const AdminUsers = () => {
                       <div className="text-right md:text-left">
                         <div className="font-black text-slate-900">{user.full_name || user.name || 'Unnamed User'}</div>
                         <div className="text-xs text-slate-500">{user.email || 'No email provided'}</div>
+                        {user.role === 'customer' && user.pets?.length > 0 && (
+                          <div className="text-[10px] text-purple-600 font-bold mt-1">
+                            Pets: {user.pets.map((p: any) => p.name).join(', ')}
+                          </div>
+                        )}
+                        {user.role === 'partner' && user.businesses?.length > 0 && (
+                          <div className="text-[10px] text-emerald-600 font-bold mt-1">
+                            Shops: {user.businesses.map((b: any) => b.name || b.shop_name).join(', ')}
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="flex justify-between items-center md:table-cell p-4 md:p-4 border-b border-slate-50 md:border-0 md:text-center">
