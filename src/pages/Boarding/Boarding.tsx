@@ -129,24 +129,24 @@ export const Boarding = () => {
       amens = amens.split(',');
     }
 
-    const searchLower = searchQuery.toLowerCase().trim();
-    const searchTokens = searchLower.split(/\s+/).filter(Boolean);
+    const rawLocation = searchParams.get("location") || "";
+    const cleanLocation = rawLocation.toLowerCase().includes("near me") || rawLocation.toLowerCase().includes("all") ? "" : rawLocation;
+    const searchLower = [searchQuery, cleanLocation].join(" ").toLowerCase().trim();
+    // Filter out common meaningless words and symbols
+    const searchTokens = searchLower.split(/\s+/).map(t => t.replace(/[^a-z0-9]/g, '')).filter(t => t && !['and', 'or', 'in', 'near', 'me', 'the', 'all'].includes(t));
 
-    const matchesSearch = !searchLower ? true : (
-      (f.name && f.name.toLowerCase().includes(searchLower)) ||
-      (f.address && f.address.toLowerCase().includes(searchLower)) ||
-      (f.type && f.type.toLowerCase().includes(searchLower)) ||
-      (f.description && f.description.toLowerCase().includes(searchLower)) ||
-      (Array.isArray(svcs) && svcs.some((s: any) => {
-        const sName = (s.name || s || "").toString().toLowerCase();
-        const sDesc = (s.description || "").toString().toLowerCase();
-        const sCat = (s.category || "").toString().toLowerCase();
-        return sName.includes(searchLower) || sDesc.includes(searchLower) || sCat.includes(searchLower) ||
-               searchTokens.every(t => sName.includes(t) || sDesc.includes(t) || sCat.includes(t));
-      })) ||
-      (Array.isArray(amens) && amens.some((a: string) => a.toLowerCase().includes(searchLower) || searchTokens.every(t => a.toLowerCase().includes(t))))
-    );
-                          
+    const matchesSearch = searchTokens.length === 0 ? true : searchTokens.every(token => {
+      const combinedText = [
+        f.name,
+        typeof f.address === 'string' ? f.address : f.address?.city,
+        f.type,
+        f.description,
+        ...(Array.isArray(svcs) ? svcs.map((s: any) => `${s.name || s} ${s.description || ''} ${s.category || ''}`) : []),
+        ...(Array.isArray(amens) ? amens : [])
+      ].join(' ').toLowerCase();
+      
+      return combinedText.includes(token);
+    });
     const matchesCategory = activeCategory === "all" ? true : (
       (f.type && f.type.toLowerCase().includes(activeCategory.toLowerCase())) ||
       (f.category && f.category.toLowerCase().includes(activeCategory.toLowerCase())) ||
