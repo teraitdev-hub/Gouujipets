@@ -5,7 +5,7 @@ import { getStorage } from "firebase/storage";
 import { getFunctions } from "firebase/functions";
 import { getMessaging } from "firebase/messaging";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyB1COW2uZ9YP-sYosaESXgRX1AOs6LVknE",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "gouujipets.firebaseapp.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "gouujipets",

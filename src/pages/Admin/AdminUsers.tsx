@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { Users, Search, Filter, X } from "lucide-react";
-import { db } from "../../lib/firebase";
-import { collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { Users, Search, Filter, X, Plus, Loader2, Shield } from "lucide-react";
+import { db, firebaseConfig } from "../../lib/firebase";
+import { collection, getDocs, query, orderBy, onSnapshot, doc, updateDoc, setDoc } from "firebase/firestore";
 import { useAuthStore } from "../../store/useAuthStore";
+import { initializeApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 
 export const AdminUsers = () => {
   const { user } = useAuthStore();
@@ -11,6 +13,45 @@ export const AdminUsers = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUserForManage, setSelectedUserForManage] = useState<any | null>(null);
+
+  const [showAddAdminModal, setShowAddAdminModal] = useState(false);
+  const [newAdmin, setNewAdmin] = useState({ name: "", email: "", password: "", role: "admin" });
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
+
+  const handleCreateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreating(true);
+    setCreateError("");
+    try {
+      // Use secondary app to prevent signing out the current admin
+      const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp" + Date.now());
+      const secondaryAuth = getAuth(secondaryApp);
+      
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, newAdmin.email, newAdmin.password);
+      await signOut(secondaryAuth);
+      
+      // Add to firestore
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        full_name: newAdmin.name,
+        name: newAdmin.name,
+        email: newAdmin.email,
+        role: newAdmin.role,
+        status: 'active',
+        created_at: new Date().toISOString(),
+        isRegistrationComplete: true
+      });
+      
+      setShowAddAdminModal(false);
+      setNewAdmin({ name: "", email: "", password: "", role: "admin" });
+      alert("Admin created successfully!");
+    } catch (err: any) {
+      console.error(err);
+      setCreateError(err.message || "Failed to create admin");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -57,6 +98,15 @@ export const AdminUsers = () => {
           <button className="p-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600">
             <Filter size={18} />
           </button>
+          {isSuper && (
+            <button 
+              onClick={() => setShowAddAdminModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 font-bold text-sm shadow-sm transition-colors"
+            >
+              <Plus size={16} />
+              Add Admin
+            </button>
+          )}
           <button 
             onClick={async () => {
               if (window.confirm("Are you sure you want to delete ALL customers and partners? This action cannot be undone.")) {
@@ -247,6 +297,98 @@ export const AdminUsers = () => {
                   className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-xl transition-all shadow-md shadow-purple-600/10 active:scale-[0.98]"
                 >
                   Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showAddAdminModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl p-6 relative border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <button 
+              onClick={() => setShowAddAdminModal(false)} 
+              className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+            >
+              <X size={20} />
+            </button>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600">
+                <Shield size={20} />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900">Add New Admin</h3>
+                <p className="text-xs font-bold text-slate-500">Create a direct administrator account</p>
+              </div>
+            </div>
+            
+            <form onSubmit={handleCreateAdmin} className="space-y-4">
+              {createError && (
+                <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-200">
+                  {createError}
+                </div>
+              )}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
+                <input 
+                  type="text" 
+                  value={newAdmin.name} 
+                  onChange={(e) => setNewAdmin({ ...newAdmin, name: e.target.value })}
+                  placeholder="e.g. John Doe"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none transition-all"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Email Address</label>
+                <input 
+                  type="email" 
+                  value={newAdmin.email} 
+                  onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+                  placeholder="admin@gouujipets.com"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none transition-all"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Temporary Password</label>
+                <input 
+                  type="password" 
+                  value={newAdmin.password} 
+                  onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
+                  placeholder="••••••••"
+                  minLength={6}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none transition-all"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Admin Level</label>
+                <select 
+                  value={newAdmin.role} 
+                  onChange={(e) => setNewAdmin({ ...newAdmin, role: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 outline-none cursor-pointer transition-all"
+                >
+                  <option value="admin">Administrator</option>
+                  <option value="superadmin">Super Administrator</option>
+                </select>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <button 
+                  type="button" 
+                  onClick={() => setShowAddAdminModal(false)}
+                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isCreating}
+                  className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center font-black rounded-xl transition-all shadow-md shadow-purple-600/10 active:scale-[0.98] disabled:opacity-70"
+                >
+                  {isCreating ? <Loader2 size={18} className="animate-spin" /> : "Create Admin"}
                 </button>
               </div>
             </form>
