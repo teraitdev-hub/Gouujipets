@@ -89,7 +89,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     }
     // Fallback to OSM if Google script is loading/unavailable
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, { headers: { 'Accept-Language': 'en' } });
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&email=contact@gouujipets.com`, { headers: { 'Accept-Language': 'en' } });
       if (res.ok) {
         const data = await res.json();
         const a = data.address || {};
@@ -135,7 +135,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     const giveUp = setTimeout(() => {
       setGpsError('Location detection timed out. Please search your address below.');
       setPhase('done');
-    }, 10000);
+    }, 5000);
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -149,7 +149,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         setGpsError(err.code === 1 ? 'Location permission denied. Please allow location in browser settings and try again.' : 'Could not get your location. Please type your address in the search box.');
         setPhase('done');
       },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
     );
   };
 
