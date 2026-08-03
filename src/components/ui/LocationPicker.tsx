@@ -132,32 +132,24 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     setGpsError('');
     setGpsAccuracy(null);
 
-    if (watchRef.current !== null) { navigator.geolocation.clearWatch(watchRef.current); watchRef.current = null; }
-
     const giveUp = setTimeout(() => {
-      if (watchRef.current !== null) { navigator.geolocation.clearWatch(watchRef.current); watchRef.current = null; }
       setGpsError('Location detection timed out. Please search your address below.');
       setPhase('done');
-    }, 20000);
+    }, 10000);
 
-    watchRef.current = navigator.geolocation.watchPosition(
+    navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng, accuracy } = pos.coords;
         setGpsAccuracy(Math.round(accuracy));
-        if (watchRef.current !== null) {
-          navigator.geolocation.clearWatch(watchRef.current);
-          watchRef.current = null;
-        }
         clearTimeout(giveUp);
         await applyLocation(lat, lng, accuracy < 100 ? 17 : 15);
       },
       (err) => {
         clearTimeout(giveUp);
-        if (watchRef.current !== null) { navigator.geolocation.clearWatch(watchRef.current); watchRef.current = null; }
         setGpsError(err.code === 1 ? 'Location permission denied. Please allow location in browser settings and try again.' : 'Could not get your location. Please type your address in the search box.');
         setPhase('done');
       },
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
     );
   };
 
