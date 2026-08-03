@@ -29,12 +29,14 @@ export const RequireAuth = ({ children, allowedRoles }: RequireAuthProps) => {
     return <Navigate to="/login/user" state={{ from: location }} replace />;
   }
 
+  const isAdmin = user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'super_admin';
+
   // MANDATORY SECURITY INTERCEPTOR
-  if (user?.needsEmailVerification && location.pathname !== '/verify-email') {
+  if (!isAdmin && user?.needsEmailVerification && location.pathname !== '/verify-email') {
     return <Navigate to="/verify-email" state={{ from: location }} replace />;
   }
 
-  if (user && !user.isRegistrationComplete && location.pathname !== '/complete-registration') {
+  if (!isAdmin && user && !user.isRegistrationComplete && location.pathname !== '/complete-registration') {
     return <Navigate to="/complete-registration" state={{ from: location }} replace />;
   }
 
