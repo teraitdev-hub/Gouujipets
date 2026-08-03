@@ -14,8 +14,7 @@ import { usePet } from "../../context/PetContext";
 import { useRazorpay } from "../../hooks/useRazorpay"; // kept for future live payment integration
 import { UiverseButton } from "../../components/ui/UiverseButton";
 import { UiverseLoader } from "../../components/ui/UiverseLoader";
-import { AddPetModal } from "../../components/pets/AddPetModal";
-import { Map, AdvancedMarker } from "@vis.gl/react-google-maps";
+import { Map, Marker } from "@vis.gl/react-google-maps";
 
 const containerStyle = {
   width: '100%',
@@ -114,14 +113,15 @@ export const Checkout = () => {
     return rate * nights() * Math.max(1, selectedPets.length);
   };
 
-  const taxes = Math.round(basePrice() * 0.18);
+  const servicesTotal = selectedServices.reduce((sum, sid) => {
+    const srv = services.find((s: any) => s.id === sid);
+    return sum + Number(srv?.price || 0);
+  }, 0);
+
+  const taxes = Math.round((basePrice() + servicesTotal) * 0.18);
 
   const grandTotal = () => {
-    const servicesTotal = selectedServices.reduce((sum, sid) => {
-      const srv = services.find(s => s.id === sid);
-      return sum + Number(srv?.price || 0);
-    }, 0);
-    return basePrice() + taxes + servicesTotal;
+    return basePrice() + servicesTotal + taxes;
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -774,7 +774,6 @@ export const Checkout = () => {
               <div className="mt-4 border border-purple-200 rounded-xl p-3 bg-purple-50/30">
                 <p className="text-xs font-bold text-purple-800 mb-2">Pinpoint your exact location:</p>
                 <Map
-                  mapId="CHECKOUT_PICKUP_MAP"
                   style={containerStyle}
                   defaultCenter={pickupLocation || center}
                   defaultZoom={13}
@@ -784,7 +783,7 @@ export const Checkout = () => {
                     }
                   }}
                 >
-                  {pickupLocation && <AdvancedMarker position={pickupLocation} />}
+                  {pickupLocation && <Marker position={pickupLocation} />}
                 </Map>
                 {!pickupLocation && (
                   <p className="text-[11px] text-purple-600 mt-2 font-medium">Click on the map to set your pickup/drop location.</p>

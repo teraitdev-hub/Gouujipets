@@ -138,10 +138,18 @@ export const InvoiceSheet: React.FC<InvoiceSheetProps> = ({ booking, onClose }) 
           </div>
 
           {/* Totals */}
-          <div className="flex justify-end pt-4">
+          <div className="flex justify-end pt-4 border-t-2 border-gray-100 mt-2">
             <div className="w-full sm:w-1/2 space-y-3">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500 font-bold">Total Cost</span>
+                <span className="text-gray-500 font-bold">Subtotal (Excl. GST)</span>
+                <span className="font-medium text-gray-900">{formatRupee(Math.round(totalCost / 1.18))}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500 font-bold">IGST/CGST+SGST (18%)</span>
+                <span className="font-medium text-gray-900">{formatRupee(totalCost - Math.round(totalCost / 1.18))}</span>
+              </div>
+              <div className="flex justify-between text-sm border-t border-gray-200 pt-2">
+                <span className="text-gray-800 font-bold">Total Cost (Incl. GST)</span>
                 <span className="font-bold text-gray-900">{formatRupee(totalCost)}</span>
               </div>
               <div className="flex justify-between text-sm text-purple-600">

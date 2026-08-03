@@ -934,7 +934,7 @@ export const BookingDetailModal = ({ booking, onClose, role = 'customer', onOpen
               <div className="flex items-center gap-1.5 pt-1">
                 <CreditCard size={12} className="text-slate-400" />
                 <span className="text-[10px] text-slate-500 capitalize font-medium">
-                  Paid via {booking.payment_method || "online"}
+                  {booking.payment_method?.includes("pay_later") ? "To be paid later" : `Paid via ${booking.payment_method || "online"}`}
                 </span>
                 {paymentIdStr && (
                   <span className="ml-auto text-[9px] font-mono text-slate-400 truncate max-w-[120px]">{paymentIdStr}</span>

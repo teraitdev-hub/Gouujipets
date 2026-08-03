@@ -17,7 +17,7 @@ interface BookingFinancialsModalProps {
 export const BookingFinancialsModal = ({ isOpen, onClose, booking, businessBaseRate, onSuccess }: BookingFinancialsModalProps) => {
   const [extraExpense, setExtraExpense] = useState('');
   const [settleAmount, setSettleAmount] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi'>('cash');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'pay_later'>('cash');
   const [isLoading, setIsLoading] = useState(false);
   const [overtimeDays, setOvertimeDays] = useState(0);
   const [showInvoice, setShowInvoice] = useState(false);
@@ -52,17 +52,20 @@ export const BookingFinancialsModal = ({ isOpen, onClose, booking, businessBaseR
   const handleUpdateFinancials = async () => {
     setIsLoading(true);
     try {
-      const additionalExpenses = Number(extraExpense) || 0;
+      const additionalExpenses = Math.round((Number(extraExpense) || 0) * 1.18);
       const paymentAmount = Number(settleAmount) || 0;
-      const overtimeCharge = overtimeDays * businessBaseRate;
+      const overtimeCharge = Math.round((overtimeDays * businessBaseRate) * 1.18);
       
       const newExtraExpenses = (Number(booking.extra_expenses) || 0) + additionalExpenses + overtimeCharge;
-      const newTotalPaid = (Number(booking.total_paid) || 0) + paymentAmount;
+      const isPayLater = paymentMethod === 'pay_later';
+      const effectivePaymentAmount = isPayLater ? 0 : paymentAmount;
+      const newTotalPaid = (Number(booking.total_paid) || 0) + effectivePaymentAmount;
       
-      const isPaying = paymentAmount > 0;
-      const newPaymentMethod = isPaying 
-        ? (booking.payment_method ? `${booking.payment_method} + ${paymentMethod}` : paymentMethod)
-        : booking.payment_method;
+      const isPaying = paymentAmount > 0 || isPayLater;
+      const newPaymentMethod = isPayLater 
+        ? (booking.payment_method ? `${booking.payment_method} + pay_later` : 'pay_later')
+        : (isPaying ? (booking.payment_method ? `${booking.payment_method} + ${paymentMethod}` : paymentMethod) : booking.payment_method);
+
 
       // 1. Insert manual extra charge if any
       if (additionalExpenses > 0) {
@@ -218,7 +221,7 @@ export const BookingFinancialsModal = ({ isOpen, onClose, booking, businessBaseR
                   Pet has stayed {overtimeDays} day(s) past the checkout date ({booking.check_out}).
                 </p>
                 <div className="mt-2 font-bold text-purple-900 text-sm">
-                  Overtime Charge: {formatRupee(overtimeDays * businessBaseRate)}
+                  Overtime Charge (incl. 18% GST): {formatRupee(Math.round((overtimeDays * businessBaseRate) * 1.18))}
                 </div>
               </div>
             </div>
@@ -243,7 +246,7 @@ export const BookingFinancialsModal = ({ isOpen, onClose, booking, businessBaseR
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2 line-clamp-1 text-ellipsis">Add Extra Charge</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2 line-clamp-1 text-ellipsis">Add Extra Charge (Pre-GST)</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <span className="text-gray-500 font-bold">₹</span>
@@ -300,6 +303,15 @@ export const BookingFinancialsModal = ({ isOpen, onClose, booking, businessBaseR
                   className={`flex-1 py-1.5 text-xs font-black rounded-lg border transition-colors ${paymentMethod === 'upi' ? 'bg-purple-600 text-white border-purple-600 shadow-2xs' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
                 >
                   UPI
+                </button>
+                <button
+                  onClick={() => {
+                    setPaymentMethod('pay_later');
+                    if (!settleAmount && balanceDue > 0) setSettleAmount(balanceDue.toString());
+                  }}
+                  className={`flex-1 py-1.5 text-xs font-black rounded-lg border transition-colors ${paymentMethod === 'pay_later' ? 'bg-purple-600 text-white border-purple-600 shadow-2xs' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+                >
+                  Pay Later
                 </button>
               </div>
             </div>
