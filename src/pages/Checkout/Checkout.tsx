@@ -15,7 +15,7 @@ import { useRazorpay } from "../../hooks/useRazorpay"; // kept for future live p
 import { UiverseButton } from "../../components/ui/UiverseButton";
 import { UiverseLoader } from "../../components/ui/UiverseLoader";
 import { AddPetModal } from "../../components/pets/AddPetModal";
-import { Map, Marker } from "@vis.gl/react-google-maps";
+import { LocationPicker } from "../../components/ui/LocationPicker";
 
 const containerStyle = {
   width: '100%',
@@ -774,24 +774,13 @@ export const Checkout = () => {
             {needsPickup && (
               <div className="mt-4 border border-purple-200 rounded-xl p-3 bg-purple-50/30">
                 <p className="text-xs font-bold text-purple-800 mb-2">Pinpoint your exact location:</p>
-                <Map
-                  style={containerStyle}
-                  defaultCenter={pickupLocation || center}
-                  defaultZoom={13}
-                  onClick={(e) => {
-                    if (e.detail.latLng) {
-                      setPickupLocation({ lat: e.detail.latLng.lat, lng: e.detail.latLng.lng });
-                    }
+                <LocationPicker
+                  onLocationSelect={(loc) => {
+                    setPickupLocation({ lat: loc.lat, lng: loc.lng });
                   }}
-                >
-                  {pickupLocation && <Marker position={pickupLocation} />}
-                </Map>
-                {!pickupLocation && (
-                  <p className="text-[11px] text-purple-600 mt-2 font-medium">Click on the map to set your pickup/drop location.</p>
-                )}
-                {pickupLocation && (
-                  <p className="text-[11px] text-green-600 mt-2 font-bold">✓ Location selected successfully.</p>
-                )}
+                  defaultLocation={pickupLocation || center}
+                  className="w-full h-[250px] rounded-xl shadow-sm border border-slate-200 z-0"
+                />
               </div>
             )}
           </section>
