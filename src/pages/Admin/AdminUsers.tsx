@@ -8,7 +8,7 @@ import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth"
 
 export const AdminUsers = () => {
   const { user } = useAuthStore();
-  const isSuper = user?.role === 'superadmin' || user?.role === 'super_admin';
+  const isSuper = user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'super_admin';
   const [users, setUsers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
