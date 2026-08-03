@@ -3,12 +3,7 @@ import { Wallet as WalletIcon, ArrowUpRight, ArrowDownRight, CreditCard, Plus } 
 import { formatRupee } from "../../utils/currency";
 
 export const Wallet = () => {
-  const transactions = [
-    { id: 1, type: "debit", amount: 1500, title: "Boarding at Happy Paws", date: "Today, 10:30 AM" },
-    { id: 2, type: "credit", amount: 5000, title: "Added to Wallet via UPI", date: "Yesterday, 2:15 PM" },
-    { id: 3, type: "debit", amount: 899, title: "Premium Salmon Dog Food", date: "Mon, 14 Jul" },
-    { id: 4, type: "debit", amount: 1200, title: "Grooming Session - Bella", date: "Sat, 12 Jul" },
-  ];
+  const transactions: any[] = [];
 
   return (
     <PageTransition className="p-8">
@@ -50,22 +45,26 @@ export const Wallet = () => {
             <h2 className="text-xl font-bold text-slate-900 mb-6">Recent Transactions</h2>
             
             <div className="space-y-6">
-              {transactions.map(t => (
-                <div key={t.id} className="flex items-center justify-between p-4 bg-white/40 border border-white/50 hover:bg-white/80 hover:border-white transition-all rounded-[20px]">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-sm border border-white/60 ${t.type === 'credit' ? 'bg-purple-100 text-purple-700' : 'bg-slate-50 text-slate-900'}`}>
-                      {t.type === 'credit' ? <ArrowDownRight size={20} /> : <ArrowUpRight size={20} />}
+              {transactions.length === 0 ? (
+                <div className="text-center py-8 text-slate-500 font-medium">No recent transactions.</div>
+              ) : (
+                transactions.map(t => (
+                  <div key={t.id} className="flex items-center justify-between p-4 bg-white/40 border border-white/50 hover:bg-white/80 hover:border-white transition-all rounded-[20px]">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-sm border border-white/60 ${t.type === 'credit' ? 'bg-purple-100 text-purple-700' : 'bg-slate-50 text-slate-900'}`}>
+                        {t.type === 'credit' ? <ArrowDownRight size={20} /> : <ArrowUpRight size={20} />}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900">{t.title}</h4>
+                        <p className="text-sm text-slate-500">{t.date}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900">{t.title}</h4>
-                      <p className="text-sm text-slate-500">{t.date}</p>
-                    </div>
+                    <span className={`font-black text-lg ${t.type === 'credit' ? 'text-purple-700' : 'text-slate-900'}`}>
+                      {t.type === 'credit' ? '+' : '-'}{formatRupee(t.amount)}
+                    </span>
                   </div>
-                  <span className={`font-black text-lg ${t.type === 'credit' ? 'text-purple-700' : 'text-slate-900'}`}>
-                    {t.type === 'credit' ? '+' : '-'}{formatRupee(t.amount)}
-                  </span>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>

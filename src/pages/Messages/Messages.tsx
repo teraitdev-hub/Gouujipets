@@ -2,11 +2,7 @@ import { PageTransition } from "../../components/layout/PageTransition";
 import { Search, Edit } from "lucide-react";
 import { motion } from "framer-motion";
 
-const messages = [
-  { id: 1, sender: "Dr. Sarah Jenkins", preview: "Your test results are ready.", time: "10:42 AM", unread: 2, avatar: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=150" },
-  { id: 2, sender: "Downtown Groomers", preview: "See you tomorrow at 2 PM!", time: "Yesterday", unread: 0, avatar: "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=150" },
-  { id: 3, sender: "City Pet Boarding", preview: "Bella is doing great today, ate all her food.", time: "Mon", unread: 0, avatar: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=150" },
-];
+const messages: any[] = [];
 
 export const Messages = () => {
   return (
@@ -29,27 +25,31 @@ export const Messages = () => {
       </div>
 
       <div className="bg-white/70 backdrop-blur-xl rounded-[24px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/80 overflow-hidden">
-        {messages.map((msg, index) => (
-          <motion.div 
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            key={msg.id}
-            className="flex items-center gap-4 p-4 border-b border-white/50 last:border-0 hover:bg-white/50 transition-colors cursor-pointer"
-          >
-            <div className="relative">
-              <img src={msg.avatar} alt={msg.sender} className="w-14 h-14 rounded-full object-cover border border-slate-200" />
-              {msg.unread > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">{msg.unread}</span>}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-center mb-1">
-                <h4 className={`font-bold text-sm truncate ${msg.unread > 0 ? 'text-slate-900' : 'text-slate-500'}`}>{msg.sender}</h4>
-                <span className={`text-[10px] shrink-0 ${msg.unread > 0 ? 'text-brand-600 font-bold' : 'text-slate-500'}`}>{msg.time}</span>
+        {messages.length === 0 ? (
+          <div className="text-center py-12 text-slate-500 font-medium">You have no new messages.</div>
+        ) : (
+          messages.map((msg, index) => (
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              key={msg.id}
+              className="flex items-center gap-4 p-4 border-b border-white/50 last:border-0 hover:bg-white/50 transition-colors cursor-pointer"
+            >
+              <div className="relative">
+                <img src={msg.avatar} alt={msg.sender} className="w-14 h-14 rounded-full object-cover border border-slate-200" />
+                {msg.unread > 0 && <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">{msg.unread}</span>}
               </div>
-              <p className={`text-xs truncate ${msg.unread > 0 ? 'font-bold text-slate-900' : 'text-slate-500'}`}>{msg.preview}</p>
-            </div>
-          </motion.div>
-        ))}
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-center mb-1">
+                  <h4 className={`font-bold text-sm truncate ${msg.unread > 0 ? 'text-slate-900' : 'text-slate-500'}`}>{msg.sender}</h4>
+                  <span className={`text-[10px] shrink-0 ${msg.unread > 0 ? 'text-brand-600 font-bold' : 'text-slate-500'}`}>{msg.time}</span>
+                </div>
+                <p className={`text-xs truncate ${msg.unread > 0 ? 'font-bold text-slate-900' : 'text-slate-500'}`}>{msg.preview}</p>
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
       
     </PageTransition>
