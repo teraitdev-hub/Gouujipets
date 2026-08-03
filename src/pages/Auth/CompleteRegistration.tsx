@@ -138,20 +138,25 @@ export const CompleteRegistration = () => {
     setError('');
 
     try {
+      // Fetch existing user to preserve name
+      const existingUserSnap = await getDoc(doc(db, "users", auth.currentUser.uid));
+      const existingData = existingUserSnap.data() || {};
+
       // 1. Create User Document
       const role = localStorage.getItem('petpro_intended_role') || 'customer';
       const userProfile = {
         uid: auth.currentUser.uid,
-        name: auth.currentUser.displayName || 'User',
-        email: auth.currentUser.email || '',
-        phone: auth.currentUser.phoneNumber || phoneNumber,
-        role: role,
+        name: existingData.full_name || existingData.name || auth.currentUser.displayName || 'User',
+        full_name: existingData.full_name || existingData.name || auth.currentUser.displayName || 'User',
+        email: auth.currentUser.email || existingData.email || '',
+        phone: auth.currentUser.phoneNumber || phoneNumber || existingData.phone || '',
+        role: existingData.role || role,
         loginMethod: auth.currentUser.providerData.some(p => p.providerId === 'google.com') ? 'google' : auth.currentUser.providerData.some(p => p.providerId === 'phone') ? 'phone' : 'email',
         isActive: true,
-        walletBalance: 0,
-        rewardPoints: 0,
-        notificationPreferences: { email: true, sms: true, push: true },
-        createdDate: new Date().toISOString(),
+        walletBalance: existingData.walletBalance || 0,
+        rewardPoints: existingData.rewardPoints || 0,
+        notificationPreferences: existingData.notificationPreferences || { email: true, sms: true, push: true },
+        createdDate: existingData.createdDate || existingData.created_at || new Date().toISOString(),
         lastLogin: new Date().toISOString(),
         address: {
           street: formData.street,
@@ -161,7 +166,7 @@ export const CompleteRegistration = () => {
         }
       };
       
-      await setDoc(doc(db, "users", auth.currentUser.uid), userProfile);
+      await setDoc(doc(db, "users", auth.currentUser.uid), userProfile, { merge: true });
 
       // 2. Create Pet Document if provided
       if (formData.petName && role === 'customer') {
