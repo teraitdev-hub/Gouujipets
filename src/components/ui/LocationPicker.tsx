@@ -280,7 +280,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           <div className="flex-1 h-px bg-slate-200" />
         </div>
 
-        <div className="relative">
+        <div className="relative z-50">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           {isSuggesting && <Loader2 size={14} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-violet-500" />}
           <input
@@ -369,7 +369,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
       </div>
 
       {/* Search box to change location */}
-      <div className="relative">
+      <div className="relative z-[60]">
         <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         {isSuggesting && <Loader2 size={14} className="absolute right-20 top-1/2 -translate-y-1/2 animate-spin text-violet-500" />}
         <input
