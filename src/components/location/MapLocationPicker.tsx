@@ -115,14 +115,14 @@ export const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
             {isGeocoding ? "Locating..." : "Order will be delivered here"}
           </div>
           
-          {/* Zomato-style sharp pin marker */}
+          {/* Zomato-style sharp pin marker but in GouujiPets purple */}
           <div className="relative flex flex-col items-center">
             {/* The circular head */}
-            <div className="w-9 h-9 bg-red-500 rounded-full flex items-center justify-center shadow-md border-[3px] border-white z-10">
+            <div className="w-9 h-9 bg-purple-600 rounded-full flex items-center justify-center shadow-md border-[3px] border-white z-10">
                <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
             </div>
             {/* The sharp needle pointing exactly to the bottom center */}
-            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-transparent border-t-red-500 -mt-[2px] z-0 drop-shadow-sm"></div>
+            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-transparent border-t-purple-600 -mt-[2px] z-0 drop-shadow-sm"></div>
           </div>
           
           {/* Ground shadow - perfectly aligned with the needle tip */}
@@ -139,7 +139,7 @@ export const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
           }}
           className="absolute bottom-28 right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg border border-slate-200 hover:bg-slate-50 transition-colors z-20 pointer-events-auto"
         >
-          {isDetecting ? <Loader2 size={20} className="text-blue-600 animate-spin" /> : <Navigation size={20} className="text-blue-600" />}
+          {isDetecting ? <Loader2 size={20} className="text-purple-600 animate-spin" /> : <Navigation size={20} className="text-purple-600" />}
         </button>
       </div>
 
@@ -147,7 +147,7 @@ export const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
       <div className="bg-white rounded-t-[24px] shadow-[0_-8px_30px_rgba(0,0,0,0.12)] px-5 py-6 z-20 relative -mt-4 shrink-0 pointer-events-auto">
         <div className="flex items-start gap-4 mb-6">
            <div className="mt-1 flex-shrink-0">
-             <MapPin size={28} className="text-red-500" strokeWidth={2.5} />
+             <MapPin size={28} className="text-purple-600" strokeWidth={2.5} />
            </div>
            <div className="flex-1 min-w-0">
               <h3 className="font-black text-slate-900 text-[22px] tracking-tight leading-tight line-clamp-1 mb-1">
@@ -155,7 +155,7 @@ export const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
               </h3>
               <p className="text-sm text-slate-500 font-medium leading-snug line-clamp-2 min-h-[40px]">
                 {isGeocoding ? (
-                  <span className="flex items-center gap-2 text-red-500 font-bold animate-pulse">
+                  <span className="flex items-center gap-2 text-purple-600 font-bold animate-pulse">
                     <Loader2 size={14} className="animate-spin" /> Fetching address details...
                   </span>
                 ) : (
@@ -171,14 +171,14 @@ export const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
              placeholder="HOUSE / FLAT / BLOCK NO." 
              value={houseFlatNo}
              onChange={e => setHouseFlatNo(e.target.value)}
-             className="w-full bg-slate-50 border-b-2 border-slate-200 px-2 py-3 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-red-500 transition-colors uppercase tracking-wide"
+             className="w-full bg-slate-50 border-b-2 border-slate-200 px-2 py-3 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-purple-600 transition-colors uppercase tracking-wide"
            />
         </div>
 
         <button
           onClick={handleConfirm}
           disabled={isGeocoding || !dragLocation}
-          className="w-full bg-red-500 hover:bg-red-600 active:scale-[0.98] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 text-lg tracking-wide uppercase"
+          className="w-full bg-purple-600 hover:bg-purple-700 active:scale-[0.98] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 text-lg tracking-wide uppercase"
         >
           {isGeocoding ? (
             <><Loader2 size={20} className="animate-spin" /> Locating...</>

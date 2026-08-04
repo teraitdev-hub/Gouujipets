@@ -65,18 +65,9 @@ export const LocationSelectorSheet: React.FC<LocationSelectorSheetProps> = ({ op
   };
 
   const handleSearchSelect = (result: PlaceResult) => {
-    const fullLoc: FullLocation = {
-      lat: result.lat,
-      lng: result.lng,
-      formatted_address: result.formatted_address || result.display_name,
-      place_id: result.place_id,
-      area: result.main_text,
-      city: result.city,
-      postal_code: result.postal_code,
-    };
-    setCurrentLocation(fullLoc);
-    addRecentSearch(fullLoc);
-    onClose();
+    // Transition to Map View to let them confirm/pin-drop the searched place
+    setPendingLocation({ lat: result.lat, lng: result.lng });
+    setView('map');
   };
 
   const handleFinalConfirm = (loc: FullLocation) => {
