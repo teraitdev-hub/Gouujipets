@@ -770,11 +770,48 @@ export const PartnerLogin = () => {
                         }}
                       />
                       
-                      {/* Hidden inputs to ensure required HTML validation still passes if needed, or we can just rely on the form state directly */}
-                      <input type="hidden" value={formData.street} required />
-                      <input type="hidden" value={formData.city} required />
-                      <input type="hidden" value={formData.state} required />
-                      <input type="hidden" value={formData.pincode} required />
+                      <div className="grid grid-cols-2 gap-3 mt-3">
+                        <div className="col-span-2 relative">
+                          <input 
+                            type="text" 
+                            placeholder="Building Name, Street, Landmark"
+                            value={formData.street}
+                            onChange={(e) => setFormData({...formData, street: e.target.value})}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all placeholder:text-slate-400"
+                            required
+                          />
+                        </div>
+                        <div className="relative">
+                          <input 
+                            type="text" 
+                            placeholder="City / District"
+                            value={formData.city}
+                            onChange={(e) => setFormData({...formData, city: e.target.value})}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all placeholder:text-slate-400"
+                            required
+                          />
+                        </div>
+                        <div className="relative">
+                          <input 
+                            type="text" 
+                            placeholder="State"
+                            value={formData.state}
+                            onChange={(e) => setFormData({...formData, state: e.target.value})}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all placeholder:text-slate-400"
+                            required
+                          />
+                        </div>
+                        <div className="relative col-span-2">
+                          <input 
+                            type="text" 
+                            placeholder="Pincode"
+                            value={formData.pincode}
+                            onChange={(e) => setFormData({...formData, pincode: e.target.value})}
+                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all placeholder:text-slate-400"
+                            required
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
