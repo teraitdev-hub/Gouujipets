@@ -151,9 +151,8 @@ export function getDistanceLabel(
  */
 export async function reverseGeocode(lat: number, lng: number): Promise<FullLocation | null> {
   if (!window.google || !window.google.maps) {
-    console.error("Google Maps API not loaded for reverse geocoding.");
-    return null;
-  }
+    console.warn("Google Maps API not loaded for reverse geocoding, falling back to OSM.");
+  } else {
   
   const geocoder = new window.google.maps.Geocoder();
   try {
@@ -201,6 +200,8 @@ export async function reverseGeocode(lat: number, lng: number): Promise<FullLoca
     console.error("Reverse Geocoding failed with Google, falling back to OSM:", err);
   }
 
+  }
+  
   // Fallback to OSM (Nominatim) if Google Maps is unavailable or failed
   try {
     const res = await fetch(

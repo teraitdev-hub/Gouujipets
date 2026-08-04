@@ -131,11 +131,10 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     // Crucial bug fix: Update the search query to show what was selected!
     setSearchQuery(data.short);
     
-    // Notify parent immediately of the map location change
     onLocationSelect({ 
       lat, lng, 
       address: data.full, 
-      exactAddress: exactInput || data.short,
+      exactAddress: exactInput || undefined,
       city: data.city,
       state: data.state,
       pincode: data.pincode

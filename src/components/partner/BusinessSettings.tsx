@@ -335,7 +335,19 @@ export const BusinessSettings = ({ business, onUpdate }: BusinessSettingsProps) 
               defaultAddress={formData.street}
               className="w-full h-full"
               onLocationSelect={(loc) => {
-                setFormData(prev => ({ ...prev, lat: loc.lat, lng: loc.lng, street: loc.address || prev.street }));
+                setFormData(prev => {
+                  // Only overwrite street if it's empty, or if the user provided an exactAddress from the picker.
+                  // Otherwise, keep the user's manually typed street address in the form below.
+                  const newStreet = loc.exactAddress ? loc.exactAddress : (prev.street ? prev.street : loc.address);
+                  return { 
+                    ...prev, 
+                    lat: loc.lat, 
+                    lng: loc.lng, 
+                    street: newStreet,
+                    city: loc.city || prev.city,
+                    pincode: loc.pincode || prev.pincode
+                  };
+                });
               }}
             />
           </div>

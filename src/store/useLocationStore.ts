@@ -134,32 +134,64 @@ export const useLocationStore = create<LocationState>()(
             };
 
             try {
-              const res = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-                { headers: { 'Accept-Language': 'en' } }
-              );
-              if (res.ok) {
-                const data = await res.json();
-                const a = data.address || {};
-                const parts = [
-                  a.house_number,
-                  a.road || a.pedestrian,
-                  a.suburb || a.neighbourhood || a.village,
-                  a.city || a.town || a.county,
-                  a.state
-                ].filter(Boolean);
-                
-                locData = {
-                  ...locData,
-                  formatted_address: parts.length > 0 ? parts.join(', ') : data.display_name || locData.formatted_address,
-                  street: a.road || a.pedestrian || '',
-                  area: a.suburb || a.neighbourhood || a.county || '',
-                  city: a.city || a.town || a.village || '',
-                  district: a.county || '',
-                  state: a.state || '',
-                  country: a.country || 'India',
-                  postal_code: a.postcode || '',
-                };
+              const googleApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+              let googleSuccess = false;
+
+              if (googleApiKey) {
+                const googleRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${googleApiKey}`);
+                if (googleRes.ok) {
+                  const googleData = await googleRes.json();
+                  if (googleData.results && googleData.results.length > 0) {
+                    const result = googleData.results[0];
+                    const full = result.formatted_address.replace(/, India$/, '');
+                    const comps = result.address_components || [];
+                    const get = (type: string) => comps.find((c: any) => c.types.includes(type))?.long_name || '';
+                    
+                    locData = {
+                      ...locData,
+                      formatted_address: full,
+                      street: get('route') || '',
+                      area: get('sublocality_level_1') || get('sublocality') || get('neighborhood') || '',
+                      city: get('locality') || get('administrative_area_level_2') || '',
+                      district: get('administrative_area_level_2') || '',
+                      state: get('administrative_area_level_1') || '',
+                      country: get('country') || 'India',
+                      postal_code: get('postal_code') || '',
+                    };
+                    googleSuccess = true;
+                  }
+                }
+              }
+
+              if (!googleSuccess) {
+                // Fallback to OSM
+                const res = await fetch(
+                  `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+                  { headers: { 'Accept-Language': 'en' } }
+                );
+                if (res.ok) {
+                  const data = await res.json();
+                  const a = data.address || {};
+                  const parts = [
+                    a.house_number,
+                    a.road || a.pedestrian,
+                    a.suburb || a.neighbourhood || a.village,
+                    a.city || a.town || a.county,
+                    a.state
+                  ].filter(Boolean);
+                  
+                  locData = {
+                    ...locData,
+                    formatted_address: parts.length > 0 ? parts.join(', ') : data.display_name || locData.formatted_address,
+                    street: a.road || a.pedestrian || '',
+                    area: a.suburb || a.neighbourhood || a.county || '',
+                    city: a.city || a.town || a.village || '',
+                    district: a.county || '',
+                    state: a.state || '',
+                    country: a.country || 'India',
+                    postal_code: a.postcode || '',
+                  };
+                }
               }
             } catch (_) {}
 
