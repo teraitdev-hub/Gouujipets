@@ -533,13 +533,7 @@ export const PartnerLogin = () => {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="flex items-center gap-2.5 mb-10">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shadow-sm shadow-violet-400/30">
-              <Building2 size={18} className="text-white" />
-            </div>
-            <div>
-              <span className="text-base font-black text-slate-900">Partner Portal</span>
-              <p className="text-[10px] font-bold text-violet-500 uppercase tracking-widest">GouujiPets Business</p>
-            </div>
+            <img src="/logo.png" alt="Gouuji Pets Business" className="h-12 w-auto object-contain" />
           </div>
 
           {/* Direct Approval Banner */}

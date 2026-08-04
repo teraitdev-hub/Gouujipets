@@ -60,17 +60,7 @@ export const AdminSidebar = ({
             onClick={() => navigate("/admin/dashboard")}
             className="flex items-center gap-2 group text-left"
           >
-            <div className="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center font-black text-white text-base shadow-sm group-hover:scale-105 transition-transform">
-              SA
-            </div>
-            <div className="leading-none">
-              <span className="text-sm font-black text-purple-950 tracking-tight block">
-                Gouuji<span className="text-purple-600">Admin</span>
-              </span>
-              <span className="text-[8px] font-bold text-purple-700 uppercase tracking-widest block -mt-0.5">
-                VERIFIED Command Desk
-              </span>
-            </div>
+            <img src="/logo.png" alt="Gouuji Admin" className="h-8 w-auto object-contain" />
           </button>
           <button
             onClick={() => setIsOpen(false)}

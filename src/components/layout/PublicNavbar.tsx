@@ -42,19 +42,9 @@ export const PublicNavbar = () => {
         {/* Left: Logo */}
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-left group shrink-0"
+          className="flex items-center gap-2 text-left shrink-0"
         >
-          <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center font-black text-white text-lg shadow-sm group-hover:scale-105 transition-transform">
-            G
-          </div>
-          <div className="leading-none hidden sm:block">
-            <span className="text-base font-black text-slate-900 tracking-tight block">
-              Gouuji<span className="text-purple-600">Pets</span>
-            </span>
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest block mt-0.5">
-              Verified Care
-            </span>
-          </div>
+          <img src="/logo.png" alt="Gouuji Pets" className="h-8 sm:h-10 w-auto object-contain" />
         </button>
 
         {/* Center: Location Bar + Search (Desktop) */}

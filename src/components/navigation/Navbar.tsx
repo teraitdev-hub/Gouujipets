@@ -53,17 +53,7 @@ export const Navbar = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
               onClick={() => navigate("/")}
               className="flex items-center gap-1.5 text-left group"
             >
-              <div className="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center font-black text-white text-base shadow-sm group-hover:scale-105 transition-transform">
-                G
-              </div>
-              <div className="leading-none">
-                <span className="text-sm md:text-base font-black text-purple-950 tracking-tight block">
-                  Gouuji<span className="text-purple-600">Directory</span>
-                </span>
-                <span className="text-[8px] font-bold text-purple-700 uppercase tracking-widest block -mt-0.5">
-                  VERIFIED for Pets
-                </span>
-              </div>
+              <img src="/logo.png" alt="Gouuji Pets" className="h-8 w-auto object-contain" />
             </button>
           </div>
 

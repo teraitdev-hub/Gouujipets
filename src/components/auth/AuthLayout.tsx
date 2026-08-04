@@ -18,10 +18,7 @@ export const AuthLayout = ({ children, imageUrl, title, subtitle }: AuthLayoutPr
         <div className="w-full max-w-sm mx-auto">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
-              <PawPrint size={24} />
-            </div>
-            <span className="text-2xl font-bold tracking-tight text-[#2D2D2D]">Gouuji Pets</span>
+            <img src="/logo.png" alt="Gouuji Pets" className="h-12 w-auto object-contain" />
           </div>
 
           <motion.div
