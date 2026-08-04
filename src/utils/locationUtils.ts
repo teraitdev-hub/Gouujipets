@@ -198,7 +198,44 @@ export async function reverseGeocode(lat: number, lng: number): Promise<FullLoca
       };
     }
   } catch (err) {
-    console.error("Reverse Geocoding failed:", err);
+    console.error("Reverse Geocoding failed with Google, falling back to OSM:", err);
   }
+
+  // Fallback to OSM (Nominatim) if Google Maps is unavailable or failed
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      const a = data.address || {};
+      const parts = [
+        a.house_number,
+        a.road || a.pedestrian,
+        a.suburb || a.neighbourhood || a.village,
+        a.city || a.town || a.county,
+        a.state
+      ].filter(Boolean);
+
+      const city = a.city || a.town || a.village || '';
+      const state = a.state || '';
+      const area = a.suburb || a.neighbourhood || a.county || '';
+
+      return {
+        lat,
+        lng,
+        formatted_address: parts.length > 0 ? parts.join(', ') : data.display_name,
+        city: city || area || state,
+        state,
+        country: a.country || 'India',
+        postal_code: a.postcode || '',
+        area: area || city,
+      };
+    }
+  } catch (osmErr) {
+    console.error("OSM Reverse Geocoding also failed:", osmErr);
+  }
+
   return null;
 }

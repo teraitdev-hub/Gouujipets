@@ -141,9 +141,17 @@ export const useLocationStore = create<LocationState>()(
               if (res.ok) {
                 const data = await res.json();
                 const a = data.address || {};
+                const parts = [
+                  a.house_number,
+                  a.road || a.pedestrian,
+                  a.suburb || a.neighbourhood || a.village,
+                  a.city || a.town || a.county,
+                  a.state
+                ].filter(Boolean);
+                
                 locData = {
                   ...locData,
-                  formatted_address: data.display_name || locData.formatted_address,
+                  formatted_address: parts.length > 0 ? parts.join(', ') : data.display_name || locData.formatted_address,
                   street: a.road || a.pedestrian || '',
                   area: a.suburb || a.neighbourhood || a.county || '',
                   city: a.city || a.town || a.village || '',

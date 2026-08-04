@@ -112,7 +112,7 @@ export const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
         <div className="absolute top-1/2 left-1/2 pointer-events-none z-10 flex flex-col items-center" style={{ transform: 'translate(-50%, -100%)' }}>
           {/* Tooltip / Label */}
           <div className="bg-slate-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg mb-1 shadow-lg whitespace-nowrap animate-fade-in-up">
-            {isGeocoding ? "Locating..." : "Order will be delivered here"}
+            {isGeocoding ? "Locating..." : "Your Location"}
           </div>
           
           {/* Zomato-style sharp pin marker but in GouujiPets purple */}
