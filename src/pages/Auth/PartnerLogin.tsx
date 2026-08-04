@@ -19,9 +19,11 @@ export const PartnerLogin = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const isApprovedParam = searchParams.get('approved') === 'true';
+  const serviceParam = searchParams.get('service');
 
   const { isAuthenticated, user } = useAuthStore();
-  const [isLogin, setIsLogin] = useState(true);
+  // Default to Register if they clicked a specific service to partner for
+  const [isLogin, setIsLogin] = useState(serviceParam ? false : true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ name: "", email: "", password: "", phone: "", businessName: "", street: "", city: "", state: "", pincode: "", gstNumber: "" });
   const [certificates, setCertificates] = useState<File[]>([]);
@@ -30,7 +32,7 @@ export const PartnerLogin = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [pendingGoogleUser, setPendingGoogleUser] = useState<any>(null);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
-  const [facilityTypes, setFacilityTypes] = useState<string[]>(["boarding"]);
+  const [facilityTypes, setFacilityTypes] = useState<string[]>(serviceParam ? [serviceParam] : ["boarding"]);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);

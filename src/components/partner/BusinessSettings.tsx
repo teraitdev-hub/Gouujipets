@@ -24,6 +24,9 @@ export const BusinessSettings = ({ business, onUpdate }: BusinessSettingsProps) 
     contactEmail: business.contact_email || business.contactEmail || "",
     contactPhone: business.contact_phone || business.contactPhone || "",
     type: business.type || "boarding",
+    services: Array.isArray(business.services) && business.services.length > 0 
+      ? business.services 
+      : [business.type || "boarding"],
     description: business.description || "",
     amenities: Array.isArray(business.amenities) ? business.amenities.join(', ') : (business.amenities || "WiFi, Air Conditioned Suites, CCTV 24/7, Vet On-Call"),
     street: initialStreet,
@@ -124,6 +127,7 @@ export const BusinessSettings = ({ business, onUpdate }: BusinessSettingsProps) 
         contact_email: formData.contactEmail,
         contact_phone: formData.contactPhone,
         type: formData.type,
+        services: formData.services,
         description: formData.description,
         city: formData.city,
         state: formData.state,
@@ -154,6 +158,25 @@ export const BusinessSettings = ({ business, onUpdate }: BusinessSettingsProps) 
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const ALL_SERVICES = [
+    { id: "boarding",   label: "Boarding" },
+    { id: "veterinary", label: "Veterinary Clinic" },
+    { id: "petshop",    label: "Pet Shop" },
+    { id: "grooming",   label: "Grooming" },
+    { id: "training",   label: "Training" },
+    { id: "daycare",    label: "Daycare" },
+    { id: "walking",    label: "Dog Walking" },
+  ];
+
+  const toggleService = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      services: prev.services.includes(id)
+        ? prev.services.length > 1 ? prev.services.filter((t: string) => t !== id) : prev.services
+        : [...prev.services, id]
+    }));
   };
 
   return (
@@ -246,6 +269,32 @@ export const BusinessSettings = ({ business, onUpdate }: BusinessSettingsProps) 
                 <option value="training">Pet Training & Agility Center</option>
                 <option value="sitting">Home Pet Sitting & Walking</option>
               </select>
+            </div>
+            
+            <div className="space-y-1.5 md:col-span-3">
+              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider ml-1">All Services Offered</label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+                {ALL_SERVICES.map((s) => {
+                  const isSelected = formData.services.includes(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => toggleService(s.id)}
+                      className={`flex items-center gap-2 px-3 py-2.5 border rounded-xl text-sm font-bold transition-all ${
+                        isSelected 
+                          ? "bg-purple-50 border-purple-300 text-purple-700 shadow-sm" 
+                          : "bg-white border-gray-200 text-gray-500 hover:border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded flex items-center justify-center border ${isSelected ? 'bg-purple-600 border-purple-600' : 'border-gray-300'}`}>
+                        {isSelected && <CheckCircle size={12} className="text-white" />}
+                      </div>
+                      {s.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="space-y-1.5 md:col-span-1">
