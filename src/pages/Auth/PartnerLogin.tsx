@@ -762,16 +762,13 @@ export const PartnerLogin = () => {
                         className="h-[350px] w-full rounded-xl overflow-hidden border border-slate-200 shadow-inner mt-2"
                         onLocationSelect={(loc) => {
                           setMapLocation({ lat: loc.lat, lng: loc.lng });
-                          setFormData(prev => {
-                            const newStreet = loc.exactAddress ? loc.exactAddress : (prev.street ? prev.street : loc.address);
-                            return {
-                              ...prev,
-                              street: newStreet,
-                              city: loc.city || prev.city,
-                              state: loc.state || prev.state,
-                              pincode: loc.pincode || prev.pincode
-                            };
-                          });
+                          setFormData(prev => ({
+                            ...prev,
+                            street: loc.exactAddress ? `${loc.exactAddress}, ${loc.address}` : loc.address,
+                            city: loc.city || prev.city,
+                            state: loc.state || prev.state,
+                            pincode: loc.pincode || prev.pincode
+                          }));
                         }}
                       />
                       
