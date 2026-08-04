@@ -11,16 +11,16 @@ import { collection, addDoc, getDocs, query, where, limit } from "firebase/fires
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
 
 const SERVICE_INFO: Record<string, { title: string, desc: string, icon: string }> = {
-  boarding: { title: "Pet Boarding", desc: "A safe, comfortable, and loving home away from home for your pets. Our trusted boarding partners provide clean accommodations, personalized care, nutritious meals, regular exercise, and 24/7 supervision to ensure your pet feels happy and secure while you're away.", icon: "뿯½Ÿ뿯½뿯½" },
-  daycare: { title: "Pet Daycare", desc: "Give your pet a fun and active day filled with supervised play, socialization, exercise, and plenty of attention. Perfect for busy pet parents who want their pets to stay engaged and cared for throughout the day.", icon: "뿯½ŸŒž" },
-  grooming: { title: "Grooming & Spa", desc: "Keep your pet looking and feeling their best with professional grooming services, including bathing, hair trimming, nail clipping, ear cleaning, coat brushing, dental hygiene, and relaxing spa treatments.", icon: "뿯½Ÿ’‡" },
-  veterinary: { title: "Veterinary Care", desc: "Connect with experienced veterinarians for routine health checkups, vaccinations, preventive care, medical consultations, diagnostics, emergency treatment, and personalized health advice to keep your pet healthy.", icon: "뿯½Ÿ뿯½뿯½" },
-  training: { title: "Pet Training", desc: "Professional trainers help pets develop good behavior, obedience, social skills, and confidence through customized training programs designed for puppies, adult pets, and pets with behavioral challenges.", icon: "뿯½ŸŽ“" },
-  walking: { title: "Dog Walking", desc: "Reliable dog walkers provide safe and enjoyable walks that help your dog stay active, healthy, mentally stimulated, and happy뿯½뿯₽”even when you're busy.", icon: "뿯½Ÿš뿯½" },
-  transportation: { title: "Pet Transportation", desc: "Convenient and secure pickup and drop-off services ensure your pet travels safely between your home, boarding center, grooming salon, veterinary clinic, or daycare facility.", icon: "뿯½Ÿš—" },
-  shop: { title: "Pet Shop", desc: "Shop premium pet food, treats, toys, accessories, grooming products, healthcare essentials, and other pet supplies from trusted brands뿯½뿯₽”all in one place.", icon: "뿯½Ÿ›뿯½뿯½뿯½뿯½" },
-  health_tracking: { title: "Pet Health Tracking", desc: "Maintain a complete digital health profile with vaccination records, medical history, medications, weight tracking, appointment reminders, and wellness reports뿯½뿯₽”all accessible anytime.", icon: "뿯½Ÿ“뿯½" },
-  default: { title: "Welcome to Goujji Pets", desc: "Join India's #1 verified pet care marketplace. Find trusted pet care providers, compare services, view availability, book instantly, make secure payments, and manage all your reservations through a single platform.", icon: "뿯½œ뿯½" }
+  boarding: { title: "Pet Boarding", desc: "A safe, comfortable, and loving home away from home for your pets. Our trusted boarding partners provide clean accommodations, personalized care, nutritious meals, regular exercise, and 24/7 supervision to ensure your pet feels happy and secure while you're away.", icon: "🏠" },
+  daycare: { title: "Pet Daycare", desc: "Give your pet a fun and active day filled with supervised play, socialization, exercise, and plenty of attention. Perfect for busy pet parents who want their pets to stay engaged and cared for throughout the day.", icon: "🎾" },
+  grooming: { title: "Grooming & Spa", desc: "Keep your pet looking and feeling their best with professional grooming services, including bathing, hair trimming, nail clipping, ear cleaning, coat brushing, dental hygiene, and relaxing spa treatments.", icon: "✂️" },
+  veterinary: { title: "Veterinary Care", desc: "Connect with experienced veterinarians for routine health checkups, vaccinations, preventive care, medical consultations, diagnostics, emergency treatment, and personalized health advice to keep your pet healthy.", icon: "🏥" },
+  training: { title: "Pet Training", desc: "Professional trainers help pets develop good behavior, obedience, social skills, and confidence through customized training programs designed for puppies, adult pets, and pets with behavioral challenges.", icon: "🎓" },
+  walking: { title: "Dog Walking", desc: "Reliable dog walkers provide safe and enjoyable walks that help your dog stay active, healthy, mentally stimulated, and happy — even when you're busy.", icon: "🦮" },
+  transportation: { title: "Pet Transportation", desc: "Convenient and secure pickup and drop-off services ensure your pet travels safely between your home, boarding center, grooming salon, veterinary clinic, or daycare facility.", icon: "🚕" },
+  shop: { title: "Pet Shop", desc: "Shop premium pet food, treats, toys, accessories, grooming products, healthcare essentials, and other pet supplies from trusted brands — all in one place.", icon: "🛍️" },
+  health_tracking: { title: "Pet Health Tracking", desc: "Maintain a complete digital health profile with vaccination records, medical history, medications, weight tracking, appointment reminders, and wellness reports — all accessible anytime.", icon: "📈" },
+  default: { title: "Welcome to Goujji Pets", desc: "Join India's #1 verified pet care marketplace. Find trusted pet care providers, compare services, view availability, book instantly, make secure payments, and manage all your reservations through a single platform.", icon: "🐾" }
 };
 
 export const UserLogin = () => {
@@ -297,7 +297,7 @@ export const UserLogin = () => {
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-xl font-medium text-sm border border-red-100 flex items-start gap-3">
-              <span className="text-red-500 mt-0.5">뿯½š뿯½뿯½뿯½뿯½</span>
+              <span className="text-red-500 mt-0.5">⚠️</span>
               {error}
             </div>
           )}
