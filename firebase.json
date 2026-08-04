@@ -35,14 +35,5 @@
   },
   "functions": {
     "source": "functions"
-  },
-  "apphosting": {
-    "backendId": "gouujipets",
-    "rootDir": ".",
-    "ignore": [
-      "node_modules",
-      ".git"
-    ],
-    "alwaysDeployFromSource": true
   }
 }

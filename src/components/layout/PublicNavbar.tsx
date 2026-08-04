@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { Search, MapPin, User, Sparkles, Menu, X, Phone } from "lucide-react";
+import { Search, User, Menu, X, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { motion, AnimatePresence } from "framer-motion";
+import { LocationHeaderBar } from "../location/LocationHeaderBar";
 
 export const PublicNavbar = () => {
   const { isAuthenticated, openLoginModal, user } = useAuthStore();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("Bangalore / Near Me");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getInitial = () => {
@@ -57,24 +57,16 @@ export const PublicNavbar = () => {
           </div>
         </button>
 
-        {/* Center: Search & Location (Desktop) */}
-        <div className="hidden lg:flex flex-1 max-w-2xl items-center bg-slate-50 border border-slate-200 rounded-2xl p-1 shadow-inner focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all">
-          <div className="flex items-center gap-1.5 px-3 border-r border-slate-200 shrink-0 cursor-pointer">
-            <MapPin size={14} className="text-purple-600" />
-            <select
-              value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
-              className="bg-transparent text-slate-700 text-xs font-bold focus:outline-none cursor-pointer max-w-[120px] truncate"
-            >
-              <option value="Bangalore / Near Me">Bangalore</option>
-              <option value="Indiranagar">Indiranagar</option>
-              <option value="Koramangala">Koramangala</option>
-              <option value="Whitefield">Whitefield</option>
-            </select>
+        {/* Center: Location Bar + Search (Desktop) */}
+        <div className="hidden lg:flex flex-1 max-w-2xl items-center gap-3">
+          {/* Location Selector */}
+          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 hover:border-purple-300 transition-colors cursor-pointer">
+            <LocationHeaderBar />
           </div>
-          
-          <form onSubmit={handleSearch} className="flex-1 flex items-center px-2">
-            <Search size={14} className="text-slate-400 mr-2" />
+
+          {/* Search */}
+          <form onSubmit={handleSearch} className="flex-1 flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-1 shadow-inner focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all">
+            <Search size={14} className="text-slate-400 mx-2" />
             <input
               type="text"
               value={searchQuery}
@@ -84,7 +76,7 @@ export const PublicNavbar = () => {
             />
             <button
               type="submit"
-              className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-xl shadow-sm transition-all ml-2"
+              className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-xl shadow-sm transition-all ml-1"
             >
               Search
             </button>
@@ -170,25 +162,20 @@ export const PublicNavbar = () => {
               </div>
 
               <div className="p-4 space-y-5 overflow-y-auto custom-scrollbar flex-1">
+                {/* Location Selector in mobile menu */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Your Location</p>
+                  <LocationHeaderBar />
+                </div>
+
                 <form onSubmit={handleSearch} className="flex flex-col gap-3">
-                  <div className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-                    <MapPin size={18} className="text-purple-600 ml-1" />
-                    <select
-                      value={selectedLocation}
-                      onChange={(e) => setSelectedLocation(e.target.value)}
-                      className="bg-transparent text-slate-700 text-base font-bold focus:outline-none w-full min-h-[32px]"
-                    >
-                      <option value="Bangalore / Near Me">Bangalore</option>
-                      <option value="Indiranagar">Indiranagar</option>
-                    </select>
-                  </div>
                   <div className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                     <Search size={18} className="text-slate-400 ml-1" />
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search pets..."
+                      placeholder="Search resorts, groomers, vets..."
                       className="w-full bg-transparent text-slate-900 text-base focus:outline-none min-h-[32px]"
                     />
                   </div>

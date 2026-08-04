@@ -15,9 +15,9 @@ const MapContext = createContext<MapContextType>({
 });
 
 // A wrapper component to track loading state from vis.gl
-const MapStateTracker = ({ children, authFailed }: { children: ReactNode, authFailed: boolean }) => {
+const MapStateTracker = ({ children, authFailed }: { children: ReactNode; authFailed: boolean }) => {
   const isApiLoaded = useApiIsLoaded();
-  
+
   const effectiveIsLoaded = isApiLoaded && !authFailed;
   const effectiveError = authFailed ? new Error("Google Maps Auth Failed") : undefined;
 
@@ -39,17 +39,25 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const apiKey = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY && import.meta.env.VITE_GOOGLE_MAPS_API_KEY !== "YOUR_GOOGLE_MAPS_API_KEY_HERE")
-    ? import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-    : (import.meta.env.VITE_FIREBASE_API_KEY || "");
+  const apiKey =
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY &&
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY !== "YOUR_GOOGLE_MAPS_API_KEY_HERE"
+      ? import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+      : import.meta.env.VITE_FIREBASE_API_KEY || "";
 
   return (
-    <APIProvider apiKey={apiKey} onLoad={() => console.log('Maps API has loaded.')}>
-      <MapStateTracker authFailed={authFailed}>
-        {children}
-      </MapStateTracker>
+    <APIProvider
+      apiKey={apiKey}
+      libraries={["places", "geocoding", "routes", "geometry", "marker"]}
+      onLoad={() => console.log("Google Maps API loaded.")}
+    >
+      <MapStateTracker authFailed={authFailed}>{children}</MapStateTracker>
     </APIProvider>
   );
 };
 
-export const useMap = () => useContext(MapContext);
+// Named useMapContext to avoid conflict with @vis.gl/react-google-maps's useMap
+export const useMapContext = () => useContext(MapContext);
+
+// Legacy alias — keeps old imports working during migration
+export const useMap = useMapContext;

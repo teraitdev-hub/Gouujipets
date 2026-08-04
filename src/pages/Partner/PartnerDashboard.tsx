@@ -302,26 +302,26 @@ export const PartnerDashboard = ({ type }: { type?: 'Boarding' | 'Grooming' | 'V
   return (
     <PageTransition className="max-w-7xl mx-auto space-y-6 font-sans pb-24">
       
-      {/* Premium Glassmorphic Operations Banner */}
-      <div className="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white rounded-[32px] p-6 sm:p-8 shadow-2xl border border-purple-500/30 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none"></div>
+      {/* High-Contrast Operations Banner */}
+      <div className="bg-slate-950 text-white rounded-[24px] p-6 sm:p-8 shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
+        {/* Subtle grid background */}
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-slate-800 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
         <div className="relative z-10 w-full lg:w-auto">
           <div className="flex flex-wrap items-center gap-2.5 mb-3">
-            <span className="bg-gradient-to-r from-purple-400 to-purple-300 text-purple-950 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest shadow-lg">
-              ✔ VERIFIED CARE PARTNER
+            <span className="bg-emerald-500 text-slate-950 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest shadow-sm">
+              ✔ VERIFIED PARTNER
             </span>
-            <span className="text-[10px] text-purple-200 font-bold uppercase tracking-widest bg-white/10 px-2.5 py-1 rounded-full backdrop-blur-md border border-white/10">
+            <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
               {String(activeType).split(',')[0]} DESK
             </span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight tracking-tight drop-shadow-sm">
+          <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight tracking-tight">
             {business ? business.name : `Welcome, ${user?.name || 'Care Facility Desk'}`}
           </h1>
-          <p className="text-sm text-purple-200 font-medium mt-2 max-w-xl leading-relaxed">
-            Real-time operations desk. All check-ins, guest stays, and financial ledgers auto-sync instantly.
+          <p className="text-sm text-slate-400 font-medium mt-2 max-w-xl">
+            Real-time operations desk. Auto-syncing check-ins, guest stays, and financial ledgers.
           </p>
         </div>
         
@@ -329,26 +329,26 @@ export const PartnerDashboard = ({ type }: { type?: 'Boarding' | 'Grooming' | 'V
           <div className="relative z-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto shrink-0">
              <button 
                onClick={() => setShowWalkIn(true)} 
-               className="px-6 py-3.5 bg-white hover:bg-purple-50 text-purple-900 rounded-2xl font-black text-xs shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 whitespace-nowrap"
+               className="px-6 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl font-black text-xs shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 whitespace-nowrap"
              >
                 <Plus size={16} className="stroke-[3]" /> Register Walk-in
              </button>
-             <div className="flex items-center gap-1.5 bg-black/20 p-1.5 rounded-2xl border border-white/10 backdrop-blur-xl overflow-x-auto custom-scrollbar">
+             <div className="flex items-center gap-1.5 bg-slate-900/50 p-1.5 rounded-xl border border-white/10 overflow-x-auto custom-scrollbar">
               <button 
                 onClick={() => setActiveTab('overview')} 
-                className={`px-4 py-2.5 font-bold text-xs rounded-xl transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-white text-purple-900 font-black shadow-lg' : 'text-purple-100 hover:bg-white/10'}`}
+                className={`px-4 py-2.5 font-bold text-xs rounded-lg transition-all whitespace-nowrap ${activeTab === 'overview' ? 'bg-white text-slate-950 font-black shadow-sm' : 'text-slate-300 hover:bg-white/10'}`}
               >
                 Dashboard
               </button>
               <button 
                 onClick={() => setActiveTab('bookings')} 
-                className={`px-4 py-2.5 font-bold text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${activeTab === 'bookings' ? 'bg-white text-purple-900 font-black shadow-lg' : 'text-purple-100 hover:bg-white/10'}`}
+                className={`px-4 py-2.5 font-bold text-xs rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${activeTab === 'bookings' ? 'bg-white text-slate-950 font-black shadow-sm' : 'text-slate-300 hover:bg-white/10'}`}
               >
-                Reservations <span className={`px-1.5 py-0.5 rounded-md text-[9px] ${activeTab === 'bookings' ? 'bg-purple-100 text-purple-900' : 'bg-white/20'}`}>{bookings.length}</span>
+                Reservations <span className={`px-1.5 py-0.5 rounded text-[9px] ${activeTab === 'bookings' ? 'bg-slate-200 text-slate-900' : 'bg-white/10'}`}>{bookings.length}</span>
               </button>
               <button 
                 onClick={() => setActiveTab('services')} 
-                className={`px-4 py-2.5 font-bold text-xs rounded-xl transition-all whitespace-nowrap ${activeTab === 'services' ? 'bg-white text-purple-900 font-black shadow-lg' : 'text-purple-100 hover:bg-white/10'}`}
+                className={`px-4 py-2.5 font-bold text-xs rounded-lg transition-all whitespace-nowrap ${activeTab === 'services' ? 'bg-white text-slate-950 font-black shadow-sm' : 'text-slate-300 hover:bg-white/10'}`}
               >
                 Services
               </button>
@@ -361,10 +361,10 @@ export const PartnerDashboard = ({ type }: { type?: 'Boarding' | 'Grooming' | 'V
         <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
             <div>
-              <h2 className="text-lg font-black text-slate-900">All Reservations Management</h2>
-              <p className="text-xs font-medium text-slate-500">Instant status tracking, guest intake check-ins, and direct customer contact</p>
+              <h2 className="text-lg font-black text-slate-900">Reservations Management</h2>
+              <p className="text-xs font-medium text-slate-500">Instant status tracking, guest intake check-ins, and customer contact</p>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5 bg-slate-50 p-1 rounded-xl border border-slate-100">
               {['all', 'pending', 'confirmed', 'checked_in', 'checked_out', 'cancelled'].map((tab) => {
                 const count = tab === 'all' ? bookings.length : bookings.filter(b => b.status === tab).length;
                 return (
@@ -372,10 +372,10 @@ export const PartnerDashboard = ({ type }: { type?: 'Boarding' | 'Grooming' | 'V
                     key={tab}
                     onClick={() => setBookingFilter(tab)}
                     className={`px-3 py-1.5 rounded-lg font-bold text-xs capitalize transition-all ${
-                      bookingFilter === tab ? 'bg-slate-900 text-white shadow-sm font-black' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      bookingFilter === tab ? 'bg-white text-slate-900 shadow-sm font-black border border-slate-200' : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
-                    {tab.replace('_', ' ')} ({count})
+                    {tab.replace('_', ' ')} <span className="opacity-50 ml-1">({count})</span>
                   </button>
                 );
               })}
@@ -390,7 +390,7 @@ export const PartnerDashboard = ({ type }: { type?: 'Boarding' | 'Grooming' | 'V
                   <th className="py-3 px-4">Dates & Time</th>
                   <th className="py-3 px-4">Stay Status</th>
                   <th className="py-3 px-4 text-right">Pricing Summary</th>
-                  <th className="py-3 px-4 text-center">Desk Actions</th>
+                  <th className="py-3 px-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="text-xs divide-y divide-slate-100">
@@ -401,57 +401,55 @@ export const PartnerDashboard = ({ type }: { type?: 'Boarding' | 'Grooming' | 'V
                     const pendingAmt = Math.max(0, totalAmt - Number(booking.total_paid || 0));
                     const bizName = booking.business_id?.name || allMyBusinesses.find(b => b.id === (typeof booking.business_id === 'string' ? booking.business_id : booking.business_id?.id))?.name || business?.name || 'Your Care Facility';
                     return (
-                      <tr key={booking.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <div className="font-black text-slate-900">{booking.customer_id?.full_name || 'Pet Parent'}</div>
+                      <tr key={booking.id} className="hover:bg-slate-50 transition-colors group">
+                        <td className="py-4 px-4">
+                          <div className="font-black text-slate-900 text-sm">{booking.customer_id?.full_name || 'Pet Parent'}</div>
                           <div className="text-[11px] font-bold text-slate-500 flex items-center gap-1 mt-0.5">
-                            <PawPrint size={11} className="text-purple-600"/> {booking.pet_count || 1} Pet(s)
+                            <PawPrint size={12} className="text-slate-400"/> {booking.pet_count || 1} Pet(s)
                           </div>
-                          {booking.customer_id?.phone && <div className="text-[10px] text-slate-400 font-medium mt-0.5 flex items-center gap-1"><Phone size={10}/> {booking.customer_id.phone}</div>}
+                          {booking.customer_id?.phone && <div className="text-[10px] text-slate-400 font-medium mt-1 flex items-center gap-1"><Phone size={10}/> {booking.customer_id.phone}</div>}
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-4 px-4">
                           <div className="font-black text-slate-800 text-xs mb-0.5">{bizName}</div>
-                          <div className="font-bold text-slate-700 text-[11px]">{booking.check_in ? new Date(booking.check_in).toLocaleString('en-IN', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : 'N/A'}</div>
-                          <div className="text-[10px] text-slate-400 font-bold uppercase mt-0.5">To {booking.check_out ? new Date(booking.check_out).toLocaleString('en-IN', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : 'N/A'}</div>
+                          <div className="font-bold text-slate-600 text-[11px] bg-slate-100 inline-block px-2 py-0.5 rounded mt-1">IN: {booking.check_in ? new Date(booking.check_in).toLocaleString('en-IN', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : 'N/A'}</div>
+                          <div className="font-bold text-slate-500 text-[11px] block mt-1">OUT: {booking.check_out ? new Date(booking.check_out).toLocaleString('en-IN', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : 'N/A'}</div>
                         </td>
-                        <td className="py-3.5 px-4">
-                          <span className={`px-2.5 py-0.5 rounded text-[9px] font-black uppercase ${
-                            booking.status === 'confirmed' ? 'bg-purple-100 text-purple-900 border border-purple-200' : 
-                            booking.status === 'cancelled' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
-                            booking.status === 'checked_in' ? 'bg-purple-600 text-white font-black animate-pulse shadow-2xs' :
-                            booking.status === 'pending' ? 'bg-purple-100 text-purple-900 border border-purple-300' : 'bg-slate-100 text-slate-700'
+                        <td className="py-4 px-4">
+                          <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider ${
+                            booking.status === 'confirmed' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 
+                            booking.status === 'cancelled' ? 'bg-red-50 text-red-700 border border-red-200' :
+                            booking.status === 'checked_in' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse shadow-sm' :
+                            booking.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600 border border-slate-200'
                           }`}>
                             {booking.status}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-right">
+                        <td className="py-4 px-4 text-right">
                           <div className="font-black text-slate-900 text-sm">₹{totalAmt.toLocaleString()}</div>
                           {booking.status === 'cancelled' && Number(booking.total_paid) > 0 ? (
-                            <div className="text-[9px] font-black uppercase text-purple-700">
-                              Refund Processed: ₹{booking.total_paid}
-                            </div>
+                            <div className="text-[9px] font-black uppercase text-slate-500 mt-1">Refund: ₹{booking.total_paid}</div>
                           ) : pendingAmt > 0 ? (
-                            <div className="text-[9px] font-black text-purple-700 uppercase">Due: ₹{pendingAmt}</div>
+                            <div className="text-[9px] font-black text-amber-600 uppercase mt-1 bg-amber-50 inline-block px-1.5 py-0.5 rounded">Due: ₹{pendingAmt}</div>
                           ) : (
-                            <div className="text-[9px] font-black text-purple-600 uppercase flex items-center justify-end gap-0.5"><CheckCircle2 size={10} /> Paid in Full</div>
+                            <div className="text-[9px] font-black text-emerald-600 uppercase mt-1 flex items-center justify-end gap-1"><CheckCircle2 size={10} /> Paid</div>
                           )}
                         </td>
-                        <td className="py-3.5 px-4">
-                          <div className="flex justify-center gap-1.5">
-                            <button onClick={() => setSelectedBooking(booking)} className="p-2 bg-purple-100 hover:bg-purple-600 hover:text-white text-purple-900 rounded-lg transition-all" title="Chat & Intake">
+                        <td className="py-4 px-4">
+                          <div className="flex justify-center gap-2">
+                            <button onClick={() => setSelectedBooking(booking)} className="p-2 bg-white border border-slate-200 hover:border-slate-400 hover:bg-slate-50 text-slate-700 rounded-lg transition-all shadow-sm group-hover:shadow" title="Chat & Intake">
                               <MessageSquare size={14} />
                             </button>
-                            <button onClick={() => setFinancialsModalData({ isOpen: true, booking })} className="p-2 bg-purple-100 hover:bg-purple-600 hover:text-white text-purple-900 rounded-lg transition-all" title="Financials">
+                            <button onClick={() => setFinancialsModalData({ isOpen: true, booking })} className="p-2 bg-white border border-slate-200 hover:border-slate-400 hover:bg-slate-50 text-slate-700 rounded-lg transition-all shadow-sm group-hover:shadow" title="Financials">
                               <DollarSign size={14} />
                             </button>
-                            <button onClick={() => setMedicalModalData({ isOpen: true, booking })} className="p-2 bg-purple-100 hover:bg-purple-600 hover:text-white text-purple-900 rounded-lg transition-all" title="Medical Records">
+                            <button onClick={() => setMedicalModalData({ isOpen: true, booking })} className="p-2 bg-white border border-slate-200 hover:border-slate-400 hover:bg-slate-50 text-slate-700 rounded-lg transition-all shadow-sm group-hover:shadow" title="Medical Records">
                               <FileText size={14} />
                             </button>
                           </div>
                           {booking.status === 'pending' && (
-                            <div className="flex gap-1 justify-center mt-1.5">
-                              <button onClick={() => handleUpdateStatus(booking.id, 'confirmed')} className="flex-1 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-[10px] font-black shadow-2xs">Approve</button>
-                              <button onClick={() => handleUpdateStatus(booking.id, 'cancelled')} className="flex-1 py-1 bg-purple-100 text-purple-900 hover:bg-purple-200 rounded text-[10px] font-bold">Deny</button>
+                            <div className="flex gap-1 justify-center mt-2">
+                              <button onClick={() => handleUpdateStatus(booking.id, 'confirmed')} className="flex-1 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded text-[10px] font-black shadow-sm">Approve</button>
+                              <button onClick={() => handleUpdateStatus(booking.id, 'cancelled')} className="flex-1 py-1 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded text-[10px] font-bold">Deny</button>
                             </div>
                           )}
                         </td>
@@ -461,7 +459,7 @@ export const PartnerDashboard = ({ type }: { type?: 'Boarding' | 'Grooming' | 'V
               </tbody>
             </table>
             {bookings.filter((b) => bookingFilter === 'all' || b.status === bookingFilter).length === 0 && (
-              <div className="text-center py-12 text-slate-400 text-xs font-medium">
+              <div className="text-center py-12 text-slate-400 text-xs font-medium bg-slate-50 rounded-xl border border-dashed border-slate-200 m-4">
                 No reservations currently in `{bookingFilter}` state.
               </div>
             )}
@@ -481,99 +479,100 @@ export const PartnerDashboard = ({ type }: { type?: 'Boarding' | 'Grooming' | 'V
           {/* Main Operations Column (Span 2) */}
           <div className="xl:col-span-2 space-y-6">
             
-            {/* Amazon Seller & VERIFIED KPI Grid */}
+            {/* Shopify-style High-Contrast Metric Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white p-4 rounded-2xl border border-purple-200 shadow-sm hover:border-purple-600 transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-black text-purple-700 uppercase tracking-wider">Today's Revenue</span>
-                  <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-black">₹</div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Today's Revenue</span>
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-black border border-emerald-100">₹</div>
                 </div>
-                <p className="text-2xl font-black text-slate-900">{formatRupee(todayRevenue)}</p>
-                <p className="text-[10px] text-purple-600 font-bold mt-1">Gross Intake Today</p>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{formatRupee(todayRevenue)}</p>
+                <p className="text-[10px] text-slate-400 font-bold mt-1">Gross Intake</p>
               </div>
 
-              <div className="bg-white p-4 rounded-2xl border border-purple-200 shadow-sm hover:border-purple-600 transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-black text-purple-700 uppercase tracking-wider">Today's Check-ins</span>
-                  <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center"><Users size={14} /></div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Check-ins</span>
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100"><Users size={16} /></div>
                 </div>
-                <p className="text-2xl font-black text-slate-900">{todayCheckIns}</p>
-                <p className="text-[10px] text-slate-500 font-bold mt-1">Scheduled Arrivals</p>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{todayCheckIns}</p>
+                <p className="text-[10px] text-slate-400 font-bold mt-1">Scheduled Arrivals</p>
               </div>
 
-              <div className="bg-white p-4 rounded-2xl border border-purple-200 shadow-sm hover:border-purple-600 transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-black text-purple-700 uppercase tracking-wider">Live Occupancy</span>
-                  <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center"><PawPrint size={14} /></div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Live</span>
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100"><PawPrint size={16} /></div>
                 </div>
-                <p className="text-2xl font-black text-slate-900">{activeBookingsCount}</p>
-                <p className="text-[10px] text-purple-600 font-bold mt-1">Guests Currently in Care</p>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{activeBookingsCount}</p>
+                <p className="text-[10px] text-slate-400 font-bold mt-1">Occupancy</p>
               </div>
 
-              <div className="bg-white p-4 rounded-2xl border border-purple-200 shadow-sm hover:border-purple-600 transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-black text-purple-700 uppercase tracking-wider">Pending Requests</span>
-                  <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center"><Calendar size={14} /></div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Pending</span>
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100"><Calendar size={16} /></div>
                 </div>
-                <p className="text-2xl font-black text-slate-900">{pendingRequests}</p>
-                <p className="text-[10px] text-purple-600 font-bold mt-1">Awaiting Desk Action</p>
+                <p className="text-2xl font-black text-slate-900 tracking-tight">{pendingRequests}</p>
+                <p className="text-[10px] text-slate-400 font-bold mt-1">Action Required</p>
               </div>
             </div>
 
             {/* Recent Reservations Table */}
-            <div className="bg-white rounded-2xl border border-purple-200 shadow-sm overflow-hidden">
-              <div className="p-4 sm:p-5 border-b border-purple-100 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-purple-600 text-white flex items-center justify-center text-xs font-black">📋</div>
-                  <h3 className="text-base font-black text-purple-950">Recent Stay Reservations</h3>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-black shadow-sm">📋</div>
+                  <h3 className="text-base font-black text-slate-900">Recent Reservations</h3>
                 </div>
-                <button onClick={() => setActiveTab('bookings')} className="text-xs font-black text-purple-600 hover:underline">View All ({bookings.length}) →</button>
+                <button onClick={() => setActiveTab('bookings')} className="text-[11px] font-black text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs transition-colors">View All ({bookings.length})</button>
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse min-w-[600px]">
                   <thead>
-                    <tr className="bg-purple-50 text-[10px] uppercase tracking-wider font-black text-purple-900 border-b border-purple-200">
-                      <th className="p-3.5 px-4">Customer & Pet</th>
-                      <th className="p-3.5 px-4">Stay Dates</th>
-                      <th className="p-3.5 px-4">Status</th>
-                      <th className="p-3.5 px-4 text-right">Amount</th>
-                      <th className="p-3.5 px-4 text-center">Action</th>
+                    <tr className="bg-white text-[10px] uppercase tracking-wider font-black text-slate-400 border-b border-slate-100">
+                      <th className="p-4">Customer & Pet</th>
+                      <th className="p-4">Stay Dates</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4 text-right">Amount</th>
+                      <th className="p-4 text-center">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="text-xs divide-y divide-purple-100">
+                  <tbody className="text-xs divide-y divide-slate-50">
                     {bookings.slice(0, 6).map((booking) => {
                       const totalAmt = (Number(booking.total_amount) || 0) + (Number(booking.extra_expenses) || 0);
                       const pendingAmt = Math.max(0, totalAmt - Number(booking.total_paid || 0));
                       return (
-                      <tr key={booking.id} className="hover:bg-purple-50/50 transition-colors">
-                        <td className="py-3 px-4">
+                      <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="p-4">
                           <div className="font-black text-slate-900">{booking.customer_id?.full_name || 'Pet Parent'}</div>
-                          <div className="text-[10px] font-bold text-slate-500 flex items-center gap-1 mt-0.5"><PawPrint size={10} className="text-purple-600"/> {booking.pet_count || 1} Pet(s)</div>
+                          <div className="text-[10px] font-bold text-slate-500 mt-0.5">{booking.pet_count || 1} Pet(s)</div>
                         </td>
-                        <td className="py-3 px-4">
-                           <div className="font-bold text-slate-800 text-[11px]">{booking.check_in ? new Date(booking.check_in).toLocaleString('en-IN', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : 'N/A'}</div>
-                           <div className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">To {booking.check_out ? new Date(booking.check_out).toLocaleString('en-IN', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) : 'N/A'}</div>
+                        <td className="p-4">
+                           <div className="font-bold text-slate-700 text-[11px] bg-slate-100 inline-block px-1.5 py-0.5 rounded">{booking.check_in ? new Date(booking.check_in).toLocaleDateString('en-IN', {month:'short', day:'numeric'}) : 'N/A'}</div>
+                           <span className="mx-1 text-slate-300 font-bold">→</span>
+                           <div className="font-bold text-slate-700 text-[11px] bg-slate-100 inline-block px-1.5 py-0.5 rounded">{booking.check_out ? new Date(booking.check_out).toLocaleDateString('en-IN', {month:'short', day:'numeric'}) : 'N/A'}</div>
                         </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
-                            booking.status === 'confirmed' ? 'bg-purple-100 text-purple-900 border border-purple-200' : 
-                            booking.status === 'cancelled' ? 'bg-purple-50 text-purple-700' :
-                            booking.status === 'checked_in' ? 'bg-purple-600 text-white font-black animate-pulse' :
-                            booking.status === 'pending' ? 'bg-purple-100 text-purple-900' : 'bg-slate-100 text-slate-700'
+                        <td className="p-4">
+                          <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider ${
+                            booking.status === 'confirmed' ? 'bg-indigo-50 text-indigo-700 border border-indigo-100' : 
+                            booking.status === 'cancelled' ? 'bg-red-50 text-red-700 border border-red-100' :
+                            booking.status === 'checked_in' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm' :
+                            booking.status === 'pending' ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-slate-100 text-slate-600'
                           }`}>
                             {booking.status}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-right">
+                        <td className="p-4 text-right">
                           <div className="font-black text-slate-900">₹{totalAmt.toLocaleString()}</div>
                           {pendingAmt > 0 ? (
-                            <div className="text-[9px] font-bold text-purple-700 uppercase">Due: ₹{pendingAmt}</div>
+                            <div className="text-[9px] font-bold text-amber-600 uppercase mt-0.5">Due: ₹{pendingAmt}</div>
                           ) : (
-                            <div className="text-[9px] font-bold text-purple-600 uppercase">Paid</div>
+                            <div className="text-[9px] font-bold text-emerald-600 uppercase mt-0.5">Paid</div>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-center">
-                          <button onClick={() => setSelectedBooking(booking)} className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white font-black text-[10px] rounded-lg transition-all shadow-2xs">
+                        <td className="p-4 text-center">
+                          <button onClick={() => setSelectedBooking(booking)} className="px-3 py-1.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 font-black text-[10px] rounded-lg transition-all shadow-2xs">
                             Manage
                           </button>
                         </td>
@@ -581,7 +580,7 @@ export const PartnerDashboard = ({ type }: { type?: 'Boarding' | 'Grooming' | 'V
                     )})}
                   </tbody>
                 </table>
-                {bookings.length === 0 && <div className="text-center py-10 text-purple-400 text-xs font-medium">No reservations recorded yet.</div>}
+                {bookings.length === 0 && <div className="text-center py-10 text-slate-400 text-xs font-medium">No reservations recorded yet.</div>}
               </div>
             </div>
 
@@ -591,52 +590,52 @@ export const PartnerDashboard = ({ type }: { type?: 'Boarding' | 'Grooming' | 'V
           <div className="space-y-6">
             
             {/* Quick Actions Panel */}
-            <div className="bg-white rounded-2xl p-5 border border-purple-200 shadow-sm">
-               <h3 className="text-sm font-black text-purple-950 mb-3.5 flex items-center gap-1.5">
-                 <span className="w-2 h-2 rounded-full bg-purple-600 animate-pulse" />
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+               <h3 className="text-sm font-black text-slate-900 mb-4 flex items-center gap-2">
+                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                  Desk Quick Actions
                </h3>
-               <div className="space-y-2.5">
-                 <button onClick={() => setShowWalkIn(true)} className="w-full text-left p-3.5 rounded-xl bg-purple-50/70 hover:bg-purple-600 hover:text-white border border-purple-200 hover:border-purple-600 transition-all flex items-center gap-3.5 group shadow-2xs">
-                    <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black shrink-0 group-hover:scale-105 transition-transform"><Dog size={16} /></div>
+               <div className="space-y-3">
+                 <button onClick={() => setShowWalkIn(true)} className="w-full text-left p-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 transition-all flex items-center gap-4 group shadow-2xs hover:shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center font-black shrink-0 group-hover:scale-105 transition-transform"><Dog size={18} /></div>
                     <div>
-                      <h4 className="font-black text-xs">Walk-in Client Intake</h4>
-                      <p className="text-[10px] text-purple-700 group-hover:text-purple-100 font-medium">Register instant offline booking</p>
+                      <h4 className="font-black text-xs text-slate-900">Walk-in Client</h4>
+                      <p className="text-[10px] text-slate-500 font-medium mt-0.5">Register offline booking</p>
                     </div>
                  </button>
-                 <button onClick={handleGenerateReport} className="w-full text-left p-3.5 rounded-xl bg-purple-50/70 hover:bg-purple-600 hover:text-white border border-purple-200 hover:border-purple-600 transition-all flex items-center gap-3.5 group shadow-2xs">
-                    <div className="w-9 h-9 rounded-xl bg-purple-950 text-white flex items-center justify-center font-black shrink-0 group-hover:scale-105 transition-transform"><FileText size={16} /></div>
+                 <button onClick={handleGenerateReport} className="w-full text-left p-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 transition-all flex items-center gap-4 group shadow-2xs hover:shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black shrink-0 group-hover:scale-105 transition-transform"><FileText size={18} /></div>
                     <div>
-                      <h4 className="font-black text-xs">Financial Statements</h4>
-                      <p className="text-[10px] text-purple-700 group-hover:text-purple-100 font-medium">Export revenue & tax sheets</p>
+                      <h4 className="font-black text-xs text-slate-900">Financial Statements</h4>
+                      <p className="text-[10px] text-slate-500 font-medium mt-0.5">Export revenue & tax sheets</p>
                     </div>
                  </button>
                </div>
             </div>
 
             {/* Expense Log */}
-            <div className="bg-white rounded-2xl p-5 border border-purple-200 shadow-sm">
-               <div className="flex items-center justify-between mb-3.5 pb-2.5 border-b border-purple-100">
-                 <h3 className="text-sm font-black text-purple-950">Center Expense Log</h3>
-                 <button onClick={() => setShowAddExpense(true)} className="text-[10px] font-black uppercase tracking-wider bg-purple-600 text-white px-2.5 py-1 rounded-lg hover:bg-purple-700 transition-colors shadow-2xs">
-                   + Add Expense
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+               <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                 <h3 className="text-sm font-black text-slate-900">Expense Log</h3>
+                 <button onClick={() => setShowAddExpense(true)} className="text-[10px] font-black uppercase tracking-wider bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-colors shadow-sm">
+                   + Log Expense
                  </button>
                </div>
                
-               <div className="space-y-2.5 overflow-y-visible">
+               <div className="space-y-3 overflow-y-visible">
                  {expenses.slice(0, 6).map((exp, i) => (
-                   <div key={i} className="flex items-center justify-between p-2.5 bg-purple-50/50 border border-purple-200/60 rounded-xl text-xs">
-                     <div className="flex items-center gap-2.5">
-                       <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-black text-xs"><DollarSign size={12}/></div>
+                   <div key={i} className="flex items-center justify-between p-3 bg-white border border-slate-100 hover:border-slate-200 rounded-xl text-xs transition-colors">
+                     <div className="flex items-center gap-3">
+                       <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 border border-red-100 flex items-center justify-center font-black text-xs"><DollarSign size={14}/></div>
                        <div>
                          <p className="font-black text-slate-900 leading-tight">{exp.category}</p>
-                         <p className="text-[10px] text-purple-700 font-medium mt-0.5">{exp.date}</p>
+                         <p className="text-[10px] text-slate-500 font-bold mt-0.5">{exp.date}</p>
                        </div>
                      </div>
-                     <span className="font-black text-purple-900">-₹{exp.amount}</span>
+                     <span className="font-black text-red-600">-₹{exp.amount}</span>
                    </div>
                  ))}
-                 {expenses.length === 0 && <div className="text-center text-xs text-purple-400 py-6 font-medium">No expenses logged for this facility.</div>}
+                 {expenses.length === 0 && <div className="text-center text-xs text-slate-400 py-6 font-medium bg-slate-50 rounded-xl border border-dashed border-slate-200">No expenses logged for this facility.</div>}
                </div>
             </div>
 

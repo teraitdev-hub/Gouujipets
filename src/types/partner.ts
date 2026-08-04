@@ -6,7 +6,13 @@ export interface PartnerProfile {
   address: string;
   latitude: number;
   longitude: number;
-  serviceRadius: number; // in km
+  place_id?: string;
+  formatted_address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  serviceRadius: number;  // in km (legacy)
+  service_radius_km?: number; // normalized field
   deliveryRadius: number; // in km
   workingHours: {
     [day: string]: { open: string; close: string; isClosed: boolean };

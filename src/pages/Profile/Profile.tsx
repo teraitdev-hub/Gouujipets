@@ -4,12 +4,15 @@ import { db, auth, storage } from "../../lib/firebase";
 import { doc, updateDoc, setDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updatePassword } from "firebase/auth";
-import { Plus, Settings, ChevronRight, Check, User as UserIcon, Mail } from "lucide-react";
+import { Plus, Settings, ChevronRight, Check, User as UserIcon, Mail, MapPin, Home, Briefcase, Star, Trash2, Navigation } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePet } from "../../context/PetContext";
 import { useAuthStore } from "../../store/useAuthStore";
 import { AddPetModal } from "../../components/pets/AddPetModal";
 import { computePetCompletion } from "../../utils/petCompletion";
+import { useLocationStore } from "../../store/useLocationStore";
+import { useEffect } from "react";
+import { LocationSelectorSheet } from "../../components/location/LocationSelectorSheet";
 
 export const Profile = () => {
   const { pets, activePet, setActivePetId } = usePet();
@@ -17,6 +20,13 @@ export const Profile = () => {
   const [ownerDetailsOpen, setOwnerDetailsOpen] = useState(false);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState(false);
   const [petToEdit, setPetToEdit] = useState<any>(null);
+  const [locationSheetOpen, setLocationSheetOpen] = useState(false);
+  
+  const { savedAddresses, loadSavedAddresses, removeSavedAddress, setDefaultAddress } = useLocationStore();
+
+  useEffect(() => {
+    if (user?.id) loadSavedAddresses(user.id);
+  }, [user?.id, loadSavedAddresses]);
   
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -201,6 +211,76 @@ export const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* ─── Saved Addresses Section ─────────────────────────────── */}
+      <div className="pt-4 border-t border-purple-200">
+        <div className="flex items-center justify-between mb-4 px-2">
+          <h2 className="text-xl font-black text-purple-950 flex items-center gap-2">
+            <MapPin size={20} className="text-purple-600" /> Saved Addresses
+          </h2>
+          <button
+            onClick={() => setLocationSheetOpen(true)}
+            className="bg-purple-600 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 hover:bg-purple-700 transition-colors shadow-2xs"
+          >
+            <Plus size={16} className="stroke-[3]" /> Add Address
+          </button>
+        </div>
+
+        {savedAddresses.length === 0 ? (
+          <div className="bg-purple-50 border border-purple-200 rounded-2xl p-8 text-center">
+            <MapPin size={28} className="text-purple-300 mx-auto mb-2" />
+            <p className="text-sm font-bold text-purple-500">No saved addresses yet</p>
+            <p className="text-xs text-purple-400 mt-1">Add home, work, or frequently visited locations for quicker checkout</p>
+            <button
+              onClick={() => setLocationSheetOpen(true)}
+              className="mt-4 text-xs font-black text-purple-600 border border-purple-300 px-4 py-2 rounded-xl hover:bg-purple-100 transition-colors"
+            >
+              + Add First Address
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {savedAddresses.map((addr) => {
+              const icon = addr.label === 'home' ? <Home size={16} /> : addr.label === 'work' ? <Briefcase size={16} /> : <Star size={16} />;
+              const colorClass = addr.label === 'home' ? 'bg-blue-100 text-blue-700' : addr.label === 'work' ? 'bg-amber-100 text-amber-700' : 'bg-purple-100 text-purple-700';
+              return (
+                <div key={addr.id} className={`bg-white border rounded-2xl p-4 flex items-start gap-3 shadow-sm ${addr.isDefault ? 'border-purple-400 ring-2 ring-purple-100' : 'border-slate-200'}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${colorClass}`}>{icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-black text-slate-900 capitalize">{addr.title || addr.label}</p>
+                      {addr.isDefault && <span className="text-[9px] font-black bg-purple-600 text-white px-1.5 py-0.5 rounded-full">DEFAULT</span>}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5 truncate">{addr.formatted_address}</p>
+                    {addr.area && <p className="text-[10px] text-slate-400">{addr.area}</p>}
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    {!addr.isDefault && (
+                      <button
+                        onClick={() => user?.id && setDefaultAddress(addr.id, user.id)}
+                        title="Set as Default"
+                        className="w-7 h-7 rounded-lg bg-purple-50 text-purple-500 hover:bg-purple-100 hover:text-purple-700 flex items-center justify-center transition-colors"
+                      >
+                        <Check size={13} />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => user?.id && removeSavedAddress(addr.id, user.id)}
+                      title="Remove"
+                      className="w-7 h-7 rounded-lg bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-colors"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Location Selector Sheet */}
+      <LocationSelectorSheet open={locationSheetOpen} onClose={() => setLocationSheetOpen(false)} />
 
       <div className="pt-4 border-t border-purple-200">
         <div className="flex items-center justify-between mb-4 px-2">

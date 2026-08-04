@@ -1,5 +1,36 @@
 export type UserRole = 'customer' | 'partner' | 'admin';
 
+export interface UserLocation {
+  latitude: number;
+  longitude: number;
+  place_id?: string;
+  formatted_address: string;
+  street?: string;
+  area?: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  country?: string;
+  postal_code?: string;
+  accuracy?: number;
+  timestamp?: string;
+}
+
+export interface SavedAddress {
+  id: string;
+  label: 'home' | 'work' | 'other';
+  title: string;
+  latitude: number;
+  longitude: number;
+  place_id?: string;
+  formatted_address: string;
+  area?: string;
+  city?: string;
+  pincode?: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
 export interface UserProfile {
   uid: string;
   name: string;
@@ -15,6 +46,7 @@ export interface UserProfile {
   pincode?: string;
   latitude?: number;
   longitude?: number;
+  location?: UserLocation;
   emergencyContact?: string;
   alternateNumber?: string;
   referralCode?: string;

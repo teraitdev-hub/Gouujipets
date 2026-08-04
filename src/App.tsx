@@ -58,6 +58,7 @@ import { PrivacyPolicy } from "./pages/Legal/PrivacyPolicy";
 import { TermsOfService } from "./pages/Legal/TermsOfService";
 import { ServiceQuickLinks } from "./components/navigation/ServiceQuickLinks";
 import { BottomNav } from "./components/navigation/BottomNav";
+import { LocationPermissionModal } from "./components/location/LocationPermissionModal";
 
 import { AdminSettings } from "./pages/Admin/AdminSettings";
 
@@ -105,6 +106,7 @@ function App() {
   return (
     <>
       <LoginModal />
+      <LocationPermissionModal />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* =========================================

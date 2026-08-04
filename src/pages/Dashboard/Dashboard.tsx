@@ -156,393 +156,224 @@ export const Dashboard = () => {
   };
 
   return (
-    <PageTransition className="pb-24 max-w-7xl mx-auto space-y-5 font-sans">
+    <PageTransition className="pb-24 bg-slate-50 min-h-screen font-sans">
       
-      {/* 1. Amazon / VERIFIED Top Status Bar & Active Pet Selector in Light Pink & Purple Theme */}
-      <div className="bg-white border border-purple-100 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative shrink-0">
-            {primaryPet ? (
-              <img 
-                src={primaryPet.photo_url || primaryPet.avatar_url || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=200"} 
-                alt={primaryPet.name} 
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover border-2 border-purple-500 shadow-sm"
-              />
-            ) : (
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-lg shadow-sm">
-                🐶
-              </div>
-            )}
-            <span className="absolute -bottom-1 -right-1 bg-purple-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow-xs">
-              ACTIVE
-            </span>
-          </div>
+      {/* 1. Hero Header with Animated Gradient */}
+      <div className="relative pt-10 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-900 via-purple-900 to-violet-900 overflow-hidden">
+        {/* Subtle decorative background elements */}
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
+        <div className="absolute top-10 -left-10 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
 
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
-                {primaryPet ? `${primaryPet.name}'s Dashboard` : `Welcome, ${user?.name || "Pet Parent"} 👋`}
-              </h2>
-              {primaryPet && (
-                <span className="bg-purple-100 text-purple-800 text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-0.5 border border-purple-200">
-                  <ShieldCheck size={12} className="text-purple-600" /> 100% Verified
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 font-medium">
-              {primaryPet ? `${primaryPet.breed} • ${primaryPet.age} Yrs • ${primaryPet.gender || 'Pet'}` : "Select or add a pet to get personalized partner matches and live care tracking."}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-purple-100">
-          {pets && pets.length > 1 && (
-            <div className="relative">
-              <button 
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="px-3.5 py-2 bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold text-xs rounded-xl transition-all flex items-center gap-1.5 border border-purple-200/60"
-              >
-                <span>Switch Pet ({pets.length})</span>
-                <ChevronRight size={14} className={`transition-transform ${isDropdownOpen ? 'rotate-90' : ''}`} />
-              </button>
-              
-              <AnimatePresence>
-                {isDropdownOpen && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 5 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    exit={{ opacity: 0, y: 5 }}
-                    className="absolute right-0 top-11 bg-white border border-purple-200 rounded-xl shadow-xl p-2 w-56 z-50 space-y-1"
-                  >
-                    {pets.map((p: any) => (
-                      <button
-                        key={p.id}
-                        onClick={() => { setActivePetId(p.id); setIsDropdownOpen(false); }}
-                        className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 text-xs font-bold transition-all ${
-                          p.id === primaryPet?.id ? 'bg-purple-100 text-purple-900 font-black' : 'hover:bg-purple-50 text-slate-800'
-                        }`}
-                      >
-                        <span className="w-2 h-2 rounded-full bg-purple-600 shrink-0" />
-                        <span className="truncate">{p.name} ({p.breed})</span>
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-
-          <button
-            onClick={() => { setPetToEdit(null); setIsAddPetModalOpen(true); }}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-xl transition-all flex items-center gap-1.5 shadow-md active:scale-95"
-          >
-            <Plus size={14} />
-            <span>Add Pet</span>
-          </button>
-        </div>
-      </div>
-
-      {/* ── Ultra-Compact Profile Strength Banner ──────────────────────── */}
-      {primaryPet && petCompletion && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 font-sans"
-        >
-          {/* Left: Overall Status */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                <path className="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                <motion.path
-                  initial={{ strokeDasharray: "0, 100" }}
-                  animate={{ strokeDasharray: `${petCompletion.percentage}, 100` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                  className={petCompletion.percentage === 100 ? "text-emerald-500" : "text-indigo-600"}
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"
-                />
-              </svg>
-              <span className="absolute text-[11px] font-black text-slate-800">{petCompletion.percentage}%</span>
+        <div className="relative max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl flex items-center justify-center text-2xl font-black text-white">
+              {primaryPet ? '🐾' : '👋'}
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                Profile Completion
-                {petCompletion.percentage === 100 && <ShieldCheck size={14} className="text-emerald-500" />}
-              </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">
-                {petCompletion.percentage === 100 ? "Fully prepared for check-ins." : "Missing details limit priority care."}
+              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">
+                Welcome back, {user?.name?.split(' ')[0] || "Pet Parent"}
+              </h1>
+              <p className="text-purple-200 font-medium mt-1 flex items-center gap-2">
+                <Sparkles size={16} className="text-yellow-400" />
+                {primaryPet ? `Managing ${primaryPet.name} • ${petCompletion?.percentage}% Profile complete` : 'Manage your pets and upcoming stays'}
               </p>
             </div>
           </div>
+          
+          <div className="flex gap-4">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3 px-5 text-center shadow-lg">
+              <span className="block text-2xl font-black text-white">{bookings.length}</span>
+              <span className="text-[10px] uppercase font-bold text-purple-200 tracking-wider">Bookings</span>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-3 px-5 text-center shadow-lg">
+              <span className="block text-2xl font-black text-white">{pets.length}</span>
+              <span className="text-[10px] uppercase font-bold text-purple-200 tracking-wider">Pets</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          {/* Middle: Mini Category Indicators */}
-          <div className="flex items-center gap-2 sm:gap-4 flex-1 w-full lg:max-w-md px-1 sm:px-4 lg:border-l lg:border-slate-100">
-            {(["basic", "health", "care", "security"] as const).map((cat) => {
-              const catFields = petCompletion.fields.filter((f) => f.category === cat);
-              const isComplete = catFields.filter((f) => f.filled).length === catFields.length;
-              const catLabel = { basic: "Basic", health: "Medical", care: "Diet", security: "Safety" }[cat];
-              return (
-                <div key={cat} className="flex-1 flex flex-col gap-1">
-                  <span className={`text-[9px] font-bold uppercase tracking-wider ${isComplete ? 'text-slate-700' : 'text-slate-400'}`}>
-                    {catLabel}
-                  </span>
-                  <div className="h-1 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div className={`h-full w-full rounded-full transition-all duration-700 ${isComplete ? "bg-emerald-500" : "bg-slate-200"}`} />
+      {/* Main Content Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 space-y-8 relative z-10">
+        
+        {/* 2. My Pets Carousel */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+              <Star className="text-purple-600" fill="currentColor" size={20} />
+              My Pets
+            </h2>
+          </div>
+          
+          <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
+            {/* Add New Pet Card */}
+            <div 
+              onClick={() => { setPetToEdit(null); setIsAddPetModalOpen(true); }}
+              className="min-w-[260px] h-[180px] rounded-3xl border-2 border-dashed border-purple-300 bg-purple-50/50 hover:bg-purple-50 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg snap-start shrink-0 group"
+            >
+              <div className="w-14 h-14 rounded-full bg-purple-200 text-purple-700 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                <Plus size={28} strokeWidth={3} />
+              </div>
+              <span className="font-bold text-purple-900">Add New Pet</span>
+            </div>
+
+            {/* Existing Pets */}
+            {pets.map((p: any) => (
+              <div 
+                key={p.id}
+                onClick={() => setActivePetId(p.id)}
+                className={`min-w-[260px] h-[180px] rounded-3xl p-5 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl snap-start shrink-0 border relative overflow-hidden ${
+                  p.id === primaryPet?.id ? 'bg-white border-purple-400 shadow-lg ring-4 ring-purple-50' : 'bg-white border-slate-200 shadow-sm'
+                }`}
+              >
+                {p.id === primaryPet?.id && (
+                  <div className="absolute top-0 right-0 bg-purple-600 text-white text-[9px] font-black uppercase px-3 py-1 rounded-bl-xl tracking-wider">
+                    Selected
+                  </div>
+                )}
+                <div className="flex items-start gap-4">
+                  <img 
+                    src={p.photo_url || p.avatar_url || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=200"} 
+                    alt={p.name}
+                    className="w-16 h-16 rounded-2xl object-cover shadow-md border border-slate-100"
+                  />
+                  <div>
+                    <h3 className="font-black text-lg text-slate-900 leading-tight">{p.name}</h3>
+                    <p className="text-xs font-bold text-slate-500 mt-0.5">{p.breed}</p>
+                    <span className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-lg border border-emerald-100">
+                      <ShieldCheck size={12} /> Vaccinated
+                    </span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2 shrink-0 w-full lg:w-auto mt-2 lg:mt-0">
-            <button
-              onClick={() => { setPetToEdit(primaryPet); setIsAddPetModalOpen(true); }}
-              className={`flex-1 lg:flex-none px-4 py-2 rounded-lg text-xs font-semibold transition-colors ${
-                petCompletion.percentage === 100
-                  ? "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100"
-                  : "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
-              }`}
-            >
-              {petCompletion.percentage === 100 ? "Update" : "Complete"}
-            </button>
-            <button
-              onClick={() => navigate(`/pet/${primaryPet.id}`)}
-              className="px-4 py-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg text-xs font-semibold transition-colors shadow-sm shrink-0"
-            >
-              View Profile
-            </button>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Upcoming Vaccinations Alert Card */}
-      {primaryPet && (
-        <div className="bg-white border border-purple-100 rounded-2xl p-4 sm:p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-purple-100">
-            <Syringe className="text-purple-650 shrink-0" size={18} />
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-              Upcoming Vaccinations & Reminders
-            </h3>
-          </div>
-          {upcomingVaccines.length > 0 ? (
-            <div className="space-y-2">
-              {upcomingVaccines.map((vax) => {
-                const diffTime = new Date(vax.date).getTime() - new Date().getTime();
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return (
-                  <div key={vax.id} className="p-3.5 bg-purple-50/40 border border-purple-200/50 rounded-xl flex items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center font-bold">
-                        💉
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-900">{vax.title || vax.name}</p>
-                        <p className="text-[10px] text-slate-500">
-                          Due on {new Date(vax.date).toLocaleDateString("en-IN")} ({diffDays > 0 ? `in ${diffDays} days` : 'Overdue!'})
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => navigate('/vaccinations')}
-                      className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-black text-[10px] rounded-lg transition-all shadow-2xs active:scale-95"
-                    >
-                      Update Record
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-4 text-xs font-medium text-slate-500 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-              🎉 No upcoming vaccinations. All immunizations up to date!
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 2. Amazon Lightning Deals Strip in Light Purple Theme */}
-      <div className="bg-purple-600 text-white p-3 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-black">
-        <div className="flex items-center gap-2">
-          <span className="bg-white text-purple-900 px-2 py-0.5 rounded uppercase tracking-wider text-[10px] animate-pulse shrink-0 font-black shadow-2xs">
-            ⚡ TODAY'S LIGHTNING DEAL
-          </span>
-          <span>Flat 20% OFF Boarding & Daycare Stays + Free First Vet Checkup</span>
-        </div>
-        <button 
-          onClick={() => navigate("/boarding")}
-          className="bg-white hover:bg-purple-50 text-purple-900 px-3.5 py-1 rounded-lg text-[11px] font-black transition-all shrink-0 shadow-xs"
-        >
-          Claim Coupon: GOUUJI20 →
-        </button>
-      </div>
-
-      {/* Gouuji VIP Subscription Plans Strip */}
-      <div className="bg-purple-950 text-white p-4 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-purple-800">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-black text-lg shrink-0 shadow-sm">
-            👑
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm sm:text-base font-black text-white leading-tight">Gouuji VIP Subscription Plans</h3>
-              <span className="bg-purple-200 text-purple-950 text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Save 20%</span>
-            </div>
-            <p className="text-xs text-purple-200 font-medium mt-0.5">
-              Get priority bookings, vet discounts & a dedicated personal care manager.
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => navigate("/membership")}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-black px-4 py-2 rounded-xl text-xs transition-all shrink-0 shadow-sm flex items-center gap-1.5"
-        >
-          <span>View Subscription Tiers</span>
-          <ChevronRight size={14} />
-        </button>
-      </div>
-
-      {/* 3. VERIFIED 10 Assured Mega Category Grid in Light Purple */}
-      <div className="bg-white border border-purple-200 rounded-2xl p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-3 pb-2 border-b border-purple-100">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-purple-600 animate-ping" />
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-              Explore VERIFIED CARE™ Categories
-            </h3>
-          </div>
-          <span className="text-[11px] font-bold text-slate-400">Upfront Rates • Zero Hidden Charges</span>
-        </div>
-
-        <div className="grid grid-cols-3 min-[400px]:grid-cols-4 sm:grid-cols-5 lg:grid-cols-10 gap-2 text-center">
-          {[
-            { id: "boarding", icon: "🏨", label: "Boarding", badge: "TOP" },
-            { id: "grooming", icon: "🛁", label: "Grooming", badge: "20% OFF" },
-            { id: "daycare", icon: "🏡", label: "Daycare", badge: "PLAY" },
-            { id: "walking", icon: "🐕", label: "Walking", badge: "GPS" },
-            { id: "swimming", icon: "🏊", label: "Pool", badge: "HEATED" },
-            { id: "shop", icon: "🛍️", label: "Shop", badge: "DEALS" },
-            { id: "training", icon: "🎓", label: "Training", badge: "AGILITY" },
-            { id: "taxi", icon: "🚕", label: "Pet Cab", badge: "AC" },
-            { id: "sitting", icon: "👨‍👩‍👧", label: "Sitting", badge: "HOME" }
-          ].map((cat) => (
-            <div
-              key={cat.id}
-              onClick={() => navigate(`/boarding?type=${cat.id}`)}
-              className="bg-purple-50 hover:bg-purple-100 border border-purple-200 hover:border-purple-400 rounded-xl p-2.5 cursor-pointer transition-all flex flex-col items-center justify-between group relative shadow-2xs hover:shadow-md"
-            >
-              <span className="absolute -top-2 bg-purple-600 text-white text-[8px] font-black px-1.5 py-0.2 rounded shadow-xs">
-                {cat.badge}
-              </span>
-              <span className="text-xl sm:text-2xl my-1 group-hover:scale-110 transition-transform">{cat.icon}</span>
-              <span className="text-[10px] sm:text-[11px] font-black text-slate-800 group-hover:text-purple-700 truncate w-full">{cat.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 5. Amazon Orders Table: Live Stays & Upcoming Bookings in Purple/Pink Theme */}
-      <div className="bg-white border border-purple-100 rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-purple-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center font-black text-sm">
-              📋
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-slate-900 leading-none">Your Orders & Active Stays</h3>
-              <p className="text-[11px] text-slate-500 font-medium mt-0.5">Track real-time check-ins, invoice bills, and health logs</p>
-            </div>
-          </div>
-          <span className="bg-purple-100 text-purple-800 font-bold text-xs px-3 py-1 rounded-full border border-purple-200">
-            {bookings.length} Order{bookings.length !== 1 ? 's' : ''}
-          </span>
-        </div>
-
-        {bookings.length > 0 ? (
-          <div className="space-y-3">
-            {bookings.map((booking: any) => {
-              const status = booking.status || 'pending';
-              const statusCfgMap: Record<string, any> = {
-                pending:     { label: 'Pending Confirmation', dot: 'bg-purple-500',   badge: 'bg-purple-50 text-purple-800 border-purple-200' },
-                confirmed:   { label: 'Confirmed & Reserved', dot: 'bg-purple-600',  badge: 'bg-purple-50 text-purple-900 border-purple-300 font-black' },
-                checked_in:  { label: '🟣 LIVE IN CARE NOW',   dot: 'bg-purple-700 animate-ping', badge: 'bg-purple-100 text-purple-950 border-purple-400 font-black' },
-                completed:   { label: 'Stay Completed',       dot: 'bg-purple-400',   badge: 'bg-purple-50/50 text-purple-700 border-purple-200' },
-                cancelled:   { label: 'Cancelled Order',      dot: 'bg-purple-800',    badge: 'bg-purple-100 text-purple-900 border-purple-300' },
-              };
-              const statusCfg = statusCfgMap[status] || { label: status, dot: 'bg-purple-400', badge: 'bg-purple-50 text-purple-700 border-purple-200' };
-              const totalCost = (Number(booking.total_amount) || 0) + (Number(booking.extra_expenses) || 0);
-
-              return (
-                <div key={booking.id} className="border border-purple-200 rounded-xl p-4 bg-purple-50/20 hover:bg-white transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 border border-purple-200 flex items-center justify-center font-black text-lg shrink-0">
-                      🏨
-                    </div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="text-xs font-black text-slate-900">
-                          {booking.businesses?.name || "Luxury Pet Care Partner"}
-                        </span>
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${statusCfg.badge}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
-                          {statusCfg.label}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
-                        <span className="flex items-center gap-1">
-                          <Calendar size={13} className="text-purple-400" />
-                          {new Date(booking.check_in || Date.now()).toLocaleDateString()} → {new Date(booking.check_out || Date.now()).toLocaleDateString()}
-                        </span>
-                        <span>•</span>
-                        <span className="font-bold text-slate-700">Pet: {primaryPet?.name || "Pet"}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between md:justify-end gap-4 border-t md:border-t-0 pt-3 md:pt-0 border-purple-100">
-                    <div className="text-left md:text-right">
-                      <span className="text-[10px] font-bold text-slate-400 block uppercase">Order Total</span>
-                      <span className="text-sm font-black text-slate-900">₹{totalCost}</span>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2 justify-end mt-2 md:mt-0">
-                      <button
-                        onClick={() => { setSelectedBookingForEdit(booking); setIsEditModalOpen(true); }}
-                        className="px-3.5 py-2 bg-white hover:bg-purple-50 border border-purple-300 text-purple-900 font-bold text-xs rounded-xl transition-all shadow-2xs"
-                      >
-                        Manage / View
-                      </button>
-                      <button
-                        onClick={() => navigate(`/facility/${booking.business_id}`)}
-                        className="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm"
-                      >
-                        View Center
-                      </button>
-                    </div>
-                  </div>
+                
+                <div className="flex gap-2">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); navigate(`/pet/${p.id}`); }}
+                    className="flex-1 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-colors border border-slate-200"
+                  >
+                    View Profile
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setPetToEdit(p); setIsAddPetModalOpen(true); }}
+                    className="flex-1 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl text-xs font-bold transition-colors border border-purple-200"
+                  >
+                    Edit
+                  </button>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
-        ) : (
-          <div className="text-center py-10 bg-purple-50/30 rounded-xl border border-dashed border-purple-200">
-            <div className="w-12 h-12 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center mx-auto mb-3 text-xl font-black">
-              📦
-            </div>
-            <h4 className="text-sm font-black text-slate-900 mb-1">No Active Bookings or Orders Yet</h4>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-              Explore our verified local directory above to book instant AC stays, grooming sessions, or emergency checkups.
-            </p>
-            <button
-              onClick={() => navigate("/boarding")}
-              className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-xl transition-all shadow-md inline-flex items-center gap-1.5"
-            >
-              <span>Explore Verified Directory</span>
-              <ChevronRight size={14} />
-            </button>
+        </section>
+
+        {/* 3. Active & Upcoming Bookings (Timeline Layout) */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+              <Calendar className="text-purple-600" size={20} />
+              Upcoming & Active Stays
+            </h2>
+            <button className="text-xs font-bold text-purple-600 hover:text-purple-800">View History →</button>
           </div>
-        )}
+
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+            {bookings.length > 0 ? (
+              <div className="relative border-l-2 border-slate-100 ml-4 space-y-8 pb-4">
+                {bookings.map((booking: any, index: number) => {
+                  const status = booking.status || 'pending';
+                  const isLive = status === 'checked_in';
+                  const isUpcoming = status === 'confirmed' || status === 'pending';
+                  
+                  // Status formatting
+                  let statusConfig = { color: 'bg-slate-400', badge: 'bg-slate-100 text-slate-700 border-slate-200', text: status };
+                  if (isLive) statusConfig = { color: 'bg-emerald-500 animate-pulse', badge: 'bg-emerald-100 text-emerald-800 border-emerald-300 font-black', text: 'Live Boarding' };
+                  else if (isUpcoming) statusConfig = { color: 'bg-purple-500', badge: 'bg-purple-100 text-purple-800 border-purple-300', text: 'Upcoming Stay' };
+                  else if (status === 'completed') statusConfig = { color: 'bg-slate-300', badge: 'bg-slate-50 text-slate-500 border-slate-200', text: 'Completed' };
+
+                  return (
+                    <div key={booking.id} className="relative pl-8">
+                      {/* Timeline Dot */}
+                      <div className={`absolute -left-[9px] top-4 w-4 h-4 rounded-full border-4 border-white shadow-sm ${statusConfig.color}`} />
+                      
+                      <div className={`rounded-2xl border p-5 transition-all duration-300 hover:shadow-lg ${isLive ? 'bg-emerald-50/30 border-emerald-200' : 'bg-white border-slate-200 hover:border-purple-300'}`}>
+                        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-5">
+                          
+                          {/* Left: Details */}
+                          <div className="flex-1 space-y-3">
+                            <div className="flex flex-wrap items-center gap-3">
+                              <span className={`px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider font-bold border ${statusConfig.badge}`}>
+                                {statusConfig.text}
+                              </span>
+                              <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                                <Calendar size={12} /> {new Date(booking.check_in || Date.now()).toLocaleDateString()}
+                              </span>
+                            </div>
+                            
+                            <div>
+                              <h3 className="text-xl font-black text-slate-900">{booking.businesses?.name || "Premium Facility"}</h3>
+                              <p className="text-sm font-bold text-slate-500 mt-1 flex items-center gap-1.5">
+                                <MapPin size={14} className="text-slate-400" />
+                                {booking.businesses?.address || "Address unavailable"}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center gap-3 bg-slate-50 rounded-xl p-3 border border-slate-100 inline-flex">
+                              <img 
+                                src={primaryPet?.photo_url || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=200"} 
+                                className="w-8 h-8 rounded-lg object-cover" alt="Pet"
+                              />
+                              <div>
+                                <p className="text-xs font-bold text-slate-700">Guest: {primaryPet?.name || 'Pet'}</p>
+                                <p className="text-[10px] font-bold text-slate-500">{new Date(booking.check_in).toLocaleDateString()} - {new Date(booking.check_out).toLocaleDateString()}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Right: Actions */}
+                          <div className="flex flex-col items-start lg:items-end justify-between gap-4 border-t lg:border-t-0 pt-4 lg:pt-0 lg:pl-6 lg:border-l border-slate-100 min-w-[200px]">
+                            <div className="text-left lg:text-right w-full">
+                              <p className="text-[10px] uppercase font-bold text-slate-400">Total Amount</p>
+                              <p className="text-xl font-black text-slate-900">₹{(Number(booking.total_amount) || 0) + (Number(booking.extra_expenses) || 0)}</p>
+                            </div>
+                            <div className="flex flex-col w-full gap-2">
+                              <button 
+                                onClick={() => { setSelectedBookingForEdit(booking); setIsEditModalOpen(true); }}
+                                className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-black transition-colors shadow-md active:scale-95 text-center"
+                              >
+                                View Details & Live Updates
+                              </button>
+                              <button 
+                                onClick={() => navigate(`/facility/${booking.business_id}`)}
+                                className="w-full py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-colors text-center"
+                              >
+                                Facility Info
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                  🏡
+                </div>
+                <h3 className="text-base font-black text-slate-900 mb-2">No active stays right now</h3>
+                <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">When you book a premium boarding or grooming session, you can track it live right here.</p>
+                <button 
+                  onClick={() => navigate('/boarding')}
+                  className="px-6 py-3 bg-purple-600 text-white rounded-xl font-black text-sm hover:bg-purple-700 transition-colors shadow-md"
+                >
+                  Explore Premium Facilities
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
       </div>
 
       {/* Modals */}

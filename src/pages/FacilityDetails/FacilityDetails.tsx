@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { PageTransition } from "../../components/layout/PageTransition";
-import { ArrowLeft, MapPin, Star, Clock, Car, Phone, CheckCircle, Crosshair, Scissors, Stethoscope, Home, DollarSign, Package, ChevronRight, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, MapPin, Star, Clock, Car, Phone, CheckCircle, Crosshair, Scissors, Stethoscope, Home, DollarSign, Package, ChevronRight, ShieldCheck, Sparkles, Navigation, ExternalLink } from "lucide-react";
 import { formatRupee } from "../../utils/currency";
 import { motion } from "framer-motion";
 import { Map, AdvancedMarker, InfoWindow } from '@vis.gl/react-google-maps';
-import { useMap } from '../../context/MapContext';
+import { useMapContext } from '../../context/MapContext';
 import { FallbackMap } from '../../components/Map/FallbackMap';
 import { Directions } from '../../components/Map/Directions';
 import { db } from "../../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { useLocationStore } from "../../store/useLocationStore";
+import { haversineDistance, formatDistance, getRoadDistance } from "../../utils/locationUtils";
 
 
 
@@ -23,9 +25,12 @@ export const FacilityDetails = () => {
   const [services, setServices] = useState<any[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   
-  const [userLoc, setUserLoc] = useState<{ lat: number, lng: number } | null>(null);
+  // Use global location store — no separate watchPosition needed
+  const { currentLocation, requestGPS } = useLocationStore();
+  const userLoc = currentLocation ? { lat: currentLocation.lat, lng: currentLocation.lng } : null;
   const [isLocating, setIsLocating] = useState(false);
-  const { isLoaded, loadError, authFailed } = useMap();
+  const [roadDistance, setRoadDistance] = useState<{ distanceText: string; durationText: string } | null>(null);
+  const { isLoaded, loadError, authFailed } = useMapContext();
   const [directionsResult, setDirectionsResult] = useState<google.maps.DirectionsResult | null>(null);
   const [activeMarker, setActiveMarker] = useState<string | null>(null);
 
@@ -98,28 +103,17 @@ export const FacilityDetails = () => {
     }
   }, [id, facility]);
 
+  // Compute road distance once we have both user location and facility
   useEffect(() => {
-    let watchId: number;
-    if (navigator.geolocation) {
-      setIsLocating(true);
-      watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          setIsLocating(false);
-        },
-        () => {
-          setIsLocating(false);
-        },
-        { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 }
-      );
-    }
-    
-    return () => {
-      if (watchId !== undefined && navigator.geolocation) {
-        navigator.geolocation.clearWatch(watchId);
-      }
+    if (!userLoc || !facility) return;
+    const facilityCoords = {
+      lat: Number(facility.lat || facility.latitude || 19.0760),
+      lng: Number(facility.lng || facility.longitude || 72.8777)
     };
-  }, []);
+    getRoadDistance(userLoc, facilityCoords).then((result) => {
+      if (result) setRoadDistance(result);
+    });
+  }, [userLoc, facility]);
 
   useEffect(() => {
     if (!userLoc || !facility || !isLoaded) return;
@@ -261,8 +255,24 @@ export const FacilityDetails = () => {
                 <span className="text-[10px] font-black uppercase text-purple-400 tracking-wider">Travel & Route</span>
                 <span className="text-purple-600 font-black text-xs">Live GPS</span>
               </div>
-              <p className="font-black text-purple-950 text-sm sm:text-base">{facility.travelTime || '15-25'} mins</p>
-              <p className="text-[11px] text-purple-700 font-medium">Turn-by-turn nav enabled</p>
+              {roadDistance ? (
+                <>
+                  <p className="font-black text-purple-950 text-sm sm:text-base">{roadDistance.durationText}</p>
+                  <p className="text-[11px] text-purple-700 font-medium">{roadDistance.distanceText} by road</p>
+                </>
+              ) : userLoc ? (
+                <>
+                  <p className="font-black text-purple-950 text-sm">Calculating...</p>
+                  <p className="text-[11px] text-purple-500 font-medium">Fetching road distance</p>
+                </>
+              ) : (
+                <button
+                  onClick={async () => { setIsLocating(true); await requestGPS(); setIsLocating(false); }}
+                  className="text-xs font-black text-purple-600 underline"
+                >
+                  {isLocating ? 'Detecting...' : 'Enable GPS for ETA'}
+                </button>
+              )}
             </motion.div>
 
             <motion.div 
@@ -400,13 +410,27 @@ export const FacilityDetails = () => {
           </div>
 
           {/* Interactive Routing Map */}
-          <div className="w-full h-[380px] rounded-2xl overflow-hidden shadow-md relative border border-purple-300">
+          <div className="w-full rounded-2xl overflow-hidden shadow-md relative border border-purple-300">
+            {/* Distance + ETA Badge */}
+            {roadDistance && (
+              <div className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-sm border border-purple-200 rounded-2xl px-4 py-2 shadow-lg flex items-center gap-3">
+                <div className="w-8 h-8 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <Navigation size={16} className="text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-black text-slate-900">{roadDistance.distanceText} away</p>
+                  <p className="text-[10px] font-bold text-purple-600">{roadDistance.durationText} drive</p>
+                </div>
+              </div>
+            )}
+
             {isLocating && (
               <div className="absolute top-4 right-4 z-[1000] bg-purple-900 text-white px-4 py-2 rounded-full shadow-lg font-bold text-sm flex items-center gap-2">
                  <Crosshair size={14} className="animate-spin" /> Detecting GPS for route...
               </div>
             )}
-            
+
+            <div style={{ height: 380 }}>
             {(loadError || authFailed || !isLoaded) ? (
               <FallbackMap
                 center={[facilityCoords.lat, facilityCoords.lng]}
@@ -447,26 +471,44 @@ export const FacilityDetails = () => {
                   )}
                 </AdvancedMarker>
 
-                {/* Start (User) Marker */}
+                {/* User Marker */}
                 {userLoc && !directionsResult && (
-                  <AdvancedMarker 
-                    position={userLoc} 
-                    onClick={() => setActiveMarker("user")}
-                  >
-                    {activeMarker === "user" && (
-                      <InfoWindow onCloseClick={() => setActiveMarker(null)}>
-                        <div className="font-bold p-1">You are here</div>
-                      </InfoWindow>
-                    )}
+                  <AdvancedMarker position={userLoc}>
+                    <div className="w-4 h-4 bg-blue-500 border-2 border-white rounded-full shadow-lg" />
                   </AdvancedMarker>
                 )}
 
                 {/* Draw Live Route */}
-                {directionsResult && (
+                {userLoc && (
                   <Directions origin={userLoc} destination={facilityCoords} />
                 )}
               </Map>
             )}
+            </div>
+
+            {/* Get Directions Button */}
+            <div className="p-3 bg-white border-t border-purple-100 flex items-center justify-between gap-3">
+              <div className="text-xs font-medium text-slate-500">
+                {userLoc ? (
+                  <span>Route from your location to <strong>{facility.name}</strong></span>
+                ) : (
+                  <button onClick={requestGPS} className="text-purple-600 font-bold underline">Enable GPS to see live route</button>
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  const dest = `${facilityCoords.lat},${facilityCoords.lng}`;
+                  const origin = userLoc ? `${userLoc.lat},${userLoc.lng}` : '';
+                  const url = `https://www.google.com/maps/dir/${origin}/${dest}`;
+                  window.open(url, '_blank');
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-xl transition-all shadow-sm shrink-0"
+              >
+                <Navigation size={14} />
+                Get Directions
+                <ExternalLink size={12} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
