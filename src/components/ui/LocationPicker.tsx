@@ -245,7 +245,13 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
             }
           }
           const address = result.formatted_address || s.main_text || '';
-          await applyLocation(lat, lng, 17, { short: s.main_text || address, full: address, city, state, pincode: pin });
+          await applyLocation(lat, lng, 17, { 
+            short: s.main_text || address, 
+            full: s.display_name || address, 
+            city, 
+            state, 
+            pincode: pin 
+          });
           return;
         }
       } catch (err) {}
@@ -319,6 +325,9 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
               type="text" 
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.preventDefault();
+              }}
               placeholder="Search area, street..."
               className="w-full h-10 sm:h-12 pl-9 pr-9 sm:pl-11 sm:pr-11 bg-transparent text-[11px] sm:text-sm font-bold text-slate-800 placeholder:text-slate-500 placeholder:font-medium focus:outline-none transition-all"
             />
