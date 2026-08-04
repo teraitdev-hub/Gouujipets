@@ -264,7 +264,24 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         short: s.main_text || s.display_name,
         full: s.display_name,
       });
+      return;
     }
+
+    // Fallback: If Google Geocoding failed (e.g. no billing enabled) or coords missing, search OSM by exact name
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(s.display_name)}&limit=1&countrycodes=in`, { headers: { 'Accept-Language': 'en' } });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+          await applyLocation(lat, lng, 17, {
+            short: s.main_text || s.display_name.split(',')[0],
+            full: s.display_name,
+          });
+        }
+      }
+    } catch (_) {}
   };
 
   const mapPinDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
