@@ -254,7 +254,10 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     if (s.lat && s.lon) {
       const lat = parseFloat(s.lat);
       const lng = parseFloat(s.lon);
-      await applyLocation(lat, lng, 17);
+      await applyLocation(lat, lng, 17, {
+        short: s.main_text || s.display_name,
+        full: s.display_name,
+      });
     }
   };
 
@@ -325,7 +328,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
           
           {/* Autocomplete Suggestions */}
           {showSuggestions && (
-            <div className="absolute z-50 top-[44px] sm:top-[52px] left-0 right-12 sm:right-14 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-100/50 overflow-hidden max-h-[180px] sm:max-h-60 overflow-y-auto animate-in slide-in-from-top-2 fade-in duration-200">
+            <div className="absolute z-50 top-[44px] sm:top-[52px] left-0 right-12 sm:right-14 bg-white/95 backdrop-blur-xl rounded-xl shadow-2xl border border-slate-100/50 overflow-hidden max-h-[180px] sm:max-h-60 overflow-y-auto animate-in slide-in-from-top-2 fade-in duration-200 pointer-events-auto">
               <button 
                 onClick={handleDetect}
                 className="w-full flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-3 hover:bg-purple-50/50 text-left border-b border-slate-100/50 transition-colors group"
