@@ -261,9 +261,14 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
     }
   };
 
-  const handleMapPin = async (lat: number, lng: number) => {
-    await applyLocation(lat, lng, mapZoom);
-  };
+  const mapPinDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMapPin = useCallback((lat: number, lng: number, zoom: number) => {
+    if (mapPinDebounceRef.current) clearTimeout(mapPinDebounceRef.current);
+    mapPinDebounceRef.current = setTimeout(async () => {
+      await applyLocation(lat, lng, zoom);
+    }, 600);
+  }, [applyLocation]);
 
   return (
     <div className={`relative ${className}`}>
@@ -275,14 +280,17 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
             zoom={mapZoom}
             onCenterChanged={(ev) => {
                setMapZoom(ev.detail.zoom);
-               handleMapPin(ev.detail.center.lat, ev.detail.center.lng);
+               const isProgrammatic = Math.abs(ev.detail.center.lat - location.lat) < 0.0001 && Math.abs(ev.detail.center.lng - location.lng) < 0.0001;
+               if (!isProgrammatic) {
+                 handleMapPin(ev.detail.center.lat, ev.detail.center.lng, ev.detail.zoom);
+               }
             }}
             gestureHandling={'cooperative'}
             disableDefaultUI={true}
             mapId="LOCATION_PICKER_MAP"
           />
         ) : (
-          <FallbackMap center={[location.lat, location.lng]} zoom={mapZoom} className="w-full h-full" onLocationSelect={(lat, lng) => handleMapPin(lat, lng)} />
+          <FallbackMap center={[location.lat, location.lng]} zoom={mapZoom} className="w-full h-full" onLocationSelect={(lat, lng) => handleMapPin(lat, lng, mapZoom)} />
         )}
 
         {/* Center Animated HTML Marker */}
