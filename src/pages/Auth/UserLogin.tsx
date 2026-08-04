@@ -43,12 +43,12 @@ export const UserLogin = () => {
     }
   }, [serviceKey, intendedRoute, setIntendedRoute]);
 
-  // Auto-redirect if already logged in
+  // Auto-redirect if already logged in as a customer
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === 'partner') navigate('/partner/dashboard');
-      else if (user.role === 'admin' || user.role === 'superadmin') navigate('/admin/dashboard');
-      else navigate(intendedRoute || '/dashboard');
+      if (user.role === 'customer') {
+        navigate(intendedRoute || '/dashboard');
+      }
     }
   }, [isAuthenticated, user, navigate, intendedRoute]);
   

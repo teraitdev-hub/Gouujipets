@@ -45,12 +45,13 @@ export const PartnerLogin = () => {
   const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
   const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ""));
 
-  // Auto-redirect if already logged in
+  // Auto-redirect if already logged in as a partner
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === 'customer') navigate('/dashboard');
-      else if (user.role === 'admin' || user.role === 'superadmin') navigate('/admin/dashboard');
-      else navigate('/partner/dashboard');
+      if (user.role === 'partner') {
+        navigate('/partner/dashboard');
+      }
+      // If they are a customer or admin, we stay on the page so they can choose to login as a partner if they want (switching accounts)
     }
   }, [isAuthenticated, user, navigate]);
 
