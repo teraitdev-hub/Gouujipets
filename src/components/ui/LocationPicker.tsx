@@ -263,7 +263,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   };
 
   return (
-    <div className={className}>
+    <div className={`relative ${className}`}>
       {/* MAP BACKGROUND */}
       <div className="absolute inset-0 z-0 bg-slate-100">
         {mapAvailable ? (
