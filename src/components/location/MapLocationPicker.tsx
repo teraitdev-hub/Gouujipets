@@ -85,7 +85,7 @@ export const MapLocationPicker: React.FC<MapLocationPickerProps> = ({
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-slate-100 transition-colors mr-2">
           <ArrowLeft size={22} className="text-slate-700" />
         </button>
-        <h2 className="text-base font-black text-slate-900 tracking-tight">Select delivery location</h2>
+        <h2 className="text-base font-black text-slate-900 tracking-tight">Select your location</h2>
       </div>
 
       {/* Map Area */}

@@ -39,7 +39,7 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
   onClear,
   className = '',
   autoFocus = false,
-  restrictToIndia = true,
+  restrictToIndia = false,
 }) => {
   const { isLoaded, authFailed } = useMapContext();
   const placesLib = useMapsLibrary('places');

@@ -32,7 +32,7 @@ export const LocationHeaderBar: React.FC = () => {
       <button
         onClick={() => setSheetOpen(true)}
         className="flex items-center gap-1.5 max-w-[200px] sm:max-w-xs group"
-        aria-label="Change delivery location"
+        aria-label="Change location"
       >
         <div className="relative flex-shrink-0">
           <MapPin
