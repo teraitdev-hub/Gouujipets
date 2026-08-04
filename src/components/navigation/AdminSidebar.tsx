@@ -60,7 +60,7 @@ export const AdminSidebar = ({
             onClick={() => navigate("/admin/dashboard")}
             className="flex items-center gap-2 group text-left"
           >
-            <img src="/logo.png" alt="Gouuji Admin" className="h-8 w-auto object-contain" />
+            <img src="/logo.png" alt="Gouuji Admin" className="h-10 w-auto object-contain drop-shadow-sm" />
           </button>
           <button
             onClick={() => setIsOpen(false)}

@@ -532,8 +532,8 @@ export const PartnerLogin = () => {
       <div className="flex-1 flex flex-col justify-center items-center px-6 sm:px-10 py-12 bg-white overflow-y-auto">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <div className="flex items-center gap-2.5 mb-10">
-            <img src="/logo.png" alt="Gouuji Pets Business" className="h-12 w-auto object-contain" />
+          <div className="flex items-center justify-center mb-10">
+            <img src="/logo.png" alt="Gouuji Pets Business" className="w-64 h-auto object-contain drop-shadow-md rounded-xl" />
           </div>
 
           {/* Direct Approval Banner */}

@@ -17,8 +17,8 @@ export const AuthLayout = ({ children, imageUrl, title, subtitle }: AuthLayoutPr
       <div className="w-full md:w-[45%] lg:w-[40%] flex flex-col justify-start md:justify-center overflow-y-auto px-8 md:px-16 lg:px-24 py-12 min-h-screen md:min-h-0">
         <div className="w-full max-w-sm mx-auto">
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-12">
-            <img src="/logo.png" alt="Gouuji Pets" className="h-12 w-auto object-contain" />
+          <div className="flex items-center justify-center mb-12">
+            <img src="/logo.png" alt="Gouuji Pets" className="w-64 h-auto object-contain drop-shadow-md rounded-xl" />
           </div>
 
           <motion.div

@@ -92,7 +92,7 @@ export const Sidebar = ({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (va
             onClick={() => navigate("/")}
             className="flex items-center gap-2 group text-left"
           >
-            <img src="/logo.png" alt="Gouuji Pets" className="h-8 w-auto object-contain" />
+            <img src="/logo.png" alt="Gouuji Pets" className="h-10 w-auto object-contain drop-shadow-sm" />
           </button>
           <button
             onClick={() => setIsOpen(false)}

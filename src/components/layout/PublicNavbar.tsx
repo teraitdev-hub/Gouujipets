@@ -44,7 +44,7 @@ export const PublicNavbar = () => {
           onClick={() => navigate("/")}
           className="flex items-center gap-2 text-left shrink-0"
         >
-          <img src="/logo.png" alt="Gouuji Pets" className="h-8 sm:h-10 w-auto object-contain" />
+          <img src="/logo.png" alt="Gouuji Pets" className="h-10 sm:h-12 w-auto object-contain" />
         </button>
 
         {/* Center: Location Bar + Search (Desktop) */}
