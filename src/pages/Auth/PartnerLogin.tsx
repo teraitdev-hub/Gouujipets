@@ -759,7 +759,7 @@ export const PartnerLogin = () => {
                       <LocationPicker
                         defaultLocation={mapLocation}
                         defaultAddress={formData.street}
-                        className="h-48 w-full rounded-xl overflow-hidden border border-slate-200 shadow-inner mt-2"
+                        className="h-[350px] w-full rounded-xl overflow-hidden border border-slate-200 shadow-inner mt-2"
                         onLocationSelect={(loc) => {
                           setMapLocation({ lat: loc.lat, lng: loc.lng });
                           setFormData(prev => {
