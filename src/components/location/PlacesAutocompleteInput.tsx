@@ -97,31 +97,31 @@ export const PlacesAutocompleteInput: React.FC<PlacesAutocompleteInputProps> = (
         }
       }
 
-      // Fallback: OpenStreetMap Nominatim
+      // Fallback: Photon API (much better for fuzzy search than Nominatim)
       try {
         const params = new URLSearchParams({
-          format: 'json',
           q: input,
           limit: '6',
-          addressdetails: '1',
         });
-        if (restrictToIndia) params.set('countrycodes', 'in');
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
-          headers: { 'Accept-Language': 'en' },
-        });
+        const res = await fetch(`https://photon.komoot.io/api/?${params}`);
         if (res.ok) {
           const data = await res.json();
           setSuggestions(
-            data.map((item: any) => ({
-              display_name: item.display_name,
-              main_text: item.display_name.split(',')[0],
-              secondary_text: item.display_name.split(',').slice(1, 3).join(', ').trim(),
-              lat: item.lat,
-              lon: item.lon,
-              source: 'osm' as const,
-            }))
+            data.features.map((f: any) => {
+              const p = f.properties;
+              const mainText = p.name || p.city || p.county || 'Unknown Location';
+              const secondaryText = [p.street, p.city, p.state, p.country].filter(Boolean).join(', ');
+              return {
+                display_name: `${mainText}, ${secondaryText}`,
+                main_text: mainText,
+                secondary_text: secondaryText,
+                lat: f.geometry.coordinates[1].toString(),
+                lon: f.geometry.coordinates[0].toString(),
+                source: 'osm' as const,
+              };
+            })
           );
-          setShowDropdown(data.length > 0);
+          setShowDropdown(data.features.length > 0);
         }
       } catch (_) {}
 
