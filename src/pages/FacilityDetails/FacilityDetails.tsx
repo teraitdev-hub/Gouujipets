@@ -519,7 +519,7 @@ export const FacilityDetails = () => {
           <div>
             <div className="flex items-center gap-1.5 mb-0.5">
               <span className="text-[9px] font-black uppercase tracking-wider text-purple-400">Total Starting Rate</span>
-              <span className="text-[9px] font-bold text-purple-900 bg-purple-100 px-1.5 py-0.5 rounded border border-purple-300 hidden sm:inline">✓ Upfront Transparent Price</span>
+              {/* Removed upfront transparent price badge per user request */}
             </div>
             <div className="flex items-baseline gap-1">
               <span className="font-black text-xl sm:text-2xl text-purple-950">{formatRupee(facility.priceFrom || facility.price_per_night || 999)}</span>

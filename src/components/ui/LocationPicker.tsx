@@ -33,7 +33,7 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
   onLocationSelect,
   defaultLocation = { lat: 12.9716, lng: 77.5946 }, // Default to Bangalore center
   defaultAddress = '',
-  className = 'w-full h-[500px] sm:h-[600px] rounded-3xl overflow-hidden relative shadow-lg border border-slate-200 font-sans',
+  className = 'w-full h-full min-h-[400px] rounded-3xl overflow-hidden relative shadow-xl border border-slate-200/60 font-sans',
 }) => {
   const { isLoaded, authFailed, loadError } = useMapContext();
   const mapAvailable = isLoaded && !authFailed && !loadError;
@@ -264,73 +264,77 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
 
   return (
     <div className={className}>
-      {/* MAP BACKGROUND (Always visible in Zomato style) */}
+      {/* MAP BACKGROUND */}
       <div className="absolute inset-0 z-0 bg-slate-100">
         {mapAvailable ? (
           <Map
             center={{ lat: location.lat, lng: location.lng }}
             zoom={mapZoom}
             onCenterChanged={(ev) => {
-               // When map pans programmatically or by user, update our internal zoom state
                setMapZoom(ev.detail.zoom);
+               handleMapPin(ev.detail.center.lat, ev.detail.center.lng);
             }}
             gestureHandling={'cooperative'}
             disableDefaultUI={true}
             mapId="LOCATION_PICKER_MAP"
-          >
-            <AdvancedMarker
-              position={{ lat: location.lat, lng: location.lng }}
-              draggable={true}
-              onDragEnd={(e) => {
-                if (e.latLng) {
-                  handleMapPin(e.latLng.lat(), e.latLng.lng());
-                }
-              }}
-            />
-          </Map>
+          />
         ) : (
-          <FallbackMap center={[location.lat, location.lng]} zoom={mapZoom} className="w-full h-full" onLocationSelect={handleMapPin} />
+          <FallbackMap center={[location.lat, location.lng]} zoom={mapZoom} className="w-full h-full" onLocationSelect={(lat, lng) => handleMapPin(lat, lng)} />
         )}
+
+        {/* Center Animated HTML Marker (Zomato-Style) */}
+        <div className="absolute top-1/2 left-1/2 pointer-events-none z-10 flex flex-col items-center" style={{ transform: 'translate(-50%, -100%)' }}>
+          <div className="bg-slate-900/90 backdrop-blur-md text-white text-[10px] font-black px-3 py-1.5 rounded-lg mb-1 shadow-lg whitespace-nowrap animate-in fade-in zoom-in duration-300">
+            {isGeocoding ? "Locating..." : "Your Location"}
+          </div>
+          <div className="relative flex flex-col items-center">
+            <div className={`w-9 h-9 bg-purple-600 rounded-full flex items-center justify-center shadow-md border-[3px] border-white z-10 transition-transform duration-200 ${isGeocoding ? 'scale-110 animate-pulse' : ''}`}>
+               <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
+            </div>
+            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-transparent border-t-purple-600 -mt-[2px] z-0 drop-shadow-sm"></div>
+          </div>
+          <div className="w-4 h-1.5 bg-black/30 rounded-[100%] blur-[1.5px] mt-0.5"></div>
+        </div>
       </div>
 
       {/* FLOATING TOP OVERLAY: Search Bar */}
-      <div className="absolute top-0 left-0 right-0 p-4 z-20 pointer-events-none">
-        <div className="pointer-events-auto max-w-lg mx-auto relative">
-          <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white overflow-hidden">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 z-20 pointer-events-none flex justify-center">
+        <div className="pointer-events-auto w-full max-w-lg relative">
+          <div className="relative bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 overflow-hidden group hover:bg-white/90 transition-all duration-300">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-600/70 pointer-events-none group-focus-within:text-purple-600 transition-colors" />
             {(isSuggesting || isGeocoding) && <Loader2 size={16} className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-purple-600" />}
             <input
               type="text" 
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search area, street, building..."
-              className="w-full h-14 pl-12 pr-12 bg-transparent text-sm font-black text-slate-900 placeholder:text-slate-400 placeholder:font-semibold focus:outline-none focus:bg-white transition-all"
+              className="w-full h-12 sm:h-14 pl-12 pr-12 bg-transparent text-sm font-bold text-slate-800 placeholder:text-slate-500 placeholder:font-medium focus:outline-none transition-all"
             />
           </div>
           
           {/* Autocomplete Suggestions */}
           {showSuggestions && (
-            <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden max-h-64 overflow-y-auto animate-in slide-in-from-top-2">
+            <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 overflow-hidden max-h-60 overflow-y-auto animate-in slide-in-from-top-2 fade-in duration-200">
               <button 
                 onClick={handleDetect}
-                className="w-full flex items-center gap-3 px-5 py-4 hover:bg-slate-50 text-left border-b border-slate-100 transition-colors group"
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-purple-50/50 text-left border-b border-slate-100/50 transition-colors group"
               >
                 <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Navigation size={16} className="shrink-0" />
                 </div>
                 <div>
                   <p className="text-sm font-black text-purple-700">Detect current location</p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-0.5">Using GPS</p>
+                  <p className="text-[10px] font-bold text-purple-400 mt-0.5">Using GPS</p>
                 </div>
               </button>
               
               {suggestions.map((s, i) => (
                 <button key={i} type="button" onClick={() => handleSuggestionPick(s)}
-                  className="w-full flex items-start gap-3.5 px-5 py-4 hover:bg-slate-50 text-left border-b border-slate-100 last:border-0 transition-colors">
-                  <MapPin size={18} className="text-slate-300 mt-0.5 shrink-0" />
+                  className="w-full flex items-start gap-3 px-4 py-3 hover:bg-slate-50/50 text-left border-b border-slate-100/50 last:border-0 transition-colors">
+                  <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-black text-slate-900 truncate">{s.main_text || s.display_name.split(',')[0]}</p>
-                    <p className="text-[11px] font-bold text-slate-500 truncate mt-0.5">{s.secondary_text || s.display_name}</p>
+                    <p className="text-sm font-bold text-slate-800 truncate">{s.main_text || s.display_name.split(',')[0]}</p>
+                    <p className="text-[11px] font-medium text-slate-500 truncate mt-0.5">{s.secondary_text || s.display_name}</p>
                   </div>
                 </button>
               ))}
@@ -339,41 +343,38 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
         </div>
       </div>
 
-      {/* FLOATING CURRENT LOCATION FAB */}
-      <div className="absolute bottom-[160px] sm:bottom-[140px] right-4 z-20">
+      {/* COMPACT FLOATING BOTTOM OVERLAY */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 z-20 pointer-events-none flex flex-col items-end gap-3 justify-end">
+        
+        {/* GPS Target Button */}
         <button
           onClick={handleDetect}
           disabled={isDetecting}
-          className="w-12 h-12 bg-white text-slate-900 rounded-full shadow-xl border border-slate-100 flex items-center justify-center hover:bg-slate-50 active:scale-90 transition-all disabled:opacity-50"
+          className="pointer-events-auto w-10 h-10 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-md text-slate-800 rounded-full shadow-lg border border-white/50 flex items-center justify-center hover:bg-white active:scale-95 transition-all disabled:opacity-50"
           title="Locate Me"
         >
-          {isDetecting ? <Loader2 size={20} className="animate-spin text-purple-600" /> : <Target size={20} className="text-slate-700" />}
+          {isDetecting ? <Loader2 size={18} className="animate-spin text-purple-600" /> : <Target size={18} className="text-purple-600" />}
         </button>
-      </div>
 
-      {/* BOTTOM SHEET: Zomato Style Address Confirmation */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-20 border-t border-slate-100 animate-in slide-in-from-bottom-10 pointer-events-auto">
-        <div className="p-5 sm:p-6 pb-6">
-          <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4" />
-          
-          <div className="flex items-start gap-4 mb-4">
-            <div className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-md">
-              <MapPin size={20} className="shrink-0" />
+        {/* Glassmorphic Address Card */}
+        <div className="pointer-events-auto w-full max-w-lg mx-auto bg-white/85 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/60 p-3 sm:p-4 animate-in slide-in-from-bottom-4 fade-in duration-300">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
+              <MapPin size={18} className="shrink-0" />
             </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-lg font-black text-slate-900 truncate pr-2">
+            <div className="min-w-0 flex-1 pt-0.5">
+              <h3 className="text-sm sm:text-base font-black text-slate-900 truncate">
                 {isGeocoding ? 'Locating...' : shortAddr || 'Select Location'}
               </h3>
-              <p className="text-xs font-bold text-slate-500 mt-1 line-clamp-2 leading-relaxed pr-2">
-                {isGeocoding ? 'Fetching address details...' : fullAddr || 'Drag the map pin to precisely locate your spot'}
+              <p className="text-[10px] sm:text-xs font-semibold text-slate-500 mt-0.5 line-clamp-1 sm:line-clamp-2">
+                {isGeocoding ? 'Fetching precise address...' : fullAddr || 'Drag the map to pinpoint your exact spot'}
               </p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            {/* Optional Exact Details Input */}
-            <div className="relative">
-              <Home size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <div className="relative flex-1">
+              <Home size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text" 
                 value={exactInput}
@@ -386,19 +387,28 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
                     pincode
                   });
                 }}
-                placeholder="House / Flat No. / Building Name (Optional)"
-                className="w-full h-12 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-semibold focus:outline-none focus:border-slate-400 focus:bg-white transition-colors"
+                placeholder="House / Flat No. (Optional)"
+                className="w-full h-10 sm:h-11 pl-9 pr-3 bg-white/60 border border-slate-200/50 rounded-xl text-xs sm:text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-purple-300 focus:bg-white transition-all"
               />
             </div>
             
             <button
               onClick={() => {
-                // Flash success, no strictly needed action here as state is lifted up, but UX implies completion
-                alert("Location Confirmed!");
+                // Flash visual success to user (optional, state already up-to-date)
+                const btn = document.getElementById('loc-confirm-btn');
+                if (btn) {
+                  btn.innerHTML = '✓ Saved';
+                  btn.classList.add('bg-green-500');
+                  setTimeout(() => {
+                    btn.innerHTML = 'Confirm';
+                    btn.classList.remove('bg-green-500');
+                  }, 2000);
+                }
               }}
-              className="w-full h-14 bg-slate-900 hover:bg-slate-800 text-white font-black text-base rounded-xl flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all"
+              id="loc-confirm-btn"
+              className="h-10 sm:h-11 px-6 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs sm:text-sm rounded-xl shadow-md active:scale-95 transition-all whitespace-nowrap"
             >
-              Confirm Location
+              Confirm
             </button>
           </div>
         </div>
