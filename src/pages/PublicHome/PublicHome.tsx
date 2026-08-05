@@ -335,7 +335,13 @@ export const PublicHome = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25, delay: idx * 0.04 }}
-                onClick={() => navigate(`/facility/${facility.id || facility._id}`, { state: { facility } })}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    navigate(`/login/user?redirect=/facility/${facility.id || facility._id}`);
+                  } else {
+                    navigate(`/facility/${facility.id || facility._id}`, { state: { facility } });
+                  }
+                }}
                 className="group bg-white rounded-2xl border border-slate-200/80 hover:-translate-y-1 hover:border-purple-300 hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer relative shadow-xs"
               >
                 {/* Image Banner */}
@@ -404,7 +410,13 @@ export const PublicHome = () => {
                     {/* Single Row Actions */}
                     <div className="flex items-center gap-1 mt-2.5" onClick={(e) => e.stopPropagation()}>
                       <button
-                        onClick={() => setShowContactModal(facility)}
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            navigate(`/login/user?redirect=/`);
+                          } else {
+                            setShowContactModal(facility);
+                          }
+                        }}
                         className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors"
                         title="Call Now"
                       >
@@ -413,10 +425,14 @@ export const PublicHome = () => {
 
                       <button
                         onClick={() => {
-                          const cleanPhone = (facility.phone || '919876543210').replace(/[\s+-]/g, '');
-                          const whatsappPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
-                          const msg = `Hi ${facility.name}, I found you on GouujiPets and would like to inquire about boarding/services for my pet!`;
-                          window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                          if (!isAuthenticated) {
+                            navigate(`/login/user?redirect=/`);
+                          } else {
+                            const cleanPhone = (facility.phone || '919876543210').replace(/[\s+-]/g, '');
+                            const whatsappPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+                            const msg = `Hi ${facility.name}, I found you on GouujiPets and would like to inquire about boarding/services for my pet!`;
+                            window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                          }
                         }}
                         className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors"
                         title="WhatsApp"
@@ -425,7 +441,13 @@ export const PublicHome = () => {
                       </button>
 
                       <button
-                        onClick={() => navigate(`/checkout/${facility.id || facility._id}`, { state: { facility } })}
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            navigate(`/login/user?redirect=/checkout/${facility.id || facility._id}`);
+                          } else {
+                            navigate(`/checkout/${facility.id || facility._id}`, { state: { facility } });
+                          }
+                        }}
                         className="flex-1 py-2.5 bg-slate-900 hover:bg-purple-600 text-white font-black text-xs rounded-xl transition-all shadow-sm text-center flex items-center justify-center gap-1"
                       >
                         <span>⚡ Book Stay</span>
