@@ -55,9 +55,13 @@ export const PublicHome = () => {
                 let owners: any[] = [];
                 for (let i = 0; i < ownerIds.length; i += 10) {
                   const chunk = ownerIds.slice(i, i + 10);
-                  const uQ = query(collection(db, 'users'), where('id', 'in', chunk));
-                  const uSnap = await getDocs(uQ);
-                  owners.push(...uSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+                  try {
+                    const uQ = query(collection(db, 'users'), where('id', 'in', chunk));
+                    const uSnap = await getDocs(uQ);
+                    owners.push(...uSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+                  } catch (err) {
+                    console.warn("Could not fetch owner details (likely unauthenticated): ", err);
+                  }
                 }
                 if (owners) {
                   ownersMap = new Map(owners.map((o: any) => [o.id, o]));
