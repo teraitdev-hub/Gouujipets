@@ -39,12 +39,17 @@ export const BusinessRegistrationModal = ({ isOpen, onClose, onSuccess, ownerId,
     try {
       const payload = {
         name: formData.name,
-        type: formData.type.toLowerCase(), // Boarding -> boarding
+        type: formData.type.toLowerCase(),
         description: formData.description,
         address: formData.street || 'Not provided',
         city: formData.city,
         owner_id: ownerId,
-        status: 'active', // Show on map automatically
+        amenities: formData.amenities ? formData.amenities.split(',').map(a => a.trim()) : [],
+        capacity: Number(formData.capacity) || 10,
+        priceFrom: Number(formData.priceFrom) || 999,
+        lat: Number(formData.lat) || 20.5937,
+        lng: Number(formData.lng) || 78.9629,
+        status: 'active',
         created_at: new Date().toISOString()
       };
 
