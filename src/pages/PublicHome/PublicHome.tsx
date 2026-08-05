@@ -14,6 +14,7 @@ import { ALL_CATEGORIES, getCategoryById } from "../../lib/serviceCategories";
 import { filterRealBusinesses } from "../../utils/filterRealBusinesses";
 import { LocationSelectorSheet } from "../../components/location/LocationSelectorSheet";
 import { useLocationStore } from "../../store/useLocationStore";
+import { Hero3DBackground } from "../../components/ui/Hero3DBackground";
 
 export const PublicHome = () => {
   const navigate = useNavigate();
@@ -143,9 +144,8 @@ export const PublicHome = () => {
 
       {/* ========== HERO SECTION (NEW & STUNNING) ========== */}
       <section className="relative pt-10 pb-16 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden border-b border-slate-200/60">
-        
+        <Hero3DBackground />
 
-        
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6">
           <div className="bg-transparent p-8 sm:p-10 rounded-[40px] mx-auto max-w-3xl flex flex-col items-center">
             <motion.div
