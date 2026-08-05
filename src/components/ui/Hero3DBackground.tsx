@@ -1,90 +1,89 @@
-import React from 'react';
-import { Canvas } from '@react-three/fiber';
-import { Sphere, MeshDistortMaterial, Float, PerspectiveCamera, Sparkles } from '@react-three/drei';
+import React, { useRef } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { Sphere, Box, Torus, Float, PerspectiveCamera, Environment, ContactShadows } from '@react-three/drei';
+import * as THREE from 'three';
+import gsap from 'gsap';
 
 const AnimatedScene = () => {
+  const groupRef = useRef<THREE.Group>(null);
+  const { camera, pointer } = useThree();
+
+  // Mouse parallax effect (3-5% shift)
+  useFrame(() => {
+    if (groupRef.current) {
+      gsap.to(groupRef.current.rotation, {
+        x: (pointer.y * Math.PI) / 40,
+        y: (pointer.x * Math.PI) / 40,
+        duration: 2,
+        ease: 'power2.out',
+      });
+      gsap.to(camera.position, {
+        x: pointer.x * 0.5,
+        y: pointer.y * 0.5,
+        duration: 2,
+        ease: 'power2.out',
+      });
+    }
+  });
+
   return (
     <>
-      <ambientLight intensity={1} />
-      <directionalLight position={[10, 10, 5]} intensity={2} color="#ffffff" />
-      <directionalLight position={[-10, -10, -5]} intensity={1} color="#f472b6" />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 10]} intensity={1.5} castShadow />
       
-      {/* Primary prominent orb (Purple) */}
-      <Float speed={2} rotationIntensity={1.5} floatIntensity={2}>
-        <Sphere visible args={[1, 64, 64]} position={[-4, 1, -2]} scale={1.8}>
-          <MeshDistortMaterial
-            color="#9333ea"
-            attach="material"
-            distort={0.4}
-            speed={2}
-            roughness={0.2}
-            metalness={0.1}
-            transparent={true}
-            opacity={0.8}
-          />
-        </Sphere>
-      </Float>
+      {/* Studio Environment for Pixar-quality lighting */}
+      <Environment preset="studio" />
 
-      {/* Secondary orb (Pink) */}
-      <Float speed={2.5} rotationIntensity={2} floatIntensity={1.5}>
-        <Sphere visible args={[1, 64, 64]} position={[4, -1.5, -4]} scale={1.4}>
-          <MeshDistortMaterial
-            color="#db2777"
-            attach="material"
-            distort={0.5}
-            speed={1.5}
-            roughness={0.3}
-            metalness={0.2}
-            transparent={true}
-            opacity={0.7}
-          />
-        </Sphere>
-      </Float>
-      
-      {/* Small accent orb (Blue) */}
-      <Float speed={3} rotationIntensity={2.5} floatIntensity={2.5}>
-        <Sphere visible args={[1, 64, 64]} position={[2, 2.5, -3]} scale={0.8}>
-          <MeshDistortMaterial
-            color="#3b82f6"
-            attach="material"
-            distort={0.3}
-            speed={3}
-            roughness={0.1}
-            metalness={0.1}
-            transparent={true}
-            opacity={0.8}
-          />
-        </Sphere>
-      </Float>
+      <group ref={groupRef}>
+        {/* Main Centerpiece Placeholder (Dog/Cat) */}
+        <Float speed={1.5} rotationIntensity={0.5} floatIntensity={1}>
+          <Sphere visible args={[1.5, 64, 64]} position={[0, 0, 0]}>
+            <meshPhysicalMaterial 
+              color="#ffffff"
+              transmission={1} 
+              opacity={1} 
+              metalness={0.1} 
+              roughness={0.1} 
+              ior={1.5} 
+              thickness={2} 
+              envMapIntensity={2} 
+            />
+          </Sphere>
+        </Float>
 
-      {/* Another small accent orb (Orange/Yellow) */}
-      <Float speed={2} rotationIntensity={1} floatIntensity={2}>
-        <Sphere visible args={[1, 64, 64]} position={[-2, -2.5, -5]} scale={1.1}>
-          <MeshDistortMaterial
-            color="#f59e0b"
-            attach="material"
-            distort={0.4}
-            speed={2.5}
-            roughness={0.2}
-            metalness={0.1}
-            transparent={true}
-            opacity={0.6}
-          />
-        </Sphere>
-      </Float>
-      
-      {/* Subtle sparkling particles in the background */}
-      <Sparkles count={150} scale={15} size={2} speed={0.4} opacity={0.3} color="#6366f1" />
-      <Sparkles count={100} scale={12} size={1.5} speed={0.3} opacity={0.2} color="#ec4899" />
+        {/* Toy 1 (Bone/Ball) */}
+        <Float speed={2} rotationIntensity={2} floatIntensity={1.5}>
+          <Box visible args={[0.5, 0.5, 0.5]} position={[-3, 1, -2]}>
+            <meshPhysicalMaterial color="#9333ea" metalness={0.8} roughness={0.2} envMapIntensity={1} />
+          </Box>
+        </Float>
+
+        {/* Toy 2 (Cat Toy) */}
+        <Float speed={2.5} rotationIntensity={2.5} floatIntensity={2}>
+          <Torus visible args={[0.4, 0.15, 16, 32]} position={[3, -1, -1]}>
+            <meshPhysicalMaterial color="#db2777" metalness={0.5} roughness={0.1} clearcoat={1} envMapIntensity={1.5} />
+          </Torus>
+        </Float>
+
+        {/* Small floating accents */}
+        <Float speed={3} rotationIntensity={1} floatIntensity={2}>
+          <Sphere visible args={[0.3, 32, 32]} position={[-2, -2, 1]}>
+            <meshPhysicalMaterial color="#3b82f6" transmission={0.8} roughness={0.2} ior={1.4} />
+          </Sphere>
+        </Float>
+      </group>
+
+      {/* Ground soft shadows */}
+      <ContactShadows position={[0, -2.5, 0]} opacity={0.4} scale={20} blur={2} far={4} />
     </>
   );
 };
 
 export const Hero3DBackground = () => {
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 0%, rgba(241,245,249,0.8) 100%)' }}>
-      <Canvas>
-        <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
+    <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 0%, rgba(241,245,249,0.9) 100%)' }}>
+      <Canvas shadows dpr={[1, 2]}>
+        <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={45} />
         <AnimatedScene />
       </Canvas>
     </div>
