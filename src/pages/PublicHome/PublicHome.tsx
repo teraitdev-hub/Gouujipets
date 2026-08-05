@@ -41,48 +41,53 @@ export const PublicHome = () => {
         const q = query(collection(db, 'businesses'));
         
         unsubscribe = onSnapshot(q, async (bSnap) => {
-          let data: any[] = bSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-          data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          try {
+            let data: any[] = bSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            data.sort((a, b) => new Date(b.created_at || Date.now()).getTime() - new Date(a.created_at || Date.now()).getTime());
 
-          if (data && data.length > 0) {
-            const filtered = filterRealBusinesses(data);
-            
-            // Fetch owners for these businesses to get their phone/email fallback
-            const ownerIds = filtered.map((b: any) => b.owner_id).filter(Boolean);
-            let ownersMap = new Map();
-            if (ownerIds.length > 0) {
-              let owners: any[] = [];
-              for (let i = 0; i < ownerIds.length; i += 10) {
-                const chunk = ownerIds.slice(i, i + 10);
-                const uQ = query(collection(db, 'users'), where('id', 'in', chunk));
-                const uSnap = await getDocs(uQ);
-                owners.push(...uSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+            if (data && data.length > 0) {
+              const filtered = filterRealBusinesses(data);
+              
+              // Fetch owners for these businesses to get their phone/email fallback
+              const ownerIds = filtered.map((b: any) => b.owner_id).filter(Boolean);
+              let ownersMap = new Map();
+              if (ownerIds.length > 0) {
+                let owners: any[] = [];
+                for (let i = 0; i < ownerIds.length; i += 10) {
+                  const chunk = ownerIds.slice(i, i + 10);
+                  const uQ = query(collection(db, 'users'), where('id', 'in', chunk));
+                  const uSnap = await getDocs(uQ);
+                  owners.push(...uSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+                }
+                if (owners) {
+                  ownersMap = new Map(owners.map((o: any) => [o.id, o]));
+                }
               }
-              if (owners) {
-                ownersMap = new Map(owners.map((o: any) => [o.id, o]));
-              }
+
+              const formattedData = filtered.map((biz) => {
+                const owner = ownersMap.get(biz.owner_id) as any;
+                return {
+                  ...biz,
+                  rating: biz.rating || 4.9,
+                  reviewsCount: biz.reviews_count || 128,
+                  images: Array.isArray(biz.images) && biz.images.length > 0 ? biz.images : [biz.image_url || 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800'],
+                  priceFrom: biz.price_per_night || biz.price_from || biz.base_rate_per_day || biz.priceFrom || 999,
+                  mrpPrice: Math.round((biz.price_per_night || biz.base_rate_per_day || 999) * 1.35),
+                  verified: true,
+                  open24Hours: biz.type?.toLowerCase() === 'veterinary' || biz.type?.toLowerCase() === 'boarding',
+                  phone: biz.contact_phone || owner?.phone || '',
+                  email: biz.contact_email || owner?.email || ''
+                };
+              });
+              setFacilities(formattedData);
+            } else {
+              setFacilities([]);
             }
-
-            const formattedData = filtered.map((biz) => {
-              const owner = ownersMap.get(biz.owner_id) as any;
-              return {
-                ...biz,
-                rating: biz.rating || 4.9,
-                reviewsCount: biz.reviews_count || 128,
-                images: Array.isArray(biz.images) && biz.images.length > 0 ? biz.images : [biz.image_url || 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800'],
-                priceFrom: biz.price_per_night || biz.price_from || biz.base_rate_per_day || biz.priceFrom || 999,
-                mrpPrice: Math.round((biz.price_per_night || biz.base_rate_per_day || 999) * 1.35),
-                verified: true,
-                open24Hours: biz.type?.toLowerCase() === 'veterinary' || biz.type?.toLowerCase() === 'boarding',
-                phone: biz.contact_phone || owner?.phone || '',
-                email: biz.contact_email || owner?.email || ''
-              };
-            });
-            setFacilities(formattedData);
-          } else {
-            setFacilities([]);
+          } catch (err) {
+            console.error("Error processing facilities data", err);
+          } finally {
+            setIsLoading(false);
           }
-          setIsLoading(false);
         }, (err) => {
           console.error("Failed to fetch facilities", err);
           setIsLoading(false);
@@ -107,14 +112,14 @@ export const PublicHome = () => {
   };
 
   const CoreCategories = [
-    { id: "boarding", icon: "🏠", title: "Pet Boarding", desc: "Safe, comfortable home away from home" },
-    { id: "daycare", icon: "🌞", title: "Pet Daycare", desc: "Fun and active supervised play" },
-    { id: "grooming", icon: "💇", title: "Grooming & Spa", desc: "Professional grooming & spa treatments" },
-    { id: "veterinary", icon: "🩺", title: "Veterinary Care", desc: "Routine health checkups & consults" },
-    { id: "training", icon: "🎓", title: "Pet Training", desc: "Customized behavior & obedience programs" },
-    { id: "transportation", icon: "🚗", title: "Pet Transportation", desc: "Secure pickup and drop-off services" },
-    { id: "shop", icon: "🛍️", title: "Pet Shop", desc: "Premium pet food, toys, and supplies" },
-    { id: "health_tracking", icon: "📱", title: "Pet Health Tracking", desc: "Digital health profile & wellness reports" }
+    { id: "boarding", icon: "🏠", title: "Boarding", desc: "Safe, comfortable home away from home" },
+    { id: "daycare", icon: "🌞", title: "Daycare", desc: "Fun and active supervised play" },
+    { id: "grooming", icon: "💇", title: "Grooming", desc: "Professional grooming & spa treatments" },
+    { id: "veterinary", icon: "🩺", title: "Vet Care", desc: "Routine health checkups & consults" },
+    { id: "training", icon: "🎓", title: "Training", desc: "Customized behavior & obedience programs" },
+    { id: "transportation", icon: "🚗", title: "Transport", desc: "Secure pickup and drop-off services" },
+    { id: "shop", icon: "🛍️", title: "Shop", desc: "Premium pet food, toys, and supplies" },
+    { id: "health_tracking", icon: "📱", title: "Health", desc: "Digital health profile & wellness reports" }
   ];
 
   const cities = ["All Bangalore", "Indiranagar", "Koramangala", "HSR Layout", "Whitefield", "Jayanagar", "Near Me (GPS)"];
