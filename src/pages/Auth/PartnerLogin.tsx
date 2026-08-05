@@ -533,7 +533,7 @@ export const PartnerLogin = () => {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="flex items-center justify-center mb-10">
-            <img src="/logo.png" alt="Gouuji Pets Business" className="w-64 h-auto object-contain drop-shadow-md rounded-full" />
+            <img src="/logo.png" alt="Gouuji Pets Business" className="w-64 h-auto object-contain drop-shadow-md rounded-full animate-[spin_8s_linear_infinite]" />
           </div>
 
           {/* Direct Approval Banner */}

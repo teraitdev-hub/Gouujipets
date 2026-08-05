@@ -18,7 +18,7 @@ export const AuthLayout = ({ children, imageUrl, title, subtitle }: AuthLayoutPr
         <div className="w-full max-w-sm mx-auto">
           {/* Logo */}
           <div className="flex items-center justify-center mb-12">
-            <img src="/logo.png" alt="Gouuji Pets" className="w-48 h-48 object-cover rounded-full drop-shadow-md border border-slate-800" />
+            <img src="/logo.png" alt="Gouuji Pets" className="w-48 h-48 object-cover rounded-full animate-[spin_8s_linear_infinite] drop-shadow-md border border-slate-800" />
           </div>
 
           <motion.div
