@@ -38,7 +38,7 @@ export const PublicHome = () => {
     const fetchFacilities = () => {
       setIsLoading(true);
       try {
-        const q = query(collection(db, 'businesses'), where('status', '==', 'active'));
+        const q = query(collection(db, 'businesses'));
         
         unsubscribe = onSnapshot(q, async (bSnap) => {
           let data: any[] = bSnap.docs.map(d => ({ id: d.id, ...d.data() }));
