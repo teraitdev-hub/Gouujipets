@@ -1,32 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search, User, Menu, X, Phone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { LocationHeaderBar } from "../location/LocationHeaderBar";
-import { MagneticButton } from "../ui/MagneticButton";
 
 export const PublicNavbar = () => {
   const { isAuthenticated, openLoginModal, user } = useAuthStore();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  const navLinks = [
-    { label: "Boarding", path: "/boarding" },
-    { label: "Grooming", path: "/grooming" },
-    { label: "Veterinary", path: "/veterinary" },
-    { label: "Activities", path: "/activities" }
-  ];
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const getInitial = () => {
     if (user?.name) return user.name.charAt(0).toUpperCase();
@@ -44,68 +27,75 @@ export const PublicNavbar = () => {
     }
   };
 
+  const navLinks = [
+    { label: "Boarding", path: "/boarding" },
+    { label: "Grooming", path: "/grooming" },
+    { label: "Veterinary", path: "/veterinary" },
+    { label: "Activities", path: "/activities" }
+  ];
+
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-500 font-sans ${scrolled ? 'bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-sm py-2' : 'bg-transparent py-4'}`}>
+    <header className="bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 shadow-sm font-sans">
       {/* Main Header Row */}
-      <div className="px-4 md:px-8 flex items-center justify-between gap-4 max-w-7xl mx-auto">
+      <div className="px-4 md:px-8 py-3 flex items-center justify-between gap-4 max-w-7xl mx-auto">
         
         {/* Left: Logo */}
         <button
           onClick={() => navigate("/")}
           className="flex items-center gap-2 text-left shrink-0"
         >
-          <img src="/logo.png" alt="Gouuji Pets" className="h-12 w-12 object-cover rounded-full shadow-lg border border-slate-800 transition-transform duration-300 hover:scale-105" />
+          <img src="/logo.png" alt="Gouuji Pets" className="h-12 sm:h-14 w-12 sm:w-14 object-cover rounded-full shadow-md border-2 border-slate-800" />
         </button>
 
         {/* Center: Location Bar + Search (Desktop) */}
         <div className="hidden lg:flex flex-1 max-w-2xl items-center gap-3">
           {/* Location Selector */}
-          <div className={`flex items-center rounded-2xl px-4 py-2.5 transition-all duration-300 cursor-pointer ${scrolled ? 'bg-slate-50 border border-slate-200 hover:border-purple-300' : 'bg-white/50 border border-white/40 hover:bg-white/80'}`}>
+          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 hover:border-purple-300 transition-colors cursor-pointer">
             <LocationHeaderBar />
           </div>
 
           {/* Search */}
-          <form onSubmit={handleSearch} className={`flex-1 flex items-center rounded-2xl p-1 shadow-inner focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all duration-300 ${scrolled ? 'bg-slate-50 border border-slate-200' : 'bg-white/50 border border-white/40 backdrop-blur-sm focus-within:bg-white'}`}>
-            <Search size={14} className="text-slate-500 mx-2" />
+          <form onSubmit={handleSearch} className="flex-1 flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-1 shadow-inner focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all">
+            <Search size={14} className="text-slate-400 mx-2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search resorts, groomers, vets..."
-              className="w-full bg-transparent text-slate-900 text-xs font-semibold focus:outline-none placeholder:text-slate-500"
+              className="w-full bg-transparent text-slate-900 text-xs font-medium focus:outline-none placeholder:text-slate-400"
             />
-            <MagneticButton
+            <button
               type="submit"
-              className="px-5 py-2 bg-slate-900 hover:bg-black text-white font-black text-xs rounded-xl shadow-md transition-all ml-1"
+              className="px-4 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-black text-xs rounded-xl shadow-sm transition-all ml-1"
             >
               Search
-            </MagneticButton>
+            </button>
           </form>
         </div>
 
         {/* Right: Actions & Auth */}
         <div className="flex items-center gap-3 shrink-0">
-          <a href="tel:18007383674" className={`hidden md:flex items-center gap-1.5 text-xs font-bold transition-colors mr-2 ${scrolled ? 'text-slate-600 hover:text-purple-600' : 'text-slate-800 hover:text-purple-700'}`}>
-            <Phone size={14} className="text-purple-600" />
+          <a href="tel:18007383674" className="hidden md:flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-purple-600 transition-colors mr-2">
+            <Phone size={14} className="text-purple-500" />
             1800-PET-EMRG
           </a>
           
           {!isAuthenticated ? (
-            <MagneticButton
+            <button
               onClick={openLoginModal}
-              className={`hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs transition-colors shadow-sm ${scrolled ? 'bg-purple-50 hover:bg-purple-100 text-purple-700' : 'bg-white/80 hover:bg-white text-slate-900 backdrop-blur-md'}`}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-black text-xs transition-colors"
             >
               <User size={14} className="stroke-[2.5]" />
               <span>Sign In</span>
-            </MagneticButton>
+            </button>
           ) : (
-            <MagneticButton
+            <button
               onClick={() => {
                 if (user?.role === 'partner') navigate("/partner/profile");
                 else if (user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'super_admin') navigate("/admin/dashboard");
                 else navigate("/profile");
               }}
-              className="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-black text-sm shadow-md overflow-hidden hover:ring-2 hover:ring-purple-400 transition-all cursor-pointer shrink-0"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-black text-xs sm:text-sm shadow-sm overflow-hidden hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer shrink-0"
               title="My Profile"
             >
               {user?.photoUrl ? (
@@ -113,12 +103,12 @@ export const PublicNavbar = () => {
               ) : (
                 getInitial()
               )}
-            </MagneticButton>
+            </button>
           )}
 
           {/* Mobile Menu Toggle */}
           <button 
-            className={`lg:hidden p-2 rounded-xl transition-colors ${scrolled ? 'text-slate-600 hover:bg-slate-100' : 'text-slate-800 hover:bg-white/50'}`}
+            className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-xl"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}

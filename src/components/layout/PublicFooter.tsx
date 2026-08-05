@@ -1,68 +1,13 @@
 import { MapPin, Phone, Mail, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-
-const PawParticles = () => {
-  const [particles, setParticles] = useState<{ id: number, x: number, delay: number, size: number }[]>([]);
-
-  useEffect(() => {
-    // Respect prefers-reduced-motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
-
-    // Generate random paw particles
-    const arr = Array.from({ length: 15 }).map((_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      delay: Math.random() * 5,
-      size: Math.random() * 15 + 10
-    }));
-    setParticles(arr);
-  }, []);
-
-  if (particles.length === 0) return null;
-
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-10 z-0">
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="absolute -bottom-10 text-white"
-          style={{ left: `${p.x}%`, fontSize: `${p.size}px` }}
-          initial={{ y: 0, opacity: 0 }}
-          animate={{ y: -500, opacity: [0, 1, 0], x: [0, Math.sin(p.id) * 30, 0] }}
-          transition={{
-            duration: 8 + Math.random() * 4,
-            repeat: Infinity,
-            delay: p.delay,
-            ease: "linear"
-          }}
-        >
-          🐾
-        </motion.div>
-      ))}
-    </div>
-  );
-};
 
 export const PublicFooter = () => {
   return (
     <footer className="bg-gradient-to-b from-slate-950 via-[#0c0a1d] to-[#0a0818] text-slate-300 font-sans pt-20 pb-10 border-t border-purple-500/20 relative overflow-hidden">
-      <PawParticles />
-      
-      {/* Decorative gradient blobs */}
-      <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[140px] pointer-events-none z-0" />
-      
-      {/* Abstract Wave Top Border */}
-      <div className="absolute top-0 left-0 w-full overflow-hidden leading-none z-0">
-        <svg className="relative block w-full h-[50px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="fill-[#0f172a]"></path>
-        </svg>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Decorative gradient blobs */}
+        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[140px] pointer-events-none" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           
           {/* Brand Info */}

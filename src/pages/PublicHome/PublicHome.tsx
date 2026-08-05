@@ -15,12 +15,6 @@ import { filterRealBusinesses } from "../../utils/filterRealBusinesses";
 import { LocationSelectorSheet } from "../../components/location/LocationSelectorSheet";
 import { useLocationStore } from "../../store/useLocationStore";
 import { Hero3DBackground } from "../../components/ui/Hero3DBackground";
-import { Service3DIcon, type ServiceType } from "../../components/ui/Service3DIcon";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export const PublicHome = () => {
   const navigate = useNavigate();
@@ -38,41 +32,6 @@ export const PublicHome = () => {
   const { currentLocation, isDetecting } = useLocationStore();
   
   // Replaced video with 2D animated effects
-  const mainRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(() => {
-    // Search box scroll interaction
-    gsap.to(".search-box-container", {
-      y: -40,
-      scrollTrigger: {
-        trigger: ".hero-section",
-        start: "top top",
-        end: "bottom top",
-        scrub: 1
-      }
-    });
-
-    // Feature cards stagger reveal
-    gsap.from(".feature-card", {
-      y: 50,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.1,
-      ease: "power2.out",
-      scrollTrigger: {
-        trigger: ".features-section",
-        start: "top 80%",
-      }
-    });
-
-    // Continuous Review Marquee (if elements exist)
-    gsap.to(".marquee-content", {
-      xPercent: -50,
-      ease: "none",
-      duration: 30,
-      repeat: -1,
-    });
-  }, { scope: mainRef });
 
   useEffect(() => {
     let unsubscribe: () => void;
@@ -149,14 +108,14 @@ export const PublicHome = () => {
   };
 
   const CoreCategories = [
-    { id: "boarding", type: "boarding" as ServiceType, title: "Pet Boarding", desc: "Safe, comfortable home away from home" },
-    { id: "daycare", type: "daycare" as ServiceType, title: "Pet Daycare", desc: "Fun and active supervised play" },
-    { id: "grooming", type: "grooming" as ServiceType, title: "Grooming & Spa", desc: "Professional grooming & spa treatments" },
-    { id: "veterinary", type: "veterinary" as ServiceType, title: "Veterinary Care", desc: "Routine health checkups & consults" },
-    { id: "training", type: "training" as ServiceType, title: "Pet Training", desc: "Customized behavior & obedience programs" },
-    { id: "transportation", type: "taxi" as ServiceType, title: "Pet Transportation", desc: "Secure pickup and drop-off services" },
-    { id: "shop", type: "shop" as ServiceType, title: "Pet Shop", desc: "Premium pet food, toys, and supplies" },
-    { id: "health_tracking", type: "health_tracking" as ServiceType, title: "Pet Health Tracking", desc: "Digital health profile & wellness reports" }
+    { id: "boarding", icon: "🏠", title: "Pet Boarding", desc: "Safe, comfortable home away from home" },
+    { id: "daycare", icon: "🌞", title: "Pet Daycare", desc: "Fun and active supervised play" },
+    { id: "grooming", icon: "💇", title: "Grooming & Spa", desc: "Professional grooming & spa treatments" },
+    { id: "veterinary", icon: "🩺", title: "Veterinary Care", desc: "Routine health checkups & consults" },
+    { id: "training", icon: "🎓", title: "Pet Training", desc: "Customized behavior & obedience programs" },
+    { id: "transportation", icon: "🚗", title: "Pet Transportation", desc: "Secure pickup and drop-off services" },
+    { id: "shop", icon: "🛍️", title: "Pet Shop", desc: "Premium pet food, toys, and supplies" },
+    { id: "health_tracking", icon: "📱", title: "Pet Health Tracking", desc: "Digital health profile & wellness reports" }
   ];
 
   const cities = ["All Bangalore", "Indiranagar", "Koramangala", "HSR Layout", "Whitefield", "Jayanagar", "Near Me (GPS)"];
@@ -180,11 +139,11 @@ export const PublicHome = () => {
   });
 
   return (
-    <div className="font-sans" ref={mainRef}>
+    <div className="font-sans">
       <main className="min-h-screen relative bg-[#f1f5f9]">
 
       {/* ========== HERO SECTION (NEW & STUNNING) ========== */}
-      <section className="hero-section relative pt-10 pb-16 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden border-b border-slate-200/60">
+      <section className="relative pt-10 pb-16 px-4 sm:px-6 lg:px-8 bg-transparent overflow-hidden border-b border-slate-200/60">
         <Hero3DBackground />
 
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6">
@@ -222,7 +181,7 @@ export const PublicHome = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="search-box-container pt-4 max-w-2xl mx-auto"
+            className="pt-4 max-w-2xl mx-auto"
           >
             <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-stretch gap-2 bg-white/90 backdrop-blur-md p-2 rounded-2xl border border-slate-200/80 shadow-xl focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all z-20 relative">
               
@@ -300,8 +259,8 @@ export const PublicHome = () => {
                 activeCategoryTab === cat.id ? "border-purple-600 ring-2 ring-purple-500/20 bg-purple-50/50" : "border-slate-200/80 hover:border-slate-300"
               }`}
             >
-              <div className="w-full h-24 mb-4 transition-colors">
-                <Service3DIcon type={cat.type} />
+              <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-3xl mb-4 transition-colors shadow-inner border border-slate-200/60">
+                <span className="group-hover:scale-110 transition-transform">{cat.icon}</span>
               </div>
               <h3 className="font-black text-base text-slate-900 transition-colors mb-1">
                 {cat.title}
@@ -517,7 +476,7 @@ export const PublicHome = () => {
       </section>
 
       {/* ========== WHY TRUST GOUUJIPETS (VERIFIED CARE Features) ========== */}
-      <section className="features-section py-10 px-3 sm:px-6 max-w-7xl mx-auto">
+      <section className="py-10 px-3 sm:px-6 max-w-7xl mx-auto">
         <div className="bg-white/60 backdrop-blur-md rounded-[32px] p-6 sm:p-10 border border-slate-200/80 shadow-sm">
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 text-center mb-2">Why 50,000+ Pet Parents Trust Gouuji Assured™</h2>
           <p className="text-xs sm:text-sm text-slate-600 font-semibold text-center max-w-xl mx-auto mb-8">Every facility on our platform undergoes a rigorous 42-point physical inspection before listing.</p>
@@ -529,11 +488,8 @@ export const PublicHome = () => {
             { icon: CheckCircle2, title: "Instant Booking & Refund", desc: "Book suites right away with transparent pricing. Zero cancellation fees up to 24h before.", color: "text-emerald-600 bg-emerald-50" },
             { icon: Award, title: "Verified Customer Reviews", desc: "Only pet parents who completed verified stays can submit ratings & testimonials.", color: "text-amber-600 bg-amber-50" },
           ].map((item, i) => (
-            <div key={i} className="feature-card bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition-all shadow-xs relative overflow-hidden group">
-              <div className="absolute right-[-20px] top-[-20px] w-24 h-24 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Service3DIcon type="health_tracking" />
-              </div>
-              <div className="relative z-10">
+            <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between hover:shadow-md transition-all shadow-xs">
+              <div>
                 <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center mb-3 border border-slate-200/60`}>
                   <item.icon size={20} />
                 </div>
@@ -597,62 +553,6 @@ export const PublicHome = () => {
               🤝 Become a Verified Partner
             </button>
             <p className="text-slate-500 text-xs mt-3 font-semibold">Join hundreds of pet care professionals on India's fastest growing pet marketplace.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* ========== CUSTOMER REVIEWS (MARQUEE) ========== */}
-      <section className="py-16 overflow-hidden bg-slate-900 text-white mt-10 rounded-t-[3rem]">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-black mb-3">Loved by Pets & Parents</h2>
-          <p className="text-slate-400 font-semibold text-sm">Read what our verified community has to say</p>
-        </div>
-        
-        <div className="relative flex overflow-x-hidden group">
-          {/* Marquee Content */}
-          <div className="marquee-content flex gap-6 px-3 min-w-max">
-            {[1,2,3,4,5,6].map((i) => (
-              <div key={i} className="bg-slate-800/50 backdrop-blur-md p-6 rounded-3xl w-80 border border-slate-700/50 shrink-0 transform transition-transform hover:scale-105 hover:bg-slate-800 cursor-pointer">
-                <div className="flex items-center gap-1 mb-4 text-amber-400">
-                  <Star size={14} className="fill-amber-400" /><Star size={14} className="fill-amber-400" /><Star size={14} className="fill-amber-400" /><Star size={14} className="fill-amber-400" /><Star size={14} className="fill-amber-400" />
-                </div>
-                <p className="text-slate-300 text-sm font-medium italic mb-6 leading-relaxed">
-                  "The absolute best experience! My golden retriever loved the stay and the daily video updates gave me total peace of mind."
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-black">
-                    {String.fromCharCode(64 + i)}
-                  </div>
-                  <div>
-                    <h4 className="font-black text-sm text-white">Happy Parent {i}</h4>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Verified Stay</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {/* Duplicate for infinite loop */}
-          <div className="marquee-content flex gap-6 px-3 min-w-max">
-            {[1,2,3,4,5,6].map((i) => (
-              <div key={`dup-${i}`} className="bg-slate-800/50 backdrop-blur-md p-6 rounded-3xl w-80 border border-slate-700/50 shrink-0 transform transition-transform hover:scale-105 hover:bg-slate-800 cursor-pointer">
-                <div className="flex items-center gap-1 mb-4 text-amber-400">
-                  <Star size={14} className="fill-amber-400" /><Star size={14} className="fill-amber-400" /><Star size={14} className="fill-amber-400" /><Star size={14} className="fill-amber-400" /><Star size={14} className="fill-amber-400" />
-                </div>
-                <p className="text-slate-300 text-sm font-medium italic mb-6 leading-relaxed">
-                  "The absolute best experience! My golden retriever loved the stay and the daily video updates gave me total peace of mind."
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-black">
-                    {String.fromCharCode(64 + i)}
-                  </div>
-                  <div>
-                    <h4 className="font-black text-sm text-white">Happy Parent {i}</h4>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Verified Stay</span>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
