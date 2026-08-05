@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -31,6 +32,15 @@
   --color-violet-900: #4C1D95;
   --color-violet-950: #2E1065;
 
+  /* New Public Homepage Theme Colors */
+  --color-petwise-bg: #ffeeca;
+  --color-petwise-brown: #6f4b4b;
+  --color-petwise-brown-hover: #5a3c3c;
+  --color-petwise-peach: #fee7d9;
+  --color-petwise-pink: #f5dafd;
+  --color-petwise-yellow: #fdf4da;
+  --color-petwise-green: #eaffcc;
+
   /* Forest-green scale – Public homepage */
   --color-forest-50: #F2F7EE;
   --color-forest-100: #E0EDDA;
@@ -60,6 +70,7 @@
 
   --color-text-light: #64748B;
   --font-sans: "Outfit", "SF Pro Display", sans-serif;
+  --font-script: "Caveat", cursive;
 }
 
 @theme inline {
