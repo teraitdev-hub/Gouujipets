@@ -53,7 +53,7 @@ export const Navbar = ({ toggleSidebar }: { toggleSidebar: () => void }) => {
               onClick={() => navigate("/")}
               className="flex items-center gap-1.5 text-left group"
             >
-              <img src="/logo.png" alt="Gouuji Pets" className="h-10 w-auto object-contain drop-shadow-sm" />
+              <img src="/logo.png" alt="Gouuji Pets" className="h-10 w-10 object-cover rounded-full animate-[spin_8s_linear_infinite] drop-shadow-sm border border-slate-800" />
             </button>
           </div>
 
