@@ -246,20 +246,20 @@ export const PublicHome = () => {
           >
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-peach)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
               <span className="text-4xl mb-2">🏠</span>
-              <h3 className="font-black text-black text-sm sm:text-base">Dog Care</h3>
+              <h3 className="font-black text-black text-sm sm:text-base">Boarding</h3>
               <p className="text-[10px] sm:text-xs text-slate-600 mt-1 leading-tight hidden sm:block">Safe home away from home</p>
             </div>
           </div>
           
-          {/* Card 2: Grooming */}
+          {/* Card 2: Daycare */}
           <div
-            onClick={() => navigate('/boarding')}
+            onClick={() => navigate('/boarding?type=daycare')}
             className="group cursor-pointer flex flex-col items-center text-center"
           >
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-pink)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
-              <span className="text-4xl mb-2">🐈</span>
-              <h3 className="font-black text-black text-sm sm:text-base">Cat Care</h3>
-              <p className="text-[10px] sm:text-xs text-slate-600 mt-1 leading-tight hidden sm:block">Specialized feline facilities</p>
+              <span className="text-4xl mb-2">🌞</span>
+              <h3 className="font-black text-black text-sm sm:text-base">Daycare</h3>
+              <p className="text-[10px] sm:text-xs text-slate-600 mt-1 leading-tight hidden sm:block">Supervised active play</p>
             </div>
           </div>
 
@@ -270,7 +270,7 @@ export const PublicHome = () => {
           >
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-yellow)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
               <span className="text-4xl mb-2">💇</span>
-              <h3 className="font-black text-black text-sm sm:text-base">Pet Grooming</h3>
+              <h3 className="font-black text-black text-sm sm:text-base">Grooming</h3>
               <p className="text-[10px] sm:text-xs text-slate-600 mt-1 leading-tight hidden sm:block">Professional spa treatments</p>
             </div>
           </div>
@@ -282,7 +282,7 @@ export const PublicHome = () => {
           >
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-green)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
               <span className="text-4xl mb-2">🩺</span>
-              <h3 className="font-black text-black text-sm sm:text-base">Veterinary</h3>
+              <h3 className="font-black text-black text-sm sm:text-base">Vet Care</h3>
               <p className="text-[10px] sm:text-xs text-slate-600 mt-1 leading-tight hidden sm:block">Routine & emergency care</p>
             </div>
           </div>

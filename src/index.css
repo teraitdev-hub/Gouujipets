@@ -33,13 +33,13 @@
   --color-violet-950: #2E1065;
 
   /* New Public Homepage Theme Colors */
-  --color-petwise-bg: #ffeeca;
-  --color-petwise-brown: #6f4b4b;
-  --color-petwise-brown-hover: #5a3c3c;
-  --color-petwise-peach: #fee7d9;
-  --color-petwise-pink: #f5dafd;
-  --color-petwise-yellow: #fdf4da;
-  --color-petwise-green: #eaffcc;
+  --color-petwise-bg: #F0FDFA; /* brand-50 */
+  --color-petwise-brown: #0D9488; /* brand-600 */
+  --color-petwise-brown-hover: #0F766E; /* brand-700 */
+  --color-petwise-peach: #CCFBF1; /* brand-100 */
+  --color-petwise-pink: #E0EDDA; /* forest-100 */
+  --color-petwise-yellow: #F5EDD4; /* cream-200 */
+  --color-petwise-green: #EDE9FE; /* violet-100 */
 
   /* Forest-green scale – Public homepage */
   --color-forest-50: #F2F7EE;
