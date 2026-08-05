@@ -75,10 +75,13 @@ export const PublicNavbar = () => {
 
         {/* Right: Actions & Auth */}
         <div className="flex items-center gap-3 shrink-0">
-          <a href="tel:18007383674" className="hidden md:flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-purple-600 transition-colors mr-2">
-            <Phone size={14} className="text-purple-500" />
-            1800-PET-EMRG
-          </a>
+          <button 
+            onClick={() => navigate("/partner/login")} 
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:text-purple-700 hover:bg-purple-50 transition-colors mr-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><path d="M9 22v-4h6v4"></path><path d="M8 6h.01"></path><path d="M16 6h.01"></path><path d="M12 6h.01"></path><path d="M12 10h.01"></path><path d="M12 14h.01"></path><path d="M16 10h.01"></path><path d="M16 14h.01"></path><path d="M8 10h.01"></path><path d="M8 14h.01"></path></svg>
+            Partner Portal Login
+          </button>
           
           {!isAuthenticated ? (
             <button
