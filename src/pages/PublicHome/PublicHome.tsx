@@ -346,7 +346,7 @@ export const PublicHome = () => {
 
             <div className="pt-4">
               <button 
-                onClick={() => navigate('/about')}
+                onClick={() => navigate('/contact')}
                 className="bg-[var(--color-petwise-brown)] hover:bg-[var(--color-petwise-brown-hover)] text-white font-bold px-8 py-3.5 rounded-lg shadow-md transition-colors"
               >
                 More About Us
