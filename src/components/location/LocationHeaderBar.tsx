@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MapPin, ChevronDown, Loader2 } from 'lucide-react';
 import { useLocationStore } from '../../store/useLocationStore';
 import { LocationSelectorSheet } from './LocationSelectorSheet';
@@ -12,15 +13,16 @@ import { LocationSelectorSheet } from './LocationSelectorSheet';
 export const LocationHeaderBar: React.FC = () => {
   const { currentLocation, isDetecting, locationPermission, setShowPermissionModal } = useLocationStore();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const routerLocation = useLocation();
 
-  // Show permission modal on first load if not yet asked
+  // Show permission modal on first load if not yet asked and NOT on home page
   useEffect(() => {
-    if (locationPermission === null) {
+    if (locationPermission === null && routerLocation.pathname !== '/') {
       // Small delay to let the page render first
       const t = setTimeout(() => setShowPermissionModal(true), 1800);
       return () => clearTimeout(t);
     }
-  }, [locationPermission, setShowPermissionModal]);
+  }, [locationPermission, setShowPermissionModal, routerLocation.pathname]);
 
   const displayCity =
     currentLocation?.formatted_address ||
