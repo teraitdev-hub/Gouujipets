@@ -17,7 +17,16 @@ import { useLocationStore } from "../../store/useLocationStore";
 
 export const PublicHome = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, openLoginModal } = useAuthStore();
+  const { isAuthenticated, openLoginModal, setIntendedRoute } = useAuthStore();
+  
+  const handleProtectedNavigate = (path: string) => {
+    if (!isAuthenticated) {
+      setIntendedRoute(path);
+      openLoginModal();
+    } else {
+      navigate(path);
+    }
+  };
   const [searchLocation, setSearchLocation] = useState("Bangalore / Near Me");
   const [activeCategoryTab, setActiveCategoryTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -241,7 +250,7 @@ export const PublicHome = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 max-w-5xl mx-auto">
           {/* Card 1: Boarding */}
           <div
-            onClick={() => navigate('/boarding')}
+            onClick={() => handleProtectedNavigate('/boarding')}
             className="group cursor-pointer flex flex-col items-center text-center"
           >
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-peach)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
@@ -253,7 +262,7 @@ export const PublicHome = () => {
           
           {/* Card 2: Daycare */}
           <div
-            onClick={() => navigate('/boarding?type=daycare')}
+            onClick={() => handleProtectedNavigate('/boarding?type=daycare')}
             className="group cursor-pointer flex flex-col items-center text-center"
           >
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-pink)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
@@ -265,7 +274,7 @@ export const PublicHome = () => {
 
           {/* Card 3: Grooming (General) */}
           <div
-            onClick={() => navigate('/grooming')}
+            onClick={() => handleProtectedNavigate('/grooming')}
             className="group cursor-pointer flex flex-col items-center text-center"
           >
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-yellow)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
@@ -277,7 +286,7 @@ export const PublicHome = () => {
 
           {/* Card 4: Veterinary */}
           <div
-            onClick={() => navigate('/veterinary')}
+            onClick={() => handleProtectedNavigate('/veterinary')}
             className="group cursor-pointer flex flex-col items-center text-center"
           >
             <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-green)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
@@ -290,7 +299,7 @@ export const PublicHome = () => {
 
         <div className="mt-12 text-center">
           <button 
-            onClick={() => navigate('/boarding')}
+            onClick={() => handleProtectedNavigate('/boarding')}
             className="bg-[var(--color-petwise-brown)] hover:bg-[var(--color-petwise-brown-hover)] text-white font-bold px-8 py-3.5 rounded-lg shadow-md transition-colors"
           >
             See All Services
