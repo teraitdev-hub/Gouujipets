@@ -74,13 +74,8 @@ export const PublicFooter = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-medium text-slate-500">
-          <div className="flex items-center gap-2">
-            <ShieldCheck size={14} className="text-purple-500" />
-            <span>Gouuji Assured™ Verified Network</span>
-          </div>
-          <p>&copy; {new Date().getFullYear()} Gouuji Pets. All rights reserved.</p>
-          <div className="flex items-center gap-4 flex-wrap">
+        <div className="pt-8 border-t border-slate-800 flex items-center justify-center text-xs font-medium text-slate-500">
+          <div className="flex items-center gap-6 flex-wrap justify-center">
             <Link to="/refund-policy" className="hover:text-purple-400 transition-colors">Refund & Cancellation Policy</Link>
             <Link to="/privacy" className="hover:text-purple-400 transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-purple-400 transition-colors">Terms of Service</Link>
