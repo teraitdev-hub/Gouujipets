@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search, User, Menu, X, Phone } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { LocationHeaderBar } from "../location/LocationHeaderBar";
@@ -8,8 +8,11 @@ import { LocationHeaderBar } from "../location/LocationHeaderBar";
 export const PublicNavbar = () => {
   const { isAuthenticated, openLoginModal, user } = useAuthStore();
   const navigate = useNavigate();
+  const routerLocation = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  const isHomePage = routerLocation.pathname === '/';
 
   const getInitial = () => {
     if (user?.name) return user.name.charAt(0).toUpperCase();
@@ -50,9 +53,11 @@ export const PublicNavbar = () => {
         {/* Center: Location Bar + Search (Desktop) */}
         <div className="hidden lg:flex flex-1 max-w-2xl items-center gap-3">
           {/* Location Selector */}
-          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 hover:border-purple-300 transition-colors cursor-pointer">
-            <LocationHeaderBar />
-          </div>
+          {!isHomePage && (
+            <div className="flex items-center bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2.5 hover:border-purple-300 transition-colors cursor-pointer">
+              <LocationHeaderBar />
+            </div>
+          )}
 
           {/* Search */}
           <form onSubmit={handleSearch} className="flex-1 flex items-center bg-slate-50 border border-slate-200 rounded-2xl p-1 shadow-inner focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-400 transition-all">
@@ -156,10 +161,12 @@ export const PublicNavbar = () => {
 
               <div className="p-4 space-y-5 overflow-y-auto custom-scrollbar flex-1">
                 {/* Location Selector in mobile menu */}
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Your Location</p>
-                  <LocationHeaderBar />
-                </div>
+                {!isHomePage && (
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Your Location</p>
+                    <LocationHeaderBar />
+                  </div>
+                )}
 
                 <form onSubmit={handleSearch} className="flex flex-col gap-3">
                   <div className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
