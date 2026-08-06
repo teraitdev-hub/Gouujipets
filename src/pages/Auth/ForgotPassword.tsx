@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Mail, ArrowRight, Loader2, KeyRound, Smartphone, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { auth } from "../../lib/firebase";
 import { sendPasswordResetEmail, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import type { ConfirmationResult } from "firebase/auth";
+import { OtpVerificationUI } from "../../components/auth/OtpVerificationUI";
 
 export const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -16,6 +17,15 @@ export const ForgotPassword = () => {
   const [otp, setOtp] = useState("");
   const [showOtp, setShowOtp] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  useEffect(() => {
+    let interval: any;
+    if (showOtp && resendTimer > 0) {
+      interval = setInterval(() => setResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [showOtp, resendTimer]);
 
   const setupRecaptcha = () => {
     if (window.recaptchaVerifier) {
@@ -37,11 +47,10 @@ export const ForgotPassword = () => {
     if (!identifier) return;
 
     const cleanId = identifier.trim();
-    const validEmail = isEmail(cleanId);
     const validPhone = isPhone(cleanId);
 
-    if (!validEmail && !validPhone) {
-      setError("Please enter a valid Email address or Phone Number.");
+    if (!validPhone) {
+      setError("Please enter a valid Phone Number.");
       return;
     }
 
@@ -58,14 +67,33 @@ export const ForgotPassword = () => {
         const confirmation = await signInWithPhoneNumber(auth, formattedPhone, verifier);
         setConfirmationResult(confirmation);
         setShowOtp(true);
+        setResendTimer(60);
         setError(""); // Clear error for OTP input
-      } else {
-        await sendPasswordResetEmail(auth, cleanId);
-        setAuthType('email');
-        setError("Password reset email sent! Check your inbox.");
       }
     } catch (err: any) {
-      setError(err.message || "Failed to send reset link or OTP.");
+      setError(err.message || "Failed to send OTP.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (resendTimer > 0) return;
+    try {
+      setIsLoading(true);
+      setError("");
+      
+      let formattedPhone = identifier.trim();
+      if (!formattedPhone.startsWith('+')) {
+        formattedPhone = '+91' + formattedPhone.replace(/[^0-9]/g, '');
+      }
+
+      const verifier = setupRecaptcha();
+      const result = await signInWithPhoneNumber(auth, formattedPhone, verifier);
+      setConfirmationResult(result);
+      setResendTimer(60);
+    } catch (err: any) {
+      setError("Failed to resend OTP. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -107,7 +135,7 @@ export const ForgotPassword = () => {
             Account Recovery
           </h1>
           <p className="text-gray-500 font-medium mt-2">
-            Enter your email to receive a password reset link.
+            Enter your phone number to receive the OTP.
           </p>
         </div>
 
@@ -116,6 +144,8 @@ export const ForgotPassword = () => {
             {error}
           </div>
         )}
+
+        <div id="recaptcha-container-forgot"></div>
 
         <AnimatePresence mode="wait">
           {!showOtp ? (
@@ -128,10 +158,10 @@ export const ForgotPassword = () => {
               className="space-y-4"
             >
               <div className="relative">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <Smartphone className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input 
                   type="text" 
-                  placeholder="Email Address or Phone Number"
+                  placeholder="Enter your phone number"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all"
@@ -146,7 +176,7 @@ export const ForgotPassword = () => {
               >
                 {isLoading ? <Loader2 className="animate-spin" /> : (
                   <>
-                    Send Reset Link
+                    Get OTP
                     <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -162,55 +192,24 @@ export const ForgotPassword = () => {
               </div>
             </motion.form>
           ) : (
-            <motion.form 
+            <motion.div
               key="otp-form"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              onSubmit={handleVerifyOTP} 
-              className="space-y-4"
             >
-              <div className="relative">
-                <ShieldCheck className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <input 
-                  type="text" 
-                  placeholder="Enter 6-digit OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all text-center tracking-widest text-lg"
-                  required
-                />
-              </div>
-
-              <button 
-                type="submit" 
-                disabled={isLoading || otp.length < 6}
-                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-4 rounded-2xl transition-all shadow-lg flex items-center justify-center gap-2 group mt-2"
-              >
-                {isLoading ? <Loader2 className="animate-spin" /> : (
-                  <>
-                    Verify & Reset Password
-                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
-
-              <div className="mt-8 text-center">
-                <button 
-                  type="button"
-                  onClick={() => {
-                    setShowOtp(false);
-                    setOtp('');
-                  }}
-                  className="text-gray-500 font-medium hover:text-gray-900 transition-colors inline-flex items-center gap-2"
-                >
-                  <ArrowRight size={16} className="rotate-180" /> Back
-                </button>
-              </div>
-            </motion.form>
+              <OtpVerificationUI 
+                otp={otp}
+                setOtp={setOtp}
+                isLoading={isLoading}
+                onSubmit={handleVerifyOTP}
+                onCancel={() => { setShowOtp(false); setConfirmationResult(null); }}
+                onResend={handleResendOTP}
+                resendTimer={resendTimer}
+              />
+            </motion.div>
           )}
         </AnimatePresence>
-        <div id="recaptcha-container-forgot"></div>
       </motion.div>
     </div>
   );
