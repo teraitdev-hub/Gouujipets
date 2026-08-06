@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LocationHeaderBar } from "../location/LocationHeaderBar";
 
 export const PublicNavbar = () => {
-  const { isAuthenticated, openLoginModal, user } = useAuthStore();
+  const { isAuthenticated, openLoginModal, user, setIntendedRoute } = useAuthStore();
   const navigate = useNavigate();
   const routerLocation = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -189,7 +189,15 @@ export const PublicNavbar = () => {
                   {navLinks.map((item) => (
                     <button
                       key={item.label}
-                      onClick={() => { navigate(item.path); setIsMobileMenuOpen(false); }}
+                      onClick={() => { 
+                        if (!isAuthenticated) {
+                          setIntendedRoute(item.path);
+                          openLoginModal();
+                        } else {
+                          navigate(item.path);
+                        }
+                        setIsMobileMenuOpen(false); 
+                      }}
                       className="w-full py-3.5 px-4 bg-transparent rounded-xl text-left text-base font-bold text-slate-700 hover:bg-purple-50 hover:text-purple-700 flex items-center justify-between min-h-[48px]"
                     >
                       {item.label}
