@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Search, HeartPulse, Scissors, Sun, ShieldCheck, ShoppingBag, Home } from "lucide-react";
 import { clsx } from "clsx";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -15,6 +15,7 @@ const services = [
 
 export const ServiceQuickLinks = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAuthenticated, openLoginModal, setIntendedRoute } = useAuthStore();
 
   return (
@@ -29,14 +30,14 @@ export const ServiceQuickLinks = () => {
             : location.pathname === svc.path;
 
           return (
-            <NavLink
+            <button
               key={svc.name}
-              to={svc.path}
               onClick={(e) => {
                 if (!isAuthenticated && svc.name !== "Home") {
-                  e.preventDefault();
                   setIntendedRoute(svc.path);
                   openLoginModal();
+                } else {
+                  navigate(svc.path);
                 }
               }}
               className={clsx(
@@ -48,7 +49,7 @@ export const ServiceQuickLinks = () => {
             >
               <svc.icon size={14} className={clsx("shrink-0", isActive && "stroke-[2.5]")} />
               <span className="text-xs sm:text-sm whitespace-nowrap">{svc.name}</span>
-            </NavLink>
+            </button>
           );
         })}
       </div>
