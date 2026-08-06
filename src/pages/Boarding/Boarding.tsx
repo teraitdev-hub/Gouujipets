@@ -445,7 +445,13 @@ export const Boarding = () => {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03 }}
-                  onClick={() => navigate(`/facility/${facility.id}`, { state: { facility, selectedServices: selectedServicesFilter } })}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      openLoginModal();
+                    } else {
+                      navigate(`/facility/${facility.id}`, { state: { facility, selectedServices: selectedServicesFilter } });
+                    }
+                  }}
                   className="group cursor-pointer bg-white border border-slate-300 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-row relative"
                 >
                   {/* Image */}

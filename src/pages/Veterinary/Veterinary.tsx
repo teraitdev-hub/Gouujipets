@@ -162,7 +162,13 @@ export const Veterinary = () => {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
-                onClick={() => navigate(`/facility/${facility.id}`)}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    openLoginModal();
+                  } else {
+                    navigate(`/facility/${facility.id}`);
+                  }
+                }}
                 className="group cursor-pointer bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-purple-200 transition-all duration-200 flex flex-col justify-between relative"
               >
                 {/* Image */}

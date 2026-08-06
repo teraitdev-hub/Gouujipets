@@ -357,7 +357,13 @@ const FacilityCard = ({ facility, index, navigate, isAuthenticated, openLoginMod
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: index * 0.05 }}
-        onClick={() => navigate(`/facility/${facility.id || facility._id}`)}
+        onClick={() => {
+          if (!isAuthenticated) {
+            openLoginModal();
+          } else {
+            navigate(`/facility/${facility.id || facility._id}`);
+          }
+        }}
         className="group cursor-pointer bg-white rounded-[24px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col sm:flex-row"
       >
         <div className="h-48 sm:h-auto sm:w-64 shrink-0 relative overflow-hidden">
@@ -433,7 +439,13 @@ const FacilityCard = ({ facility, index, navigate, isAuthenticated, openLoginMod
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
-      onClick={() => navigate(`/facility/${facility.id || facility._id}`)}
+      onClick={() => {
+        if (!isAuthenticated) {
+          openLoginModal();
+        } else {
+          navigate(`/facility/${facility.id || facility._id}`);
+        }
+      }}
       className="group cursor-pointer bg-white rounded-xl border border-purple-200 shadow-2xs hover:shadow-lg hover:border-purple-600 transition-all duration-200 flex flex-col justify-between relative"
     >
       {/* Image */}
