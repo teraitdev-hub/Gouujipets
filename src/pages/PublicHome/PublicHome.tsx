@@ -173,20 +173,7 @@ export const PublicHome = () => {
             >
               <form onSubmit={handleSearch} className="flex flex-col sm:flex-row items-stretch gap-2 bg-white p-2 rounded-full border border-slate-200/80 shadow-xl focus-within:ring-2 focus-within:ring-[var(--color-petwise-brown)]/20 transition-all z-20 relative">
                 
-                <div className="flex items-center w-full sm:w-[40%] border-b sm:border-b-0 sm:border-r border-slate-200 px-2 py-1">
-                  <button
-                    type="button"
-                    onClick={() => setHeroLocationSheetOpen(true)}
-                    className="w-full flex items-center gap-2 px-3 py-2 hover:bg-slate-50 rounded-full transition-colors group"
-                  >
-                    <MapPin size={18} className="text-[var(--color-petwise-brown)] shrink-0" />
-                    <div className="flex flex-col items-start min-w-0 flex-1">
-                      <span className="text-sm font-bold text-slate-900 truncate w-full text-left">
-                        {currentLocation ? (currentLocation.area || currentLocation.city || currentLocation.formatted_address) : 'Select Location'}
-                      </span>
-                    </div>
-                  </button>
-                </div>
+
 
                 <div className="flex items-center w-full flex-1 gap-2 px-3 py-2">
                   <Search size={18} className="text-slate-400 shrink-0" />
