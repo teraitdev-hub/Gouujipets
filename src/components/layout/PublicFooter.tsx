@@ -65,15 +65,15 @@ export const PublicFooter = () => {
             <ul className="space-y-4 text-sm font-medium">
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-purple-500 shrink-0 mt-0.5" />
-                <span>123 Pet Avenue, Koramangala, Bangalore, KA 560034</span>
+                <span>24, 100 Feet Rd, HRBR Layout 1st Block, Balaji Layout, Subbaiahnapalya, Banaswadi, Bengaluru, Karnataka 560043</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={18} className="text-purple-500 shrink-0" />
-                <a href="tel:18007383674" className="hover:text-purple-400 transition-colors">1800-PET-EMRG</a>
+                <a href="tel:+919071710000" className="hover:text-purple-400 transition-colors">+919071710000</a>
               </li>
               <li className="flex items-center gap-3">
                 <Mail size={18} className="text-purple-500 shrink-0" />
-                <a href="mailto:support@gouujipets.com" className="hover:text-purple-400 transition-colors">support@gouujipets.com</a>
+                <a href="mailto:ping@gouuji.com" className="hover:text-purple-400 transition-colors">ping@gouuji.com</a>
               </li>
             </ul>
           </div>

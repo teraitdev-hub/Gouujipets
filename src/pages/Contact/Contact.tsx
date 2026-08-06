@@ -22,11 +22,11 @@ export const Contact = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-4 text-white/90">
                 <div className="w-10 h-10 bg-[#FDFBF7]/20 rounded-full flex items-center justify-center shrink-0"><Phone size={18} /></div>
-                <p className="font-bold text-lg">1-800-PET-EMERG</p>
+                <p className="font-bold text-lg">+919071710000</p>
               </div>
               <div className="flex items-center gap-4 text-white/90">
                 <div className="w-10 h-10 bg-[#FDFBF7]/20 rounded-full flex items-center justify-center shrink-0"><MapPin size={18} /></div>
-                <p className="text-sm font-medium">123 Pet Care Blvd, Cityville, ST 12345</p>
+                <p className="text-sm font-medium">24, 100 Feet Rd, HRBR Layout 1st Block, Banaswadi, Bengaluru, 560043</p>
               </div>
             </div>
           </div>
@@ -36,11 +36,11 @@ export const Contact = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-4 text-[#7A7A7A]">
                 <div className="w-10 h-10 bg-secondary/50 rounded-full flex items-center justify-center shrink-0"><Phone size={18} /></div>
-                <p className="font-bold text-[#2D2D2D] text-sm">(555) 987-6543</p>
+                <p className="font-bold text-[#2D2D2D] text-sm">+919071710000</p>
               </div>
               <div className="flex items-center gap-4 text-[#7A7A7A]">
                 <div className="w-10 h-10 bg-secondary/50 rounded-full flex items-center justify-center shrink-0"><Mail size={18} /></div>
-                <p className="font-bold text-[#2D2D2D] text-sm">support@gouu.com</p>
+                <p className="font-bold text-[#2D2D2D] text-sm">ping@gouuji.com</p>
               </div>
             </div>
           </div>
@@ -69,10 +69,10 @@ export const Contact = () => {
       {/* Map Section */}
       <div className="bg-[#FDFBF7] rounded-[32px] p-2 shadow-sm border border-[#EBE6DF]">
         <Map 
-          center={[40.7128, -74.0060]} 
-          zoom={13} 
+          center={[13.0238, 77.6434]} 
+          zoom={15} 
           markers={[
-            { position: [40.7128, -74.0060], popupText: "Gouujipets HQ - 123 Pet Care Blvd" }
+            { position: [13.0238, 77.6434], popupText: "Gouujipets - HRBR Layout" }
           ]} 
         />
       </div>
