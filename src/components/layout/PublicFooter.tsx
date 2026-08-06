@@ -28,13 +28,6 @@ export const PublicFooter = () => {
             <p className="text-sm text-slate-400 font-medium leading-relaxed">
               India's first completely verified network for premium pet boarding, grooming, and 24/7 emergency veterinary care.
             </p>
-            <div className="flex items-center gap-2 pt-2 text-xs font-bold text-slate-500">
-              <span className="hover:text-purple-400 cursor-pointer transition-colors">Facebook</span>
-              <span>•</span>
-              <span className="hover:text-purple-400 cursor-pointer transition-colors">Instagram</span>
-              <span>•</span>
-              <span className="hover:text-purple-400 cursor-pointer transition-colors">Twitter (X)</span>
-            </div>
           </div>
 
           {/* Quick Links */}
