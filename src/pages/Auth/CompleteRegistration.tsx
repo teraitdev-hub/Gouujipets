@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { RecaptchaVerifier, linkWithPhoneNumber } from 'firebase/auth';
 import type { ConfirmationResult } from 'firebase/auth';
 import { doc, setDoc, collection, addDoc, getDoc } from 'firebase/firestore';
+import { OtpVerificationUI } from '../../components/auth/OtpVerificationUI';
 
 export const CompleteRegistration = () => {
   const { user, loadUser } = useAuthStore();
@@ -263,36 +264,15 @@ export const CompleteRegistration = () => {
                   </button>
                 </form>
               ) : (
-                <form onSubmit={handleVerifyOTP} className="space-y-4 max-w-md">
-                  <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">Enter OTP</label>
-                    <input 
-                      type="text" 
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      placeholder="6-digit code"
-                      maxLength={6}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all font-medium text-center tracking-[0.5em]"
-                      required
-                    />
-                  </div>
-                  
-                  <button 
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-slate-900 hover:bg-black disabled:opacity-50 text-white font-bold py-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
-                  >
-                    {loading ? <ActivitySquare className="w-5 h-5 animate-spin" /> : 'Verify & Continue'}
-                  </button>
-
-                  <button 
-                    type="button"
-                    onClick={() => setShowOtp(false)}
-                    className="w-full text-slate-500 hover:text-slate-700 text-sm font-semibold transition-colors mt-2"
-                  >
-                    Use a different number
-                  </button>
-                </form>
+                <OtpVerificationUI 
+                  otp={otp}
+                  setOtp={setOtp}
+                  isLoading={loading}
+                  onSubmit={handleVerifyOTP}
+                  onCancel={() => setShowOtp(false)}
+                  onResend={handleSendOTP as any}
+                  resendTimer={cooldown}
+                />
               )}
               <div id="recaptcha-container-link"></div>
             </div>

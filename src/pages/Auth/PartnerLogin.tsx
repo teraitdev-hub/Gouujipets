@@ -8,6 +8,7 @@ import type { ConfirmationResult } from "firebase/auth";
 import { collection, addDoc, doc, setDoc, getDocs, query, where, limit, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
+import { OtpVerificationUI } from "../../components/auth/OtpVerificationUI";
 import { checkPasswordStrength } from "../../utils/security";
 
 import { useMap } from "../../context/MapContext";
@@ -36,6 +37,35 @@ export const PartnerLogin = () => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  useEffect(() => {
+    let interval: any;
+    if (showOtpInput && resendTimer > 0) {
+      interval = setInterval(() => setResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [showOtpInput, resendTimer]);
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+    try {
+      setIsLoading(true);
+      setError("");
+      setSuccessMsg("");
+      
+      const loginIdentifier = formData.email.trim();
+      const recaptchaVerifier = setupRecaptcha("recaptcha-container");
+      const confirmation = await sendOTP(loginIdentifier, recaptchaVerifier);
+      setConfirmationResult(confirmation);
+      setResendTimer(60);
+      setSuccessMsg(`OTP resent to ${loginIdentifier}`);
+    } catch (err: any) {
+      setError("Failed to resend OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const [mapLocation, setMapLocation] = useState({ lat: 20.5937, lng: 78.9629 });
 
@@ -595,28 +625,15 @@ export const PartnerLogin = () => {
 
           {/* OTP Section */}
           {showOtpInput ? (
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Enter 6-Digit OTP</label>
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="123456"
-                  maxLength={6}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-center text-lg font-bold tracking-widest focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || otp.length < 6}
-                className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-bold text-sm rounded-xl shadow-lg shadow-violet-500/20 transition-all flex items-center justify-center gap-2"
-              >
-                {isLoading ? <Loader2 size={18} className="animate-spin" /> : "Verify OTP & Continue"}
-              </button>
-            </form>
+            <OtpVerificationUI 
+              otp={otp}
+              setOtp={setOtp}
+              isLoading={isLoading}
+              onSubmit={handleVerifyOtp}
+              onCancel={() => { setShowOtpInput(false); setConfirmationResult(null); }}
+              onResend={handleResendOtp}
+              resendTimer={resendTimer}
+            />
           ) : (
             /* Regular Form */
             <form onSubmit={handleSubmit} className="space-y-4">

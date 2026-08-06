@@ -8,6 +8,8 @@ import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import type { ConfirmationResult } from "firebase/auth";
 import { doc, getDoc, collection, query, where, limit, getDocs } from "firebase/firestore";
 import { setupRecaptcha, sendOTP, verifyOTP } from "../../services/auth";
+import { OtpVerificationUI } from "../../components/auth/OtpVerificationUI";
+import { useEffect } from "react";
 
 export const AdminLogin = () => {
   const navigate = useNavigate();
@@ -19,6 +21,33 @@ export const AdminLogin = () => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  useEffect(() => {
+    let interval: any;
+    if (showOtpInput && resendTimer > 0) {
+      interval = setInterval(() => setResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [showOtpInput, resendTimer]);
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+    try {
+      setIsLoading(true);
+      setError("");
+      
+      const loginIdentifier = formData.email.trim();
+      const recaptchaVerifier = setupRecaptcha("recaptcha-container");
+      const confirmation = await sendOTP(loginIdentifier, recaptchaVerifier);
+      setConfirmationResult(confirmation);
+      setResendTimer(60);
+    } catch (err: any) {
+      setError("Failed to resend OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
   const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ''));
@@ -186,44 +215,15 @@ export const AdminLogin = () => {
       <div id="recaptcha-container"></div>
       
       {showOtpInput ? (
-        <form className="space-y-5 font-sans" onSubmit={handleVerifyOtp}>
-          {error && (
-            <div className="p-4 bg-red-50 text-red-600 border border-red-200 rounded-[16px] text-sm font-medium mb-4">
-              {error}
-            </div>
-          )}
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Enter 6-Digit Admin OTP</label>
-            <div className="relative group form_inputContainer">
-              <Lock size={18} className="form_inputIcon group-focus-within:text-purple-600 transition-colors" />
-              <input 
-                type="text" 
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="123456" 
-                maxLength={6}
-                className="form_inputField !pl-11 tracking-[0.5em] text-center"
-                required
-              />
-            </div>
-          </div>
-          <div className="flex gap-3 mt-6 flex-col">
-            <button 
-              disabled={isLoading}
-              type="submit"
-              className="form_button flex items-center justify-center gap-2 disabled:bg-gray-400 !bg-purple-600 hover:!bg-purple-700 text-white font-bold"
-            >
-              {isLoading ? <Loader2 className="animate-spin" /> : "Verify Admin OTP"}
-            </button>
-            <button 
-              type="button"
-              onClick={() => { setShowOtpInput(false); setConfirmationResult(null); }}
-              className="w-full bg-white text-slate-600 font-bold py-3 rounded-2xl transition-all"
-            >
-              Change Admin Contact
-            </button>
-          </div>
-        </form>
+        <OtpVerificationUI 
+          otp={otp}
+          setOtp={setOtp}
+          isLoading={isLoading}
+          onSubmit={handleVerifyOtp}
+          onCancel={() => { setShowOtpInput(false); setConfirmationResult(null); }}
+          onResend={handleResendOtp}
+          resendTimer={resendTimer}
+        />
       ) : (
         <form className="space-y-5 font-sans" onSubmit={handleSubmit}>
           {error && (

@@ -8,6 +8,8 @@ import { signOut } from "firebase/auth";
 import type { ConfirmationResult } from "firebase/auth";
 import { doc, getDoc, collection, query, where, limit, getDocs } from "firebase/firestore";
 import { setupRecaptcha, sendOTP, verifyOTP } from "../../services/auth";
+import { OtpVerificationUI } from "../../components/auth/OtpVerificationUI";
+import { useEffect } from "react";
 
 export const BoardingLogin = () => {
   const navigate = useNavigate();
@@ -19,6 +21,32 @@ export const BoardingLogin = () => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  useEffect(() => {
+    let interval: any;
+    if (showOtpInput && resendTimer > 0) {
+      interval = setInterval(() => setResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [showOtpInput, resendTimer]);
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+    try {
+      setIsLoading(true);
+      setError("");
+      
+      const recaptchaVerifier = setupRecaptcha("recaptcha-container");
+      const confirmation = await sendOTP(formData.phone, recaptchaVerifier);
+      setConfirmationResult(confirmation);
+      setResendTimer(60);
+    } catch (err: any) {
+      setError("Failed to resend OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ''));
 
@@ -93,44 +121,15 @@ export const BoardingLogin = () => {
       <div id="recaptcha-container"></div>
       
       {showOtpInput ? (
-        <form className="space-y-5 font-sans" onSubmit={handleVerifyOtp}>
-          {error && (
-            <div className="p-4 bg-red-50 text-red-600 border border-red-200 rounded-[16px] text-sm font-medium mb-4">
-              {error}
-            </div>
-          )}
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-[#7A7A7A] uppercase tracking-wider ml-1">Enter 6-Digit Staff OTP</label>
-            <div className="relative group form_inputContainer">
-              <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7A7A7A] group-focus-within:text-[#2D2D2D] transition-colors" />
-              <input 
-                type="text" 
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="123456" 
-                maxLength={6}
-                className="w-full h-12 bg-white border border-[#EBE6DF] rounded-[16px] pl-11 pr-4 tracking-[0.5em] text-center focus:outline-none focus:ring-2 focus:ring-[#2D2D2D]/20 focus:border-[#2D2D2D]/50 transition-all shadow-sm"
-                required
-              />
-            </div>
-          </div>
-          <div className="flex gap-3 mt-6 flex-col">
-            <button 
-              disabled={isLoading}
-              type="submit"
-              className="w-full h-12 bg-[#2D2D2D] text-white font-bold rounded-[16px] shadow-md hover:bg-black transition-colors flex items-center justify-center gap-2"
-            >
-              {isLoading ? <Loader2 className="animate-spin" /> : "Verify Staff OTP"}
-            </button>
-            <button 
-              type="button"
-              onClick={() => { setShowOtpInput(false); setConfirmationResult(null); }}
-              className="w-full bg-white text-slate-600 font-bold py-3 rounded-[16px] border border-[#EBE6DF] hover:bg-slate-50 transition-all"
-            >
-              Change Staff Phone Number
-            </button>
-          </div>
-        </form>
+        <OtpVerificationUI 
+          otp={otp}
+          setOtp={setOtp}
+          isLoading={isLoading}
+          onSubmit={handleVerifyOtp}
+          onCancel={() => { setShowOtpInput(false); setConfirmationResult(null); }}
+          onResend={handleResendOtp}
+          resendTimer={resendTimer}
+        />
       ) : (
         <form className="space-y-5" onSubmit={handleSubmit}>
           {error && (

@@ -9,6 +9,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthP
 import type { ConfirmationResult } from "firebase/auth";
 import { collection, addDoc, getDocs, query, where, limit } from "firebase/firestore";
 import { setupRecaptcha, sendOTP, verifyOTP, loginWithGoogle } from "../../services/auth";
+import { OtpVerificationUI } from "../../components/auth/OtpVerificationUI";
 
 const SERVICE_INFO: Record<string, { title: string, desc: string, icon: string }> = {
   boarding: { title: "Pet Boarding", desc: "A safe, comfortable, and loving home away from home for your pets. Our trusted boarding partners provide clean accommodations, personalized care, nutritious meals, regular exercise, and 24/7 supervision to ensure your pet feels happy and secure while you're away.", icon: "🏠" },
@@ -66,6 +67,41 @@ export const UserLogin = () => {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  useEffect(() => {
+    let interval: any;
+    if (showOtpInput && resendTimer > 0) {
+      interval = setInterval(() => setResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [showOtpInput, resendTimer]);
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+    try {
+      setIsLoading(true);
+      setError("");
+      
+      const loginIdentifier = formData.email.trim();
+      const validPhone = isPhone(loginIdentifier);
+      const phoneNumber = validPhone ? loginIdentifier : formData.phone;
+
+      if (!phoneNumber) {
+        setError("Phone number is required for OTP.");
+        return;
+      }
+
+      const verifier = setupRecaptcha("recaptcha-container");
+      const result = await sendOTP(phoneNumber, verifier);
+      setConfirmationResult(result);
+      setResendTimer(60);
+    } catch (err: any) {
+      setError("Failed to resend OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const isEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.trim());
   const isPhone = (input: string) => /^\+?[0-9]{10,15}$/.test(input.replace(/[\s-]/g, ''));
@@ -305,33 +341,15 @@ export const UserLogin = () => {
           <div id="recaptcha-container"></div>
 
           {showOtpInput ? (
-            <form onSubmit={handleVerifyOtp} className="space-y-4">
-              <div className="relative group">
-                <input 
-                  type="text" 
-                  placeholder="Enter 6-digit OTP"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all text-center tracking-[0.5em] text-2xl shadow-sm"
-                  maxLength={6}
-                  required
-                />
-              </div>
-              <button 
-                type="submit" 
-                disabled={isLoading}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2 mt-4 hover:shadow-purple-600/40 active:scale-[0.98]"
-              >
-                {isLoading ? <Loader2 className="animate-spin" /> : "Verify OTP"}
-              </button>
-              <button 
-                type="button" 
-                onClick={() => { setShowOtpInput(false); setConfirmationResult(null); }}
-                className="w-full bg-white text-slate-600 font-bold py-3 rounded-2xl transition-all mt-2"
-              >
-                Change Mobile Number
-              </button>
-            </form>
+            <OtpVerificationUI 
+              otp={otp}
+              setOtp={setOtp}
+              isLoading={isLoading}
+              onSubmit={handleVerifyOtp}
+              onCancel={() => { setShowOtpInput(false); setConfirmationResult(null); }}
+              onResend={handleResendOtp}
+              resendTimer={resendTimer}
+            />
           ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (

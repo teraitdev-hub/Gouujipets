@@ -4,7 +4,8 @@ import { useAuthStore } from "../../store/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../../lib/firebase";
 import { loginWithGoogle, setupRecaptcha, sendOTP, verifyOTP } from "../../services/auth";
-import { useState } from "react";
+import { OtpVerificationUI } from "./OtpVerificationUI";
+import { useState, useEffect } from "react";
 
 export const LoginModal = () => {
   const { isLoginModalOpen, closeLoginModal } = useAuthStore();
@@ -18,6 +19,33 @@ export const LoginModal = () => {
   const [otp, setOtp] = useState("");
   const [confirmationResult, setConfirmationResult] = useState<any>(null);
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+
+  useEffect(() => {
+    let interval: any;
+    if (showOtpInput && resendTimer > 0) {
+      interval = setInterval(() => setResendTimer(prev => prev - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [showOtpInput, resendTimer]);
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0) return;
+    try {
+      setIsLoading(true);
+      setError("");
+      const cleanPhone = phone.replace(/\D/g, '');
+      const recaptchaVerifier = setupRecaptcha("modal-recaptcha-container");
+      const formattedPhone = phone.startsWith('+') ? phone : `+91${cleanPhone.slice(-10)}`;
+      const result = await sendOTP(formattedPhone, recaptchaVerifier);
+      setConfirmationResult(result);
+      setResendTimer(60);
+    } catch (err: any) {
+      setError("Failed to resend OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleGoogleLogin = async () => {
     try {
@@ -172,41 +200,15 @@ export const LoginModal = () => {
 
               {loginTab === 'otp' ? (
                 showOtpInput ? (
-                  <form onSubmit={handleVerifyOtp} className="space-y-4">
-                    <div className="text-center mb-2">
-                      <p className="text-xs text-slate-500 font-medium">Enter the 6-digit OTP sent to</p>
-                      <p className="text-sm font-black text-slate-900">{phone.startsWith('+') ? phone : `+91 ${phone}`}</p>
-                    </div>
-                    <input 
-                      type="text" 
-                      placeholder="• • • • • •"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                      className="w-full bg-slate-50 border border-purple-300 rounded-2xl px-5 py-3.5 font-black outline-none focus:ring-2 focus:ring-purple-600/30 focus:border-purple-600 transition-all text-center tracking-[0.5em] text-xl sm:text-2xl shadow-inner min-h-[48px]"
-                      maxLength={6}
-                      autoFocus
-                      required
-                    />
-                    <button 
-                      type="submit" 
-                      disabled={isLoading}
-                      className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-purple-600/25 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
-                    >
-                      {isLoading ? <Loader2 className="animate-spin" size={18} /> : (
-                        <>
-                          <span>Verify & Login</span>
-                          <CheckCircle2 size={18} />
-                        </>
-                      )}
-                    </button>
-                    <button 
-                      type="button" 
-                      onClick={resetOtpFlow}
-                      className="w-full text-xs text-slate-500 hover:text-slate-800 font-bold py-2 transition-colors text-center"
-                    >
-                      ← Change Mobile Number
-                    </button>
-                  </form>
+                  <OtpVerificationUI 
+                    otp={otp}
+                    setOtp={setOtp}
+                    isLoading={isLoading}
+                    onSubmit={handleVerifyOtp}
+                    onCancel={resetOtpFlow}
+                    onResend={handleResendOtp}
+                    resendTimer={resendTimer}
+                  />
                 ) : (
                   <form onSubmit={handleSendOtp} className="space-y-4">
                     <div className="relative group">
