@@ -397,7 +397,6 @@ export const PartnerLogin = () => {
           city: formData.city,
           state: formData.state,
           pincode: formData.pincode,
-          gstNumber: formData.gstNumber,
           latitude: lat,
           longitude: lng,
           certificates: certUrls,
