@@ -26,7 +26,7 @@ export const PartnerLogin = () => {
   // Default to Register if they clicked a specific service to partner for
   const [isLogin, setIsLogin] = useState(serviceParam ? false : true);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", password: "", phone: "", businessName: "", street: "", city: "", state: "", pincode: "", gstNumber: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", phone: "", businessName: "", street: "", city: "", state: "", pincode: "" });
   const [certificates, setCertificates] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -759,20 +759,6 @@ export const PartnerLogin = () => {
                   </div>
 
                   <div className="pt-2">
-                    
-                  <div className="pt-4 pb-2">
-                    <h3 className="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2">Enterprise Information</h3>
-                  </div>
-                  <div className="relative">
-                    <input 
-                      type="text" 
-                      placeholder="GST Number / Tax ID"
-                      value={formData.gstNumber || ""}
-                      onChange={(e) => setFormData({...formData, gstNumber: e.target.value})}
-                      className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 font-medium outline-none focus:ring-2 focus:ring-purple-600/20 focus:border-purple-600 transition-all placeholder:text-slate-400 shadow-sm"
-                      required={!isLogin}
-                    />
-                  </div>
 
                     <label className="block text-xs font-bold text-slate-600 uppercase mb-2 mt-4">Business Licenses & Govt ID (Required)</label>
                     <div className="w-full border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50 hover:bg-slate-100 transition-all">
