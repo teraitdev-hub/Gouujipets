@@ -174,14 +174,7 @@ export const PartnerLogin = () => {
             setIsLoading(false);
             return;
           }
-          if (!pendingGoogleUser) {
-        const passwordCheck = checkPasswordStrength(formData.password);
-        if (!passwordCheck.isStrong) {
-          setError(passwordCheck.errors.join(" "));
-          setIsLoading(false);
-          return;
-        }
-      }
+          // Password check removed because Registration no longer collects password
     }
 
     if (validPhone) {
@@ -235,6 +228,11 @@ export const PartnerLogin = () => {
           }
           
           // Active — let them in
+          // Record login time to trigger backend audit log
+          await setDoc(doc(db, "users", userCredential.user.uid), {
+            lastLogin: new Date().toISOString()
+          }, { merge: true });
+
           await useAuthStore.getState().loadUser();
           navigate("/partner/dashboard");
         } catch (signInErr: any) {
@@ -262,10 +260,10 @@ export const PartnerLogin = () => {
         let lng = 78.9629;
         try {
           if (certificates.length === 0) {
-          setError("Please upload at least one business license or government ID.");
-          setIsLoading(false);
-          return;
-        }
+            setError("Please upload at least one business license or government ID.");
+            setIsLoading(false);
+            return;
+          }
           try {
             const addressStr = `${formData.street}, ${formData.city}, ${formData.state}, ${formData.pincode}`;
             const geocodeRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressStr)}`);
@@ -283,27 +281,13 @@ export const PartnerLogin = () => {
             lng = mapLocation.lng;
           }
 
-          let uid = "";
-          
-          if (pendingGoogleUser) {
-            uid = pendingGoogleUser.uid;
-          } else {
-            const { isDisposableEmail } = await import('../../utils/security');
-            if (isDisposableEmail(finalEmail)) {
-               setError("Temporary email addresses are not supported.");
-               setIsLoading(false);
-               return;
-            }
-            const { registerWithEmail } = await import('../../services/auth');
-            const userCredential = await registerWithEmail(finalEmail, formData.password, formData.name, 'partner');
-            uid = userCredential.user.uid;
-          }
-          
           let certUrls: string[] = [];
           if (certificates.length > 0) {
             try {
+              // We don't have a UID yet, so we use a temp id or business name
+              const tempId = formData.businessName.replace(/[^a-zA-Z0-9]/g, '') + Date.now();
               for (const file of certificates) {
-                const storageRef = ref(storage, `certificates/${uid}/${Date.now()}_${file.name}`);
+                const storageRef = ref(storage, `certificates/${tempId}/${Date.now()}_${file.name}`);
                 await uploadBytes(storageRef, file);
                 const url = await getDownloadURL(storageRef);
                 certUrls.push(url);
@@ -313,16 +297,10 @@ export const PartnerLogin = () => {
             }
           }
 
-          await setDoc(doc(db, "users", uid), {
-            full_name: formData.name,
-            phone: validPhone ? loginIdentifier : formData.phone,
-            email: pendingGoogleUser ? pendingGoogleUser.email : (validPhone ? '' : loginIdentifier),
-            role: "partner",
-            loginMethod: pendingGoogleUser ? 'google' : 'email'
-          }, { merge: true });
-
           const bizRef = await addDoc(collection(db, "businesses"), {
-            owner_id: uid,
+            ownerName: formData.name,
+            email: finalEmail,
+            phone: validPhone ? loginIdentifier : formData.phone,
             name: formData.businessName || `${formData.name}'s Facility`,
             type: facilityTypes[0] || "boarding",
             services: facilityTypes,
@@ -338,68 +316,15 @@ export const PartnerLogin = () => {
             title: "New Partner Registration Pending",
             message: `${formData.name} registered a new facility (${facilityTypes.join(", ")}) requiring admin verification.`,
             business_id: bizRef.id,
-            owner_id: uid,
             type: "partner_registration",
             read: false,
             created_at: new Date().toISOString()
           });
 
-          await signOut(auth);
-          setPendingGoogleUser(null);
-          setShowApprovalModal(true);
-          await signOut(auth);
           setPendingGoogleUser(null);
           setShowApprovalModal(true);
         } catch (regErr: any) {
-          if (regErr.code === "auth/email-already-in-use") {
-            try {
-              // Try to sign in. If it succeeds, it means they are an existing auth user missing a firestore document (e.g. after a wipe)
-              const userCredential = await signInWithEmailAndPassword(auth, finalEmail, formData.password);
-              const uid = userCredential.user.uid;
-              
-              // Proceed to create their missing documents using the registration form data
-              await setDoc(doc(db, "users", uid), {
-                full_name: formData.name,
-                phone: validPhone ? loginIdentifier : formData.phone,
-                email: pendingGoogleUser ? pendingGoogleUser.email : (validPhone ? '' : loginIdentifier),
-                role: "partner",
-                loginMethod: pendingGoogleUser ? 'google' : 'email'
-              }, { merge: true });
-
-              const bizRef = await addDoc(collection(db, "businesses"), {
-                owner_id: uid,
-                name: formData.businessName || `${formData.name}'s Facility`,
-                type: facilityTypes[0] || "boarding",
-                services: facilityTypes,
-                address: `${formData.street}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
-                latitude: lat, // from outer scope
-                longitude: lng, // from outer scope
-                certificates: [], // skip certs for recovery
-                status: "pending",
-                created_at: new Date().toISOString()
-              });
-
-              await addDoc(collection(db, "admin_notifications"), {
-                title: "New Partner Registration Pending",
-                message: `${formData.name} registered a new facility (${facilityTypes.join(", ")}) requiring admin verification.`,
-                business_id: bizRef.id,
-                owner_id: uid,
-                type: "partner_registration",
-                read: false,
-                created_at: new Date().toISOString()
-              });
-
-              await signOut(auth);
-              setPendingGoogleUser(null);
-              setShowApprovalModal(true);
-            } catch (recoveryErr) {
-               // If sign in fails, standard flow
-               setIsLogin(true);
-               setError("This email is already registered. We've switched you to Sign In. Please enter your password to log in, or use 'Forgot?' to reset it.");
-            }
-          } else {
-            setError(regErr.message || "Registration failed.");
-          }
+          setError(regErr.message || "Registration failed.");
         }
       }
     } catch (err: any) {
@@ -675,34 +600,34 @@ export const PartnerLogin = () => {
                     </div>
                   </div>
 
-                  <div className="pt-2">
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="block text-xs font-bold text-slate-600 uppercase">Password</label>
-                      {isLogin && (
+                  {isLogin && (
+                    <div className="pt-2">
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="block text-xs font-bold text-slate-600 uppercase">Password</label>
                         <Link to="/forgot-password" className="text-xs font-semibold text-violet-600 hover:text-violet-700">
                           Forgot?
                         </Link>
-                      )}
+                      </div>
+                      <div className="relative">
+                        <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          value={formData.password}
+                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                          placeholder="••••••••"
+                          className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
                     </div>
-                    <div className="relative">
-                      <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        placeholder="••••••••"
-                        className="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                      >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                  </div>
+                  )}
                 </>
               )}
 

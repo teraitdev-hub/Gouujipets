@@ -3,6 +3,8 @@ import { Building2, Search, Filter, X } from "lucide-react";
 import { db } from "../../lib/firebase";
 import { collection, getDocs, getDoc, query, orderBy, doc, updateDoc, addDoc, onSnapshot } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
+import { functions } from "../../lib/firebase";
+import { httpsCallable } from "firebase/functions";
 
 export const AdminBusinesses = () => {
   const [businesses, setBusinesses] = useState<any[]>([]);
@@ -67,10 +69,18 @@ export const AdminBusinesses = () => {
   const handleUpdateStatus = async (businessId: string, newStatus: string, ownerId: any) => {
     if (!window.confirm(`Are you sure you want to change status to "${newStatus}" for this facility?`)) return;
     try {
+      if (newStatus === 'active' || newStatus === 'approved') {
+        const approveFn = httpsCallable(functions, 'approvePartnerApplication');
+        await approveFn({ businessId });
+        setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: 'approved' } : b));
+        alert('Facility approved and secure activation email dispatched!');
+        return;
+      }
+
       await updateDoc(doc(db, 'businesses', businessId), { status: newStatus });
       setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: newStatus } : b));
       
-      const loginUrl = `${window.location.origin}/partner/login?approved=true`;
+      const loginUrl = `${window.location.origin}/partner/login`;
       
       let recipient = 'partner@example.com';
       if (ownerId) {
@@ -90,7 +100,6 @@ export const AdminBusinesses = () => {
       const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
       if (serviceId && templateId && publicKey && recipient !== 'partner@example.com') {
-        const statusText = newStatus === 'active' || newStatus === 'approved' ? 'Approved! 🎉' : 'Status Update';
         try {
           await emailjs.send(
             serviceId,
@@ -98,8 +107,8 @@ export const AdminBusinesses = () => {
             {
               to_email: recipient,
               to_name: "Partner",
-              subject: `GouujiPets Partner Account ${statusText}`,
-              message: `Your GouujiPets Partner Account has been ${newStatus}. Click here to log in to your Partner Dashboard: ${loginUrl}`
+              subject: `GouujiPets Partner Account Status Update`,
+              message: `Your GouujiPets Partner Account status has been updated to: ${newStatus}.`
             },
             publicKey
           );
@@ -111,16 +120,16 @@ export const AdminBusinesses = () => {
       await addDoc(collection(db, 'mail'), {
         to: recipient,
         message: {
-          subject: `GouujiPets Partner Account ${newStatus === 'active' || newStatus === 'approved' ? 'Approved! 🎉' : 'Status Update'}`,
-          text: `Your GouujiPets Partner Account has been ${newStatus}. Click here to log in to your Partner Dashboard: ${loginUrl}`,
-          html: `<p>Your GouujiPets Partner Account has been ${newStatus}.</p><p><a href="${loginUrl}" style="background-color: #7c3aed; color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Click Here to Login to Partner Dashboard</a></p>`
+          subject: `GouujiPets Partner Account Status Update`,
+          text: `Your GouujiPets Partner Account status has been updated to: ${newStatus}.`,
+          html: `<p>Your GouujiPets Partner Account status has been updated to: <strong>${newStatus}</strong>.</p>`
         },
         created_at: new Date().toISOString()
       });
       alert(`Facility marked as ${newStatus}. Status update processed.`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to update status.");
+      alert(`Failed to update status: ${err.message || 'Unknown error'}`);
     }
   };
 

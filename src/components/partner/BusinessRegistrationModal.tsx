@@ -49,7 +49,7 @@ export const BusinessRegistrationModal = ({ isOpen, onClose, onSuccess, ownerId,
         priceFrom: Number(formData.priceFrom) || 999,
         lat: Number(formData.lat) || 20.5937,
         lng: Number(formData.lng) || 78.9629,
-        status: 'active',
+        status: 'pending',
         created_at: new Date().toISOString()
       };
 

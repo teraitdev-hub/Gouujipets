@@ -30,6 +30,7 @@ import { UserLogin } from "./pages/Auth/UserLogin";
 import { CompleteRegistration } from "./pages/Auth/CompleteRegistration";
 import { VerifyEmail } from "./pages/Auth/VerifyEmail";
 import { PartnerLogin } from "./pages/Auth/PartnerLogin";
+import { PartnerActivate } from "./pages/Auth/PartnerActivate";
 import { AdminLogin } from "./pages/Auth/AdminLogin";
 import { ForgotPassword } from "./pages/Auth/ForgotPassword";
 import { ResetPassword } from "./pages/Auth/ResetPassword";
@@ -116,9 +117,11 @@ function App() {
           <Route path="/splash" element={<Splash />} />
           <Route path="/login/user" element={<UserLogin />} />
           <Route path="/complete-registration" element={<CompleteRegistration />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/partner/login" element={<PartnerLogin />} />
-          <Route path="/login/admin" element={<AdminLogin />} />
+          <Route path="/partner/activate" element={<PartnerActivate />} />
+          <Route path="/auth/complete" element={<CompleteRegistration />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
