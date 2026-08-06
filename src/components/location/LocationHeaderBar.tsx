@@ -23,9 +23,10 @@ export const LocationHeaderBar: React.FC = () => {
   }, [locationPermission, setShowPermissionModal]);
 
   const displayCity =
-    currentLocation?.area || currentLocation?.city
+    currentLocation?.formatted_address ||
+    (currentLocation?.area || currentLocation?.city
       ? `${currentLocation.area || ''}${currentLocation.area && currentLocation.city ? ', ' : ''}${currentLocation.city || ''}`
-      : null;
+      : null);
 
   return (
     <>
@@ -45,7 +46,7 @@ export const LocationHeaderBar: React.FC = () => {
         </div>
         <div className="flex flex-col items-start min-w-0">
           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-            {currentLocation ? 'Delivering to' : 'Set Location'}
+            {currentLocation ? 'Your Location' : 'Set Location'}
           </span>
           <div className="flex items-center gap-0.5">
             {isDetecting ? (
@@ -53,7 +54,10 @@ export const LocationHeaderBar: React.FC = () => {
                 <Loader2 size={10} className="animate-spin" /> Detecting...
               </span>
             ) : (
-              <span className="text-xs font-black text-slate-900 truncate max-w-[140px] sm:max-w-[200px]">
+              <span 
+                className="text-xs font-black text-slate-900 truncate max-w-[140px] sm:max-w-[200px]"
+                title={currentLocation?.formatted_address || ''}
+              >
                 {displayCity || 'Select Location'}
               </span>
             )}
