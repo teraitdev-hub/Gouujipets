@@ -76,7 +76,7 @@ export const LoginModal = () => {
       const formattedPhone = phone.startsWith('+') ? phone : `+91${cleanPhone.slice(-10)}`;
       const result = await sendOTP(formattedPhone, recaptchaVerifier);
       setConfirmationResult(result);
-      setShowOtpInput(true);
+      setShowOtpInput(true); setResendTimer(60);
     } catch (err: any) {
       console.error("OTP Send Error:", err);
       setError(err.message || "Failed to send OTP. Please check your network or phone number.");

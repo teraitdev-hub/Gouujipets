@@ -189,7 +189,7 @@ export const PartnerLogin = () => {
         const recaptchaVerifier = setupRecaptcha("recaptcha-container");
         const confirmation = await sendOTP(loginIdentifier, recaptchaVerifier);
         setConfirmationResult(confirmation);
-        setShowOtpInput(true);
+        setShowOtpInput(true); setResendTimer(60);
         setSuccessMsg(`OTP sent to ${loginIdentifier}`);
       } catch (err: any) {
         setError(err.message || "Failed to send OTP. Please check the number.");
