@@ -70,7 +70,8 @@ export const AdminBusinesses = () => {
     if (!window.confirm(`Are you sure you want to change status to "${newStatus}" for this facility?`)) return;
     try {
       // First resolve the recipient email properly from the ownerId
-      let recipient = b.email || '';
+      const biz = businesses.find(bz => bz.id === businessId);
+      let recipient = biz?.email || '';
       if (ownerId) {
         const ownerUid = typeof ownerId === 'string' ? ownerId : (ownerId?.id || ownerId?.uid);
         if (ownerUid) {
@@ -180,7 +181,8 @@ export const AdminBusinesses = () => {
   const handleResendActivation = async (businessId: string, ownerId: any) => {
     if (!window.confirm(`Resend activation email to this partner?`)) return;
     try {
-      let recipient = '';
+      const biz = businesses.find(bz => bz.id === businessId);
+      let recipient = biz?.email || '';
       if (ownerId) {
         const ownerUid = typeof ownerId === 'string' ? ownerId : (ownerId?.id || ownerId?.uid);
         if (ownerUid) {
