@@ -37,8 +37,8 @@ export const onBookingUpdate = functions.firestore
     if (newData.status !== previousData.status) {
       console.log(`Booking ${bookingId} status changed from ${previousData.status} to ${newData.status}`);
       
-      const customerId = newData.customerId;
-      const partnerId = newData.partnerId;
+      // const customerId = newData.customerId;
+      // const partnerId = newData.partnerId;
 
       // Fetch Customer and Partner for FCM tokens
       // const customerDoc = await db.collection("users").doc(customerId).get();
