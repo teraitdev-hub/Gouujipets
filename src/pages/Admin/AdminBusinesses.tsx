@@ -117,7 +117,15 @@ export const AdminBusinesses = () => {
         }
         
         if (!sentViaEmailJs) {
-           prompt("Facility approved, and the email request was sent to Firebase! Since email delivery might be delayed or misconfigured without SMTP, you can also copy the activation link below and send it manually:", response.data?.activationLink);
+           try {
+             const { sendPasswordResetEmail } = await import('firebase/auth');
+             const { auth } = await import('../../lib/firebase');
+             await sendPasswordResetEmail(auth, finalEmail);
+             alert(`Built-in Firebase email sent successfully to ${finalEmail}!`);
+           } catch (firebaseErr: any) {
+             console.error("Firebase native email failed:", firebaseErr);
+             prompt("Facility approved, and the email request was sent to Firebase! Since email delivery might be delayed or misconfigured without SMTP, you can also copy the activation link below and send it manually:", response.data?.activationLink);
+           }
         }
 
         setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: 'approved' } : b));
@@ -217,7 +225,15 @@ export const AdminBusinesses = () => {
       }
       
       if (!sentViaEmailJs) {
-         prompt("Email request sent to Firebase successfully! If the partner does not receive it due to a missing Firebase SMTP configuration, you can manually copy and send them this activation link:", response.data?.activationLink);
+         try {
+           const { sendPasswordResetEmail } = await import('firebase/auth');
+           const { auth } = await import('../../lib/firebase');
+           await sendPasswordResetEmail(auth, finalEmail);
+           alert(`Built-in Firebase email sent successfully to ${finalEmail}!`);
+         } catch (firebaseErr: any) {
+           console.error("Firebase native email failed:", firebaseErr);
+           prompt("Email request sent to Firebase successfully! If the partner does not receive it due to a missing Firebase SMTP configuration, you can manually copy and send them this activation link:", response.data?.activationLink);
+         }
       }
     } catch (err: any) {
       console.error(err);
