@@ -118,7 +118,9 @@ function App() {
           <Route path="/login/user" element={<UserLogin />} />
           <Route path="/complete-registration" element={<CompleteRegistration />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/login/admin" element={<Navigate to="/admin/login" replace />} />
           <Route path="/partner/login" element={<PartnerLogin />} />
+          <Route path="/login/partner" element={<Navigate to="/partner/login" replace />} />
           <Route path="/partner/activate" element={<PartnerActivate />} />
           <Route path="/auth/complete" element={<CompleteRegistration />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
