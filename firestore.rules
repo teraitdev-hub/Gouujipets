@@ -75,8 +75,9 @@ service cloud.firestore {
       // Public can read businesses
       allow read: if true; 
       
-      // Authenticated verified users can create a business (Application phase)
-      allow create: if isVerifiedUser() && request.resource.data.owner_id == request.auth.uid;
+      // Allow guests to submit pending applications, or verified users to create businesses
+      allow create: if (isVerifiedUser() && request.resource.data.owner_id == request.auth.uid) || 
+                       (request.resource.data.status == 'pending' && !('owner_id' in request.resource.data));
       
       // Owners can update their business. Admins can update any business (e.g., approving status).
       allow update: if (isVerifiedUser() && resource.data.owner_id == request.auth.uid) || isAdmin() || isSuperAdmin();
@@ -135,6 +136,13 @@ service cloud.firestore {
       allow read, update: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow create: if isAuthenticated();
       allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // Admin Notifications Collection
+    match /admin_notifications/{notifId} {
+      // Admins can read/write. Guests can create partner_registration notifications.
+      allow read, update, delete: if isAdmin() || isSuperAdmin();
+      allow create: if (isAdmin() || isSuperAdmin()) || request.resource.data.type == 'partner_registration';
     }
 
     // Catch-all for remaining collections that need basic auth protection

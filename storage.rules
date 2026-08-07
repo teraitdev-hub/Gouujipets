@@ -13,6 +13,12 @@ service firebase.storage {
       allow write: if isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Business Certificates (Registration)
+    match /certificates/{tempId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if true; // Allow guests to upload during registration
+    }
+
     // Pet Photos
     match /pets/{userId}/{allPaths=**} {
       allow read: if true;

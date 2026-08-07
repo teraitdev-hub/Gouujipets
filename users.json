@@ -1,110 +1,63 @@
-{"users": [
 {
-  "localId": "BPBZCj0NV6UIznBbJ76ceO9ekB12",
-  "email": "rachanuthappa@gmail.com",
-  "emailVerified": false,
-  "passwordHash": "bfhLVrWtX6nGZg4G7DoAc3ac4KCyrZnrBX1Bov6t5qnFGkDv+x0PhRc6O6dGbvEOXfZ2Nsz9F2IYlEtj6nao0w==",
-  "salt": "SV2TqTB0XKd5SQ==",
-  "lastSignedInAt": "1785483581262",
-  "createdAt": "1785480871970",
-  "providerUserInfo": []
-},
-{
-  "localId": "IgqlhN5nHcNGzL7Owzf67Jf1Kct2",
-  "lastSignedInAt": "1785586787228",
-  "createdAt": "1785586787228",
-  "phoneNumber": "+919071710000",
-  "providerUserInfo": []
-},
-{
-  "localId": "NcWF1lxC3TN5qxcdAkktv8Zo4Qi1",
-  "email": "lewissanorarishu26@gmail.com",
-  "emailVerified": false,
-  "passwordHash": "a7ENZa4a7tPd/Y9EerTLM4lXC5NfcvZdZKtrPcENcU7JpQO0Vzdzgbb++yf7adtUNBq0fZ3I/nh/uoIG2Df/uw==",
-  "salt": "1rSuSO4ACl9Dvw==",
-  "displayName": "rgtrh",
-  "lastSignedInAt": "1785489342258",
-  "createdAt": "1785489342258",
-  "providerUserInfo": []
-},
-{
-  "localId": "YH8fuYU9JWUxYGJJ8TtX973qg5g2",
-  "email": "anita.rao@gouujipets.com",
-  "emailVerified": false,
-  "passwordHash": "x5QJKkx/OCqhETvMg36RhDEBEf2ooR67J4Jfr75obLYucUuJU8Q30JbSjDOpMS078W2EQa2fWjIXV4m9pt/WYw==",
-  "salt": "NJ6JqigGRguAog==",
-  "lastSignedInAt": "1785734896260",
-  "createdAt": "1785734896260",
-  "providerUserInfo": []
-},
-{
-  "localId": "bN8wXu7jyOSTcck5ZLZGIjWbcbG3",
-  "email": "priya.patel@gmail.com",
-  "emailVerified": false,
-  "passwordHash": "3jNmEFbZdFs0M5w++B4wA3aC0qhcFaBKhK95IKe0WAHM/RRyPIuFTTKj/W1zVC9hQZSDqE/l2FGJuWextY4dfA==",
-  "salt": "zy7a6O/JTzjDfQ==",
-  "lastSignedInAt": "1785734897086",
-  "createdAt": "1785734897086",
-  "providerUserInfo": []
-},
-{
-  "localId": "bUYrcS7cywP3Frqq3ex6JHCTl9w2",
-  "email": "admin@gouujipets.com",
-  "emailVerified": false,
-  "passwordHash": "EKFDfILVyRzkEf/P39dw0BGpC/8rhdUm8Xx149VE8F1gPMAtFz86x9VqqfDqWwZpke4PyWyoZtHxowQXFgtqcA==",
-  "salt": "L+g2nkkGUG1foQ==",
-  "lastSignedInAt": "1785736459646",
-  "createdAt": "1785734894292",
-  "providerUserInfo": []
-},
-{
-  "localId": "cEUzwcnqLvVdQZFZBeD0VOjkxvU2",
-  "email": "admin@gouuji.com",
-  "emailVerified": false,
-  "passwordHash": "aeP4Rf04MxpT2W5Xz7LgdaSHxWKfNgPlSlBX0lyw3RO6nl5TzPJ3R29rwyqkprv8AiAKookwRnmq2W+/3fBCAQ==",
-  "salt": "pUri2qEuSHDCPg==",
-  "lastSignedInAt": "1785482103551",
-  "createdAt": "1785482103551",
-  "providerUserInfo": []
-},
-{
-  "localId": "eDe279YkwNUR9HTGjVT7Hpq67V72",
-  "email": "dr.sharma@gouujipets.com",
-  "emailVerified": false,
-  "passwordHash": "jw3Pm9Dv6rbOXg0ITXZccYhDOkIkI3IVGN/DF7NJiXgBrshThh98Fifa+QRCbAH3KVSV3BBAUsmAzatsY+kPsg==",
-  "salt": "K6YAA5k+HZPU5Q==",
-  "lastSignedInAt": "1785734895296",
-  "createdAt": "1785734895296",
-  "providerUserInfo": []
-},
-{
-  "localId": "oEskeq0xcpRmkK2MuZXSkiCfwVD2",
-  "email": "rishuriha2605@gmail.com",
-  "emailVerified": true,
-  "passwordHash": "1OZAZfNxdM1TOXvgz175RpIeATOMfWfRBSIYzkl6QrN6MpxGdpEjliEvlEt4L7rGPBlf+eUulOazogP/NSLTeQ==",
-  "salt": "JmXlQyBzxTTmxw==",
-  "displayName": "Rishal Rihanna",
-  "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKVqr9hYSfPHbVruRpzKher4hykAmWdIzZtcpyVa9TdJEzX_Ko=s96-c",
-  "lastSignedInAt": "1785571475846",
-  "createdAt": "1785559176530",
-  "phoneNumber": "+919901801307",
-  "providerUserInfo": [
+  "users": [
     {
-      "providerId": "google.com",
-      "rawId": "107095573157394153882",
+      "localId": "BPBZCj0NV6UIznBbJ76ceO9ekB12",
+      "email": "rachanuthappa@gmail.com",
+      "emailVerified": false,
+      "passwordHash": "bfhLVrWtX6nGZg4G7DoAc3ac4KCyrZnrBX1Bov6t5qnFGkDv+x0PhRc6O6dGbvEOXfZ2Nsz9F2IYlEtj6nao0w==",
+      "salt": "SV2TqTB0XKd5SQ==",
+      "lastSignedInAt": "1785483581262",
+      "createdAt": "1785480871970",
+      "providerUserInfo": []
+    },
+    {
+      "localId": "IgqlhN5nHcNGzL7Owzf67Jf1Kct2",
+      "lastSignedInAt": "1785586787228",
+      "createdAt": "1785586787228",
+      "phoneNumber": "+919071710000",
+      "providerUserInfo": []
+    },
+    {
+      "localId": "NcWF1lxC3TN5qxcdAkktv8Zo4Qi1",
+      "email": "lewissanorarishu26@gmail.com",
+      "emailVerified": false,
+      "passwordHash": "a7ENZa4a7tPd/Y9EerTLM4lXC5NfcvZdZKtrPcENcU7JpQO0Vzdzgbb++yf7adtUNBq0fZ3I/nh/uoIG2Df/uw==",
+      "salt": "1rSuSO4ACl9Dvw==",
+      "displayName": "rgtrh",
+      "lastSignedInAt": "1785489342258",
+      "createdAt": "1785489342258",
+      "providerUserInfo": []
+    },
+    {
+      "localId": "cEUzwcnqLvVdQZFZBeD0VOjkxvU2",
+      "email": "admin@gouuji.com",
+      "emailVerified": false,
+      "passwordHash": "aeP4Rf04MxpT2W5Xz7LgdaSHxWKfNgPlSlBX0lyw3RO6nl5TzPJ3R29rwyqkprv8AiAKookwRnmq2W+/3fBCAQ==",
+      "salt": "pUri2qEuSHDCPg==",
+      "lastSignedInAt": "1785482103551",
+      "createdAt": "1785482103551",
+      "providerUserInfo": []
+    },
+    {
+      "localId": "oEskeq0xcpRmkK2MuZXSkiCfwVD2",
       "email": "rishuriha2605@gmail.com",
+      "emailVerified": true,
+      "passwordHash": "1OZAZfNxdM1TOXvgz175RpIeATOMfWfRBSIYzkl6QrN6MpxGdpEjliEvlEt4L7rGPBlf+eUulOazogP/NSLTeQ==",
+      "salt": "JmXlQyBzxTTmxw==",
       "displayName": "Rishal Rihanna",
-      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKVqr9hYSfPHbVruRpzKher4hykAmWdIzZtcpyVa9TdJEzX_Ko=s96-c"
+      "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKVqr9hYSfPHbVruRpzKher4hykAmWdIzZtcpyVa9TdJEzX_Ko=s96-c",
+      "lastSignedInAt": "1785571475846",
+      "createdAt": "1785559176530",
+      "phoneNumber": "+919901801307",
+      "providerUserInfo": [
+        {
+          "providerId": "google.com",
+          "rawId": "107095573157394153882",
+          "email": "rishuriha2605@gmail.com",
+          "displayName": "Rishal Rihanna",
+          "photoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKVqr9hYSfPHbVruRpzKher4hykAmWdIzZtcpyVa9TdJEzX_Ko=s96-c"
+        }
+      ]
     }
   ]
-},
-{
-  "localId": "zV0ysFuWNdTmCUKXpGqoXbTilM33",
-  "email": "rahul.verma@gmail.com",
-  "emailVerified": false,
-  "passwordHash": "bBTXjDUjUjraDuM/Zxn8WLx4b/yMVun29o9EbCnBSodQL/v3qxTInnKibIWMQ4imG9Xa/LocsmebhLGc7RRDLA==",
-  "salt": "S4awj9V8OSEvRA==",
-  "lastSignedInAt": "1785734897914",
-  "createdAt": "1785734897914",
-  "providerUserInfo": []
-}]}
+}
