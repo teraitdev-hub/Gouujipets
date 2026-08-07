@@ -94,6 +94,7 @@ export const AdminBusinesses = () => {
         const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
         const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
         
+        let sentViaEmailJs = false;
         if (serviceId && templateId && publicKey && finalEmail) {
            try {
               await emailjs.send(
@@ -108,12 +109,16 @@ export const AdminBusinesses = () => {
                 publicKey
               );
               console.log("Sent via EmailJS");
+              sentViaEmailJs = true;
+              alert("Email sent successfully via EmailJS!");
            } catch (emailErr) {
              console.error("Failed to send activation email via EmailJS:", emailErr);
            }
         }
         
-        alert("Email sent successfully!");
+        if (!sentViaEmailJs) {
+           prompt("Facility approved, and the email request was sent to Firebase! Since email delivery might be delayed or misconfigured without SMTP, you can also copy the activation link below and send it manually:", response.data?.activationLink);
+        }
 
         setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: 'approved' } : b));
         return;
@@ -189,6 +194,7 @@ export const AdminBusinesses = () => {
       const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
       const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
       
+      let sentViaEmailJs = false;
       if (serviceId && templateId && publicKey && finalEmail) {
          try {
             await emailjs.send(
@@ -203,12 +209,16 @@ export const AdminBusinesses = () => {
               publicKey
             );
             console.log("Sent via EmailJS");
+            sentViaEmailJs = true;
+            alert("Email sent successfully via EmailJS!");
          } catch (emailErr) {
            console.error("Failed to send activation email via EmailJS:", emailErr);
          }
       }
       
-      alert("Email sent successfully!");
+      if (!sentViaEmailJs) {
+         prompt("Email request sent to Firebase successfully! If the partner does not receive it due to a missing Firebase SMTP configuration, you can manually copy and send them this activation link:", response.data?.activationLink);
+      }
     } catch (err: any) {
       console.error(err);
       alert(`Failed to resend activation: ${err.message || 'Unknown error'}`);
