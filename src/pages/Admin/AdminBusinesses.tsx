@@ -70,7 +70,7 @@ export const AdminBusinesses = () => {
     if (!window.confirm(`Are you sure you want to change status to "${newStatus}" for this facility?`)) return;
     try {
       // First resolve the recipient email properly from the ownerId
-      let recipient = 'partner@example.com';
+      let recipient = b.email || '';
       if (ownerId) {
         const ownerUid = typeof ownerId === 'string' ? ownerId : (ownerId?.id || ownerId?.uid);
         if (ownerUid) {
@@ -87,7 +87,7 @@ export const AdminBusinesses = () => {
         const approveFn = httpsCallable(functions, 'approvePartnerApplication');
         const response: any = await approveFn({ businessId, ownerEmail: recipient });
         
-        const finalEmail = recipient !== 'partner@example.com' ? recipient : response.data?.targetEmail;
+        const finalEmail = response.data?.targetEmail || recipient;
         
         // Dispatch EmailJS email if configured
         const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
@@ -180,7 +180,7 @@ export const AdminBusinesses = () => {
   const handleResendActivation = async (businessId: string, ownerId: any) => {
     if (!window.confirm(`Resend activation email to this partner?`)) return;
     try {
-      let recipient = 'partner@example.com';
+      let recipient = '';
       if (ownerId) {
         const ownerUid = typeof ownerId === 'string' ? ownerId : (ownerId?.id || ownerId?.uid);
         if (ownerUid) {
@@ -196,7 +196,7 @@ export const AdminBusinesses = () => {
       const approveFn = httpsCallable(functions, 'approvePartnerApplication');
       const response: any = await approveFn({ businessId, ownerEmail: recipient });
       
-      const finalEmail = recipient !== 'partner@example.com' ? recipient : response.data?.targetEmail;
+      const finalEmail = response.data?.targetEmail || recipient;
       
       const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
       const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
