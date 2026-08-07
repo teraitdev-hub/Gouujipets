@@ -71,7 +71,31 @@ export const AdminBusinesses = () => {
     try {
       if (newStatus === 'active' || newStatus === 'approved') {
         const approveFn = httpsCallable(functions, 'approvePartnerApplication');
-        await approveFn({ businessId });
+        const response: any = await approveFn({ businessId });
+        
+        // Dispath EmailJS email if configured
+        const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+        const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+        const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+        
+        if (serviceId && templateId && publicKey && response.data?.targetEmail) {
+           try {
+              await emailjs.send(
+                serviceId,
+                templateId,
+                {
+                  to_email: response.data.targetEmail,
+                  to_name: response.data.businessName || "Partner",
+                  subject: `Action Required: Welcome to GOUUJI Pets!`,
+                  message: `Your partner application has been approved! Please activate your account using this link (expires in 24 hours): ${response.data.activationLink}`
+                },
+                publicKey
+              );
+           } catch (emailErr) {
+             console.error("Failed to send activation email via EmailJS:", emailErr);
+           }
+        }
+
         setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: 'approved' } : b));
         alert('Facility approved and secure activation email dispatched!');
         return;

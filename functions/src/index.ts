@@ -311,7 +311,13 @@ export const approvePartnerApplication = functions.https.onCall(async (data, con
       created_at: new Date().toISOString()
     });
 
-    return { success: true, message: 'Partner approved and activation email sent.' };
+    return { 
+      success: true, 
+      message: 'Partner approved.', 
+      activationLink, 
+      targetEmail, 
+      businessName: bizData.businessName 
+    };
   } catch (error: any) {
     console.error("Approve Partner Error:", error);
     // Rethrow standard HttpsErrors
