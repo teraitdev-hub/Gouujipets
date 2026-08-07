@@ -163,6 +163,59 @@ export const AdminBusinesses = () => {
     }
   };
 
+  const handleResendActivation = async (businessId: string, ownerId: any) => {
+    if (!window.confirm(`Resend activation email to this partner?`)) return;
+    try {
+      let recipient = 'partner@example.com';
+      if (ownerId) {
+        const ownerUid = typeof ownerId === 'string' ? ownerId : (ownerId?.id || ownerId?.uid);
+        if (ownerUid) {
+          const userDoc = await getDoc(doc(db, 'users', ownerUid));
+          if (userDoc.exists() && userDoc.data()?.email) {
+            recipient = userDoc.data().email;
+          } else if (typeof ownerId === 'object' && ownerId.email) {
+            recipient = ownerId.email;
+          }
+        }
+      }
+
+      const approveFn = httpsCallable(functions, 'approvePartnerApplication');
+      const response: any = await approveFn({ businessId });
+      
+      const finalEmail = recipient !== 'partner@example.com' ? recipient : response.data?.targetEmail;
+      
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+      
+      if (serviceId && templateId && publicKey && finalEmail) {
+         try {
+            await emailjs.send(
+              serviceId,
+              templateId,
+              {
+                to_email: finalEmail,
+                to_name: response.data?.businessName || "Partner",
+                subject: `Action Required: Welcome to GOUUJI Pets!`,
+                message: `Your partner application has been approved! Please activate your account using this link (expires in 24 hours): ${response.data?.activationLink}`
+              },
+              publicKey
+            );
+            alert("Email sent successfully!");
+         } catch (emailErr) {
+           console.error("Failed to send activation email via EmailJS:", emailErr);
+           alert("Token generated, but email failed to send.");
+         }
+      } else {
+         alert("Email service is not properly configured. Cannot send email.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(`Failed to resend activation: ${err.message || 'Unknown error'}`);
+    }
+  };
+
+
   const filteredBusinesses = businesses.filter(b => {
     const q = searchQuery.toLowerCase();
     const name = b.name || '';
@@ -279,12 +332,20 @@ export const AdminBusinesses = () => {
                           </button>
                         </div>
                       ) : (
-                        <button 
-                          onClick={() => setSelectedBizForManage(facility)}
-                          className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 text-xs font-black rounded-lg transition-all shadow-sm"
-                        >
-                          Manage
-                        </button>
+                        <div className="flex flex-col gap-1.5 items-end">
+                          <button 
+                            onClick={() => handleResendActivation(facility.id, facility.owner_id)}
+                            className="px-3 py-1.5 bg-purple-50 border border-purple-200 hover:bg-purple-100 text-purple-700 text-[10px] font-black rounded-lg transition-all shadow-sm w-full sm:w-auto text-center"
+                          >
+                            Resend Email
+                          </button>
+                          <button 
+                            onClick={() => setSelectedBizForManage(facility)}
+                            className="px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-slate-700 text-xs font-black rounded-lg transition-all shadow-sm w-full sm:w-auto text-center"
+                          >
+                            Manage
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>

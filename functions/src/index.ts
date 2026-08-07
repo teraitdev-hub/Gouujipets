@@ -252,8 +252,9 @@ export const approvePartnerApplication = functions.https.onCall(async (data, con
 
     const bizData = bizDoc.data()!;
     
-    if (bizData.status === 'approved') {
-      throw new functions.https.HttpsError('failed-precondition', 'Business is already approved.');
+    if (bizData.status === 'approved' || bizData.status === 'active') {
+      // Don't throw an error, allow regeneration of the token for resending
+      console.log(`Business ${businessId} is already approved/active. Regenerating token for resend.`);
     }
 
     // Fallback email if missing
