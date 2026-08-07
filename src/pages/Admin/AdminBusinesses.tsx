@@ -110,8 +110,10 @@ export const AdminBusinesses = () => {
               alert("Email sent successfully!");
            } catch (emailErr) {
              console.error("Failed to send activation email via EmailJS:", emailErr);
-             alert("Facility approved, but email failed to send.");
+             prompt("Facility approved, but EmailJS failed. You can manually send this link to the partner:", response.data?.activationLink);
            }
+        } else {
+           prompt("Facility approved, but EmailJS is not configured! Copy this activation link and send it to the partner manually:", response.data?.activationLink);
         }
 
         setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: 'approved' } : b));
@@ -204,10 +206,10 @@ export const AdminBusinesses = () => {
             alert("Email sent successfully!");
          } catch (emailErr) {
            console.error("Failed to send activation email via EmailJS:", emailErr);
-           alert("Token generated, but email failed to send.");
+           prompt("Token generated, but EmailJS failed to send. You can manually send this link to the partner:", response.data?.activationLink);
          }
       } else {
-         alert("Email service is not properly configured. Cannot send email.");
+         prompt("EmailJS service is not configured! However, the token was generated successfully. Copy this activation link and send it to the partner manually:", response.data?.activationLink);
       }
     } catch (err: any) {
       console.error(err);
