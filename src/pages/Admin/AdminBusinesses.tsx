@@ -69,43 +69,7 @@ export const AdminBusinesses = () => {
   const handleUpdateStatus = async (businessId: string, newStatus: string, ownerId: any) => {
     if (!window.confirm(`Are you sure you want to change status to "${newStatus}" for this facility?`)) return;
     try {
-      if (newStatus === 'active' || newStatus === 'approved') {
-        const approveFn = httpsCallable(functions, 'approvePartnerApplication');
-        const response: any = await approveFn({ businessId });
-        
-        // Dispath EmailJS email if configured
-        const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-        const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-        const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-        
-        if (serviceId && templateId && publicKey && response.data?.targetEmail) {
-           try {
-              await emailjs.send(
-                serviceId,
-                templateId,
-                {
-                  to_email: response.data.targetEmail,
-                  to_name: response.data.businessName || "Partner",
-                  subject: `Action Required: Welcome to GOUUJI Pets!`,
-                  message: `Your partner application has been approved! Please activate your account using this link (expires in 24 hours): ${response.data.activationLink}`
-                },
-                publicKey
-              );
-           } catch (emailErr) {
-             console.error("Failed to send activation email via EmailJS:", emailErr);
-           }
-        }
-
-        setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: 'approved' } : b));
-        alert('Facility approved and secure activation email dispatched!');
-        return;
-      }
-
-      await updateDoc(doc(db, 'businesses', businessId), { status: newStatus });
-      setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: newStatus } : b));
-      
-      const loginUrl = `${window.location.origin}/partner/login`;
-      
+      // First resolve the recipient email properly from the ownerId
       let recipient = 'partner@example.com';
       if (ownerId) {
         const ownerUid = typeof ownerId === 'string' ? ownerId : (ownerId?.id || ownerId?.uid);
@@ -118,6 +82,48 @@ export const AdminBusinesses = () => {
           }
         }
       }
+
+      if (newStatus === 'active' || newStatus === 'approved') {
+        const approveFn = httpsCallable(functions, 'approvePartnerApplication');
+        const response: any = await approveFn({ businessId });
+        
+        const finalEmail = recipient !== 'partner@example.com' ? recipient : response.data?.targetEmail;
+        
+        // Dispatch EmailJS email if configured
+        const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+        const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+        const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+        
+        if (serviceId && templateId && publicKey && finalEmail) {
+           try {
+              await emailjs.send(
+                serviceId,
+                templateId,
+                {
+                  to_email: finalEmail,
+                  to_name: response.data?.businessName || "Partner",
+                  subject: `Action Required: Welcome to GOUUJI Pets!`,
+                  message: `Your partner application has been approved! Please activate your account using this link (expires in 24 hours): ${response.data?.activationLink}`
+                },
+                publicKey
+              );
+              alert("Email sent successfully!");
+           } catch (emailErr) {
+             console.error("Failed to send activation email via EmailJS:", emailErr);
+             alert("Facility approved, but email failed to send.");
+           }
+        }
+
+        setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: 'approved' } : b));
+        return;
+      }
+
+      await updateDoc(doc(db, 'businesses', businessId), { status: newStatus });
+      setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: newStatus } : b));
+      
+      const loginUrl = `${window.location.origin}/partner/login`;
+      
+      // recipient is already resolved above
 
       const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
       const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
