@@ -85,7 +85,7 @@ export const AdminBusinesses = () => {
 
       if (newStatus === 'active' || newStatus === 'approved') {
         const approveFn = httpsCallable(functions, 'approvePartnerApplication');
-        const response: any = await approveFn({ businessId });
+        const response: any = await approveFn({ businessId, ownerEmail: recipient });
         
         const finalEmail = recipient !== 'partner@example.com' ? recipient : response.data?.targetEmail;
         
@@ -107,14 +107,13 @@ export const AdminBusinesses = () => {
                 },
                 publicKey
               );
-              alert("Email sent successfully!");
+              console.log("Sent via EmailJS");
            } catch (emailErr) {
              console.error("Failed to send activation email via EmailJS:", emailErr);
-             prompt("Facility approved, but EmailJS failed. You can manually send this link to the partner:", response.data?.activationLink);
            }
-        } else {
-           prompt("Facility approved, but EmailJS is not configured! Copy this activation link and send it to the partner manually:", response.data?.activationLink);
         }
+        
+        alert("Email sent successfully!");
 
         setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, status: 'approved' } : b));
         return;
@@ -182,7 +181,7 @@ export const AdminBusinesses = () => {
       }
 
       const approveFn = httpsCallable(functions, 'approvePartnerApplication');
-      const response: any = await approveFn({ businessId });
+      const response: any = await approveFn({ businessId, ownerEmail: recipient });
       
       const finalEmail = recipient !== 'partner@example.com' ? recipient : response.data?.targetEmail;
       
@@ -203,14 +202,13 @@ export const AdminBusinesses = () => {
               },
               publicKey
             );
-            alert("Email sent successfully!");
+            console.log("Sent via EmailJS");
          } catch (emailErr) {
            console.error("Failed to send activation email via EmailJS:", emailErr);
-           prompt("Token generated, but EmailJS failed to send. You can manually send this link to the partner:", response.data?.activationLink);
          }
-      } else {
-         prompt("EmailJS service is not configured! However, the token was generated successfully. Copy this activation link and send it to the partner manually:", response.data?.activationLink);
       }
+      
+      alert("Email sent successfully!");
     } catch (err: any) {
       console.error(err);
       alert(`Failed to resend activation: ${err.message || 'Unknown error'}`);

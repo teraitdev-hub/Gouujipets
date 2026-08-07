@@ -258,7 +258,14 @@ export const approvePartnerApplication = functions.https.onCall(async (data, con
     }
 
     // Fallback email if missing
-    const targetEmail = bizData.email || 'no-email-provided@gouuji.com';
+    let targetEmail = data.ownerEmail || bizData.email;
+    if (!targetEmail && bizData.ownerId) {
+      const ownerDoc = await db.collection('users').doc(bizData.ownerId).get();
+      if (ownerDoc.exists) {
+        targetEmail = ownerDoc.data()?.email;
+      }
+    }
+    targetEmail = targetEmail || 'no-email-provided@gouuji.com';
 
     // Generate secure token (32 random bytes, hex encoded)
     const rawToken = crypto.randomBytes(32).toString('hex');
