@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
-import { Building2, Lock, ArrowRight, Loader2, Mail, User, Eye, EyeOff, PawPrint, CheckSquare, Square, MapPin, CheckCircle, Clock, UploadCloud, File as FileIcon, X } from "lucide-react";
+import { Building2, Lock, ArrowRight, Loader2, Mail, User, Eye, EyeOff, PawPrint, CheckSquare, Square, MapPin, CheckCircle, Clock, UploadCloud, File as FileIcon, X, Phone } from "lucide-react";
 import { auth, db, storage } from "../../lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import type { ConfirmationResult } from "firebase/auth";
@@ -26,8 +26,16 @@ export const PartnerLogin = () => {
   // Default to Register if they clicked a specific service to partner for
   const [isLogin, setIsLogin] = useState(serviceParam ? false : true);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ name: "", email: "", password: "", phone: "", businessName: "", street: "", city: "", state: "", pincode: "" });
+  const [formData, setFormData] = useState({ 
+    name: "", email: "", password: "", phone: "", businessName: "", 
+    street: "", city: "", state: "", pincode: "",
+    gstNumber: "", operatingHours: "",
+    bankAccountName: "", bankAccountNumber: "", bankIfsc: "", bankName: ""
+  });
   const [certificates, setCertificates] = useState<File[]>([]);
+  const [facilityPhotos, setFacilityPhotos] = useState<File[]>([]);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [agreementAccepted, setAgreementAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -173,8 +181,12 @@ export const PartnerLogin = () => {
             setError("Please upload at least one business license or government ID.");
             setIsLoading(false);
             return;
-          }
-          // Password check removed because Registration no longer collects password
+      }
+      if (!isLogin && (!termsAccepted || !agreementAccepted)) {
+            setError("You must accept the Terms & Conditions and Partner Agreement to register.");
+            setIsLoading(false);
+            return;
+      }
     }
 
     if (validPhone) {
@@ -282,7 +294,8 @@ export const PartnerLogin = () => {
           }
 
           let certUrls: string[] = [];
-          if (certificates.length > 0) {
+          let photoUrls: string[] = [];
+          if (certificates.length > 0 || facilityPhotos.length > 0) {
             try {
               // We don't have a UID yet, so we use a temp id or business name
               const tempId = formData.businessName.replace(/[^a-zA-Z0-9]/g, '') + Date.now();
@@ -292,22 +305,41 @@ export const PartnerLogin = () => {
                 const url = await getDownloadURL(storageRef);
                 certUrls.push(url);
               }
+              for (const file of facilityPhotos) {
+                const storageRef = ref(storage, `facility_photos/${tempId}/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                photoUrls.push(url);
+              }
             } catch (err) {
-              console.error("Failed to upload certificates", err);
+              console.error("Failed to upload files", err);
             }
           }
 
           const bizRef = await addDoc(collection(db, "businesses"), {
             ownerName: formData.name,
             email: finalEmail,
-            phone: validPhone ? loginIdentifier : formData.phone,
+            phone: formData.phone || loginIdentifier,
             name: formData.businessName || `${formData.name}'s Facility`,
             type: facilityTypes[0] || "boarding",
             services: facilityTypes,
             address: `${formData.street}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
+            street: formData.street,
+            city: formData.city,
+            state: formData.state,
+            pincode: formData.pincode,
             latitude: lat,
             longitude: lng,
             certificates: certUrls,
+            facilityPhotos: photoUrls,
+            gstNumber: formData.gstNumber,
+            operatingHours: formData.operatingHours,
+            bankDetails: {
+              accountName: formData.bankAccountName,
+              accountNumber: formData.bankAccountNumber,
+              ifscCode: formData.bankIfsc,
+              bankName: formData.bankName
+            },
             status: "pending",
             created_at: new Date().toISOString()
           });
@@ -366,7 +398,8 @@ export const PartnerLogin = () => {
         } catch (e) { console.error("Geocoding failed", e); }
 
         let certUrls: string[] = [];
-        if (certificates.length > 0) {
+        let photoUrls: string[] = [];
+        if (certificates.length > 0 || facilityPhotos.length > 0) {
           try {
             for (const file of certificates) {
               const storageRef = ref(storage, `certificates/${userCredential.user.uid}/${Date.now()}_${file.name}`);
@@ -374,8 +407,14 @@ export const PartnerLogin = () => {
               const url = await getDownloadURL(storageRef);
               certUrls.push(url);
             }
+            for (const file of facilityPhotos) {
+              const storageRef = ref(storage, `facility_photos/${userCredential.user.uid}/${Date.now()}_${file.name}`);
+              await uploadBytes(storageRef, file);
+              const url = await getDownloadURL(storageRef);
+              photoUrls.push(url);
+            }
           } catch (err) {
-            console.error("Failed to upload certificates", err);
+            console.error("Failed to upload files", err);
           }
         }
 
@@ -389,6 +428,9 @@ export const PartnerLogin = () => {
 
         const bizRef = await addDoc(collection(db, "businesses"), {
           owner_id: userCredential.user.uid,
+          ownerName: formData.name || "Partner",
+          email: formData.email.trim(),
+          phone: formData.phone || formData.email.trim(),
           name: formData.businessName || `${formData.name || 'My'}'s Facility`,
           type: facilityTypes[0] || "boarding",
           services: facilityTypes,
@@ -400,6 +442,15 @@ export const PartnerLogin = () => {
           latitude: lat,
           longitude: lng,
           certificates: certUrls,
+          facilityPhotos: photoUrls,
+          gstNumber: formData.gstNumber,
+          operatingHours: formData.operatingHours,
+          bankDetails: {
+            accountName: formData.bankAccountName,
+            accountNumber: formData.bankAccountNumber,
+            ifscCode: formData.bankIfsc,
+            bankName: formData.bankName
+          },
           status: "pending",
           created_at: new Date().toISOString()
         });
@@ -563,21 +614,37 @@ export const PartnerLogin = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name & Credentials */}
               {!isLogin && (
-                <div>
-                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Full Name / Facility Owner</label>
-                  <div className="relative">
-                    <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="John Doe"
-                      className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
-                      required
-                      disabled={!!pendingGoogleUser}
-                    />
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Full Name / Facility Owner</label>
+                    <div className="relative">
+                      <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="John Doe"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                        required
+                        disabled={!!pendingGoogleUser}
+                      />
+                    </div>
                   </div>
-                </div>
+                  <div className="pt-2">
+                    <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Mobile Number</label>
+                    <div className="relative">
+                      <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        placeholder="+919876543210"
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all outline-none"
+                        required
+                      />
+                    </div>
+                  </div>
+                </>
               )}
 
               {(!pendingGoogleUser) && (
@@ -769,7 +836,7 @@ export const PartnerLogin = () => {
                           if (e.target.files) {
                             setCertificates([...certificates, ...Array.from(e.target.files)]);
                           }
-                          e.target.value = ''; // Reset input to allow adding the same file again if needed
+                          e.target.value = '';
                         }}
                         className="hidden"
                         id="cert-upload"
@@ -777,9 +844,9 @@ export const PartnerLogin = () => {
                       <label htmlFor="cert-upload" className="cursor-pointer flex flex-col items-center justify-center">
                         <UploadCloud size={24} className="text-violet-500 mb-2" />
                         <span className="text-xs font-bold text-slate-700">
-                          {certificates.length > 0 ? "Click to add more certificates" : "Click to upload certificates"}
+                          {certificates.length > 0 ? "Click to add more documents" : "Click to upload Identity/Business documents"}
                         </span>
-                        <span className="text-[10px] text-slate-400 mt-1">Accepts multiple Images and PDFs</span>
+                        <span className="text-[10px] text-slate-400 mt-1">Accepts Images and PDFs (Registration/License details)</span>
                       </label>
                     </div>
                     {certificates.length > 0 && (
@@ -801,6 +868,134 @@ export const PartnerLogin = () => {
                         ))}
                       </div>
                     )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-600 uppercase mb-1">GST / Business Info</label>
+                        <input 
+                          type="text" 
+                          placeholder="GSTIN (Optional)"
+                          value={formData.gstNumber}
+                          onChange={(e) => setFormData({...formData, gstNumber: e.target.value})}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all placeholder:text-slate-400"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Operating Hours</label>
+                        <input 
+                          type="text" 
+                          placeholder="e.g. Mon-Fri 9AM-8PM"
+                          value={formData.operatingHours}
+                          onChange={(e) => setFormData({...formData, operatingHours: e.target.value})}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all placeholder:text-slate-400"
+                        />
+                      </div>
+                    </div>
+
+                    <label className="block text-xs font-bold text-slate-600 uppercase mb-2 mt-4">Facility Photos</label>
+                    <div className="w-full border-2 border-dashed border-slate-200 rounded-xl p-4 text-center bg-slate-50 hover:bg-slate-100 transition-all">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/jpeg,image/png"
+                        onChange={(e) => {
+                          if (e.target.files) {
+                            setFacilityPhotos([...facilityPhotos, ...Array.from(e.target.files)]);
+                          }
+                          e.target.value = '';
+                        }}
+                        className="hidden"
+                        id="photo-upload"
+                      />
+                      <label htmlFor="photo-upload" className="cursor-pointer flex flex-col items-center justify-center">
+                        <UploadCloud size={24} className="text-violet-500 mb-2" />
+                        <span className="text-xs font-bold text-slate-700">
+                          {facilityPhotos.length > 0 ? "Click to add more photos" : "Click to upload Facility Photos"}
+                        </span>
+                        <span className="text-[10px] text-slate-400 mt-1">Showcase your resort or clinic to pet parents</span>
+                      </label>
+                    </div>
+                    {facilityPhotos.length > 0 && (
+                      <div className="mt-3 space-y-2">
+                        {facilityPhotos.map((file, idx) => (
+                          <div key={`photo-${idx}`} className="flex items-center justify-between bg-violet-50 px-3 py-2 rounded-lg border border-violet-100">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              <FileIcon size={14} className="text-violet-600 shrink-0" />
+                              <span className="text-xs font-medium text-violet-900 truncate">{file.name}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setFacilityPhotos(facilityPhotos.filter((_, i) => i !== idx))}
+                              className="p-1 hover:bg-violet-100 rounded-md text-violet-600 transition-colors"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <h4 className="text-xs font-bold text-slate-600 uppercase mb-2 mt-5 border-b border-slate-200 pb-2">Bank & Payment Details</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                      <input 
+                        type="text" 
+                        placeholder="Account Holder Name"
+                        value={formData.bankAccountName}
+                        onChange={(e) => setFormData({...formData, bankAccountName: e.target.value})}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all placeholder:text-slate-400"
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="Bank Account Number"
+                        value={formData.bankAccountNumber}
+                        onChange={(e) => setFormData({...formData, bankAccountNumber: e.target.value})}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all placeholder:text-slate-400"
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="IFSC Code"
+                        value={formData.bankIfsc}
+                        onChange={(e) => setFormData({...formData, bankIfsc: e.target.value})}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all placeholder:text-slate-400"
+                      />
+                      <input 
+                        type="text" 
+                        placeholder="Bank Name"
+                        value={formData.bankName}
+                        onChange={(e) => setFormData({...formData, bankName: e.target.value})}
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all placeholder:text-slate-400"
+                      />
+                    </div>
+
+                    <div className="mt-5 space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <div className="mt-0.5">
+                          <input 
+                            type="checkbox" 
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                            className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-600" 
+                          />
+                        </div>
+                        <span className="text-xs text-slate-600 font-medium leading-relaxed">
+                          I accept the <a href="#" className="text-violet-600 hover:underline">Terms & Conditions</a> and confirm that the provided information is valid.
+                        </span>
+                      </label>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <div className="mt-0.5">
+                          <input 
+                            type="checkbox" 
+                            checked={agreementAccepted}
+                            onChange={(e) => setAgreementAccepted(e.target.checked)}
+                            className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-600" 
+                          />
+                        </div>
+                        <span className="text-xs text-slate-600 font-medium leading-relaxed">
+                          I agree to the <a href="#" className="text-violet-600 hover:underline">Partner Agreement</a> and commit to maintaining high standards of pet care on this platform.
+                        </span>
+                      </label>
+                    </div>
+
                   </div>
                 </>
               )}
