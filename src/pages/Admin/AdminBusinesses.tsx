@@ -13,6 +13,7 @@ export const AdminBusinesses = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<any>('all');
   const [whatsappModal, setWhatsappModal] = useState<{show: boolean, link: string, phone: string, name: string}>({show: false, link: "", phone: "", name: ""});
+  const [isGeneratingLink, setIsGeneratingLink] = useState<string | null>(null);
   const [selectedBizForManage, setSelectedBizForManage] = useState<any | null>(null);
 
   useEffect(() => {
@@ -70,6 +71,7 @@ export const AdminBusinesses = () => {
 
   const handleUpdateStatus = async (businessId: string, newStatus: string, ownerId: any) => {
     if (!window.confirm(`Are you sure you want to change status to "${newStatus}" for this facility?`)) return;
+    setIsGeneratingLink(businessId);
     try {
       // First resolve the recipient email properly from the ownerId
       const biz = businesses.find(bz => bz.id === businessId);
@@ -180,11 +182,14 @@ export const AdminBusinesses = () => {
     } catch (err: any) {
       console.error(err);
       alert(`Failed to update status: ${err.message || 'Unknown error'}`);
+    } finally {
+      setIsGeneratingLink(null);
     }
   };
 
   const handleResendActivation = async (businessId: string, ownerId: any) => {
-    if (!window.confirm(`Resend activation email to this partner?`)) return;
+    if (!window.confirm(`Generate secure activation link for this partner?`)) return;
+    setIsGeneratingLink(businessId);
     try {
       const biz = businesses.find(bz => bz.id === businessId);
       let recipient = biz?.email || '';
@@ -247,7 +252,9 @@ export const AdminBusinesses = () => {
       }
     } catch (err: any) {
       console.error(err);
-      alert(`Failed to resend activation: ${err.message || 'Unknown error'}`);
+      alert(`Failed to generate link: ${err.message || 'Unknown error'}`);
+    } finally {
+      setIsGeneratingLink(null);
     }
   };
 
@@ -354,15 +361,16 @@ export const AdminBusinesses = () => {
                     <td className="p-4 text-right">
                       {facility.status === 'pending' ? (
                         <div className="flex flex-col gap-1.5 items-end">
-                          <button onClick={() => handleUpdateStatus(facility.id, 'active', facility.owner_id)} className="px-3 py-1 bg-emerald-600 text-white hover:bg-emerald-700 text-[10px] font-black rounded shadow-sm w-full sm:w-auto text-center">
-                            Approve
+                          <button disabled={isGeneratingLink === facility.id} onClick={() => handleUpdateStatus(facility.id, 'active', facility.owner_id)} className="px-3 py-1 bg-emerald-600 text-white hover:bg-emerald-700 text-[10px] font-black rounded shadow-sm w-full sm:w-auto text-center disabled:opacity-50">
+                            {isGeneratingLink === facility.id ? 'Wait...' : 'Approve'}
                           </button>
-                          <button onClick={() => handleUpdateStatus(facility.id, 'rejected', facility.owner_id)} className="px-3 py-1 bg-red-100 text-red-700 hover:bg-red-200 text-[10px] font-black rounded w-full sm:w-auto text-center">
+                          <button disabled={isGeneratingLink === facility.id} onClick={() => handleUpdateStatus(facility.id, 'rejected', facility.owner_id)} className="px-3 py-1 bg-red-100 text-red-700 hover:bg-red-200 text-[10px] font-black rounded w-full sm:w-auto text-center disabled:opacity-50">
                             Reject
                           </button>
                           <button 
+                            disabled={isGeneratingLink === facility.id}
                             onClick={() => setSelectedBizForManage(facility)}
-                            className="px-3 py-1 bg-purple-100 text-purple-700 hover:bg-purple-200 text-[10px] font-black rounded w-full sm:w-auto text-center"
+                            className="px-3 py-1 bg-purple-100 text-purple-700 hover:bg-purple-200 text-[10px] font-black rounded w-full sm:w-auto text-center disabled:opacity-50"
                           >
                             View Details
                           </button>
@@ -370,10 +378,11 @@ export const AdminBusinesses = () => {
                       ) : (
                         <div className="flex flex-col gap-1.5 items-end">
                           <button 
+                            disabled={isGeneratingLink === facility.id}
                             onClick={() => handleResendActivation(facility.id, facility.owner_id)}
-                            className="px-3 py-1.5 bg-purple-50 border border-purple-200 hover:bg-purple-100 text-purple-700 text-[10px] font-black rounded-lg transition-all shadow-sm w-full sm:w-auto text-center"
+                            className="px-3 py-1.5 bg-purple-50 border border-purple-200 hover:bg-purple-100 text-purple-700 text-[10px] font-black rounded-lg transition-all shadow-sm w-full sm:w-auto text-center disabled:opacity-50"
                           >
-                            Resend Email
+                            {isGeneratingLink === facility.id ? 'Generating...' : 'Resend Email'}
                           </button>
                           <button 
                             onClick={() => setSelectedBizForManage(facility)}
