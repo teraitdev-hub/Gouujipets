@@ -980,7 +980,7 @@ export const PartnerLogin = () => {
                           />
                         </div>
                         <span className="text-xs text-slate-600 font-medium leading-relaxed">
-                          I accept the <a href="#" onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }} className="text-violet-600 hover:underline">Terms & Conditions</a> and confirm that the provided information is valid.
+                          I accept the <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowTermsModal(true); }} className="text-violet-600 hover:underline font-semibold focus:outline-none">Terms & Conditions</button> and confirm that the provided information is valid.
                         </span>
                       </label>
                       <label className="flex items-start gap-3 cursor-pointer">
@@ -993,7 +993,7 @@ export const PartnerLogin = () => {
                           />
                         </div>
                         <span className="text-xs text-slate-600 font-medium leading-relaxed">
-                          I agree to the <a href="#" onClick={(e) => { e.preventDefault(); setShowAgreementModal(true); }} className="text-violet-600 hover:underline">Partner Agreement</a> and commit to maintaining high standards of pet care on this platform.
+                          I agree to the <button type="button" onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAgreementModal(true); }} className="text-violet-600 hover:underline font-semibold focus:outline-none">Partner Agreement</button> and commit to maintaining high standards of pet care on this platform.
                         </span>
                       </label>
                     </div>
@@ -1058,7 +1058,10 @@ export const PartnerLogin = () => {
               Your business and facility registration has been submitted to the Admin for verification. After approval you will get a mail, follow that mail to login to your portal.
             </p>
             <button
-              onClick={() => {
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 setShowApprovalModal(false);
                 setIsLogin(true);
                 setSuccessMsg("Registration successful! After approval you will get a mail, follow that mail to login to your portal.");
@@ -1083,7 +1086,8 @@ export const PartnerLogin = () => {
               <p><strong>4. Verification</strong><br/>All partner accounts are subject to verification. We reserve the right to suspend accounts that provide false information or violate our policies.</p>
             </div>
             <button
-              onClick={() => setShowTermsModal(false)}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowTermsModal(false); }}
               className="mt-6 w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-2xl transition-all"
             >
               Close
@@ -1104,7 +1108,8 @@ export const PartnerLogin = () => {
               <p><strong>4. Dispute Resolution</strong><br/>In the event of a customer dispute, you agree to cooperate with GouujiPets support to reach a fair resolution.</p>
             </div>
             <button
-              onClick={() => setShowAgreementModal(false)}
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowAgreementModal(false); }}
               className="mt-6 w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-2xl transition-all"
             >
               Close
