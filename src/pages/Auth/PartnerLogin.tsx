@@ -41,6 +41,8 @@ export const PartnerLogin = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const [pendingGoogleUser, setPendingGoogleUser] = useState<any>(null);
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showAgreementModal, setShowAgreementModal] = useState(false);
   const [facilityTypes, setFacilityTypes] = useState<string[]>(serviceParam ? [serviceParam] : ["boarding"]);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState("");
@@ -978,7 +980,7 @@ export const PartnerLogin = () => {
                           />
                         </div>
                         <span className="text-xs text-slate-600 font-medium leading-relaxed">
-                          I accept the <a href="#" className="text-violet-600 hover:underline">Terms & Conditions</a> and confirm that the provided information is valid.
+                          I accept the <a href="#" onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }} className="text-violet-600 hover:underline">Terms & Conditions</a> and confirm that the provided information is valid.
                         </span>
                       </label>
                       <label className="flex items-start gap-3 cursor-pointer">
@@ -991,7 +993,7 @@ export const PartnerLogin = () => {
                           />
                         </div>
                         <span className="text-xs text-slate-600 font-medium leading-relaxed">
-                          I agree to the <a href="#" className="text-violet-600 hover:underline">Partner Agreement</a> and commit to maintaining high standards of pet care on this platform.
+                          I agree to the <a href="#" onClick={(e) => { e.preventDefault(); setShowAgreementModal(true); }} className="text-violet-600 hover:underline">Partner Agreement</a> and commit to maintaining high standards of pet care on this platform.
                         </span>
                       </label>
                     </div>
@@ -1064,6 +1066,48 @@ export const PartnerLogin = () => {
               className="w-full py-3.5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm rounded-2xl shadow-lg shadow-violet-500/20 transition-all"
             >
               Understood, Return to Login
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Terms and Conditions Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col">
+            <h3 className="text-2xl font-black text-slate-900 mb-4">Terms & Conditions</h3>
+            <div className="overflow-y-auto pr-4 space-y-4 text-sm text-slate-600 flex-1 custom-scrollbar">
+              <p><strong>1. Introduction</strong><br/>Welcome to GouujiPets Partner Program. By registering, you agree to abide by our platform guidelines and provide accurate facility information.</p>
+              <p><strong>2. Account Responsibilities</strong><br/>You are responsible for maintaining the confidentiality of your login credentials. All information provided must be truthful and up-to-date.</p>
+              <p><strong>3. Liability</strong><br/>GouujiPets acts as a marketplace. We are not liable for direct interactions or transactions that occur outside of our automated booking system.</p>
+              <p><strong>4. Verification</strong><br/>All partner accounts are subject to verification. We reserve the right to suspend accounts that provide false information or violate our policies.</p>
+            </div>
+            <button
+              onClick={() => setShowTermsModal(false)}
+              className="mt-6 w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-2xl transition-all"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Partner Agreement Modal */}
+      {showAgreementModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col">
+            <h3 className="text-2xl font-black text-slate-900 mb-4">Partner Agreement</h3>
+            <div className="overflow-y-auto pr-4 space-y-4 text-sm text-slate-600 flex-1 custom-scrollbar">
+              <p><strong>1. Service Quality</strong><br/>As a GouujiPets partner, you commit to maintaining high standards of pet care, ensuring a safe, clean, and welcoming environment for all pets.</p>
+              <p><strong>2. Booking Management</strong><br/>You agree to honor all confirmed bookings made through the platform and update your availability in real-time to prevent double bookings.</p>
+              <p><strong>3. Payments & Fees</strong><br/>Standard platform fees apply to transactions processed via GouujiPets. Payouts are made according to the schedule specified in your partner dashboard.</p>
+              <p><strong>4. Dispute Resolution</strong><br/>In the event of a customer dispute, you agree to cooperate with GouujiPets support to reach a fair resolution.</p>
+            </div>
+            <button
+              onClick={() => setShowAgreementModal(false)}
+              className="mt-6 w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-2xl transition-all"
+            >
+              Close
             </button>
           </div>
         </div>
