@@ -549,10 +549,10 @@ export const Boarding = () => {
                       <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <a
                           href={`tel:${facility.phone || '+919876543210'}`}
-                          className="px-3 py-2 sm:px-2 sm:py-1 rounded-md sm:rounded-sm bg-green-600 hover:bg-green-700 border border-green-600 text-white font-bold flex items-center justify-center gap-1.5 transition-colors text-[11px] sm:text-[9px] min-h-[36px] sm:min-h-0"
+                          className="px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-100 text-purple-600 font-bold flex items-center justify-center gap-1.5 transition-all text-xs min-h-[36px]"
                           title="Call"
                         >
-                          <Phone size={14} className="sm:w-[10px] sm:h-[10px]" /><span className="hidden sm:inline">Call</span>
+                          <Phone size={14} className="sm:w-[13px] sm:h-[13px]" /><span className="hidden sm:inline">Call</span>
                         </a>
                         <button
                           onClick={(e) => {
@@ -562,10 +562,10 @@ export const Boarding = () => {
                             const msg = `Hi ${facility.name}, I found you on GouujiPets and would like to inquire about booking/services!`;
                             window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(msg)}`, '_blank');
                           }}
-                          className="p-2 sm:p-1 rounded-md sm:rounded-sm bg-slate-100 hover:bg-slate-200 border border-slate-200 text-emerald-700 transition-colors flex items-center justify-center min-h-[36px] sm:min-h-0 min-w-[36px] sm:min-w-0"
+                          className="px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-100 text-purple-600 transition-all flex items-center justify-center min-h-[36px]"
                           title="WhatsApp"
                         >
-                          <MessageCircle size={16} className="sm:w-[12px] sm:h-[12px]" />
+                          <MessageCircle size={15} className="sm:w-[14px] sm:h-[14px]" />
                         </button>
                         <button
                           onClick={(e) => {
@@ -573,7 +573,7 @@ export const Boarding = () => {
                             if (!isAuthenticated) { openLoginModal(); }
                             else { navigate(`/checkout/${facility.id || facility._id}`, { state: { facility, selectedServices: selectedServicesFilter } }); }
                           }}
-                          className="px-4 py-2 sm:px-2 sm:py-1 bg-blue-600 hover:bg-blue-700 text-white font-black text-[11px] sm:text-[9px] rounded-md sm:rounded-sm transition-all flex items-center justify-center gap-1 whitespace-nowrap min-h-[36px] sm:min-h-0"
+                          className="px-5 py-2 sm:px-4 sm:py-1.5 bg-purple-600 hover:bg-purple-700 shadow-sm shadow-purple-600/30 text-white font-black text-xs rounded-xl transition-all flex items-center justify-center gap-1 whitespace-nowrap min-h-[36px]"
                         >
                           <span>Enquire</span>
                         </button>
