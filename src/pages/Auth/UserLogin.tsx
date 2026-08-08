@@ -307,11 +307,11 @@ export const UserLogin = () => {
       </div>
 
       {/* RIGHT SIDE - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
+      <div className="w-full lg:w-1/2 flex items-start sm:items-center justify-center p-4 py-8 sm:p-12 overflow-y-auto min-h-[100dvh]">
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="w-full max-w-md"
+          className="w-full max-w-md my-auto"
         >
           {/* Mobile Header (Hidden on Desktop) */}
           <div className="lg:hidden flex flex-col items-center text-center mb-8">
@@ -372,7 +372,7 @@ export const UserLogin = () => {
                   <p className="text-xs text-slate-500 mt-1">Please register your pet to continue.</p>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col xs:flex-row gap-4">
                   <div className="relative flex-1">
                     <input 
                       type="text" 
@@ -383,7 +383,7 @@ export const UserLogin = () => {
                       required={!isLogin}
                     />
                   </div>
-                  <div className="relative w-32">
+                  <div className="relative w-full xs:w-32">
                     <select
                       value={formData.petType}
                       onChange={(e) => setFormData({...formData, petType: e.target.value})}

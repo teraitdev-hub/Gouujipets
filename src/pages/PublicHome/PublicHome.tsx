@@ -144,20 +144,20 @@ export const PublicHome = () => {
       <main className="min-h-screen relative">
 
       {/* ========== HERO SECTION (NEW AESTHETIC) ========== */}
-      <section className="relative pt-16 lg:pt-24 pb-32 px-4 sm:px-6 lg:px-8 bg-[var(--color-petwise-bg)]">
-        <div className="max-w-7xl mx-auto relative z-10 flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-8">
+      <section className="relative pt-12 sm:pt-16 lg:pt-24 pb-20 sm:pb-32 px-4 sm:px-6 lg:px-8 bg-[var(--color-petwise-bg)]">
+        <div className="max-w-7xl mx-auto relative z-10 flex flex-col-reverse lg:flex-row items-center gap-8 lg:gap-8">
           
           {/* Left Text Content */}
-          <div className="flex-1 text-center lg:text-left space-y-6">
+          <div className="flex-1 text-center lg:text-left space-y-4 sm:space-y-6 mt-4 lg:mt-0">
             <div className="relative inline-block">
-              <span className="font-script text-3xl sm:text-4xl text-slate-800 absolute -top-8 -left-4 sm:-left-8 -rotate-6">
+              <span className="font-script text-2xl sm:text-4xl text-slate-800 absolute -top-6 sm:-top-8 left-0 sm:-left-8 -rotate-6">
                 Welcome To GouujiPets
               </span>
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-5xl sm:text-6xl lg:text-7xl font-black text-black tracking-tight leading-tight mt-6 relative z-10"
+                className="text-4xl sm:text-6xl lg:text-7xl font-black text-black tracking-tight leading-tight mt-6 sm:mt-6 relative z-10"
               >
                 The Best Care For<br/>Your Best Friend
               </motion.h1>
@@ -197,11 +197,11 @@ export const PublicHome = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6 }}
-            className="flex-1 relative w-full max-w-[500px] aspect-square mx-auto"
+            className="flex-1 relative w-full max-w-[300px] sm:max-w-[400px] lg:max-w-[500px] aspect-square mx-auto"
           >
             {/* Brush stroke border effect created with rounded circle and pseudo-elements */}
-            <div className="absolute inset-0 rounded-full border-[8px] border-dashed border-[var(--color-petwise-brown)]/20 animate-spin-slow"></div>
-            <div className="absolute inset-2 rounded-full overflow-hidden border-4 border-white shadow-2xl">
+            <div className="absolute inset-0 rounded-full border-[6px] sm:border-[8px] border-dashed border-[var(--color-petwise-brown)]/20 animate-spin-slow"></div>
+            <div className="absolute inset-2 sm:inset-3 rounded-full overflow-hidden border-4 border-white shadow-2xl">
               <img 
                 src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800" 
                 alt="Happy dog and owner" 
@@ -234,16 +234,16 @@ export const PublicHome = () => {
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 max-w-5xl mx-auto">
           {/* Card 1: Boarding */}
           <div
             onClick={() => handleProtectedNavigate('/boarding')}
             className="group cursor-pointer flex flex-col items-center text-center"
           >
-            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-peach)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
-              <span className="text-4xl mb-2">🏠</span>
-              <h3 className="font-black text-black text-sm sm:text-base">Boarding</h3>
-              <p className="text-[10px] sm:text-xs text-slate-600 mt-1 leading-tight hidden sm:block">Safe home away from home</p>
+            <div className="w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full bg-[var(--color-petwise-peach)] flex flex-col items-center justify-center p-3 sm:p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
+              <span className="text-3xl sm:text-4xl mb-1 sm:mb-2">🏠</span>
+              <h3 className="font-black text-black text-xs sm:text-sm lg:text-base">Boarding</h3>
+              <p className="text-[9px] sm:text-[10px] lg:text-xs text-slate-600 mt-1 leading-tight hidden xs:block">Safe home away</p>
             </div>
           </div>
           
@@ -252,10 +252,10 @@ export const PublicHome = () => {
             onClick={() => handleProtectedNavigate('/boarding?type=daycare')}
             className="group cursor-pointer flex flex-col items-center text-center"
           >
-            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-pink)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
-              <span className="text-4xl mb-2">🌞</span>
-              <h3 className="font-black text-black text-sm sm:text-base">Daycare</h3>
-              <p className="text-[10px] sm:text-xs text-slate-600 mt-1 leading-tight hidden sm:block">Supervised active play</p>
+            <div className="w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full bg-[var(--color-petwise-pink)] flex flex-col items-center justify-center p-3 sm:p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
+              <span className="text-3xl sm:text-4xl mb-1 sm:mb-2">🌞</span>
+              <h3 className="font-black text-black text-xs sm:text-sm lg:text-base">Daycare</h3>
+              <p className="text-[9px] sm:text-[10px] lg:text-xs text-slate-600 mt-1 leading-tight hidden xs:block">Active play</p>
             </div>
           </div>
 
@@ -264,10 +264,10 @@ export const PublicHome = () => {
             onClick={() => handleProtectedNavigate('/grooming')}
             className="group cursor-pointer flex flex-col items-center text-center"
           >
-            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-yellow)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
-              <span className="text-4xl mb-2">💇</span>
-              <h3 className="font-black text-black text-sm sm:text-base">Grooming</h3>
-              <p className="text-[10px] sm:text-xs text-slate-600 mt-1 leading-tight hidden sm:block">Professional spa treatments</p>
+            <div className="w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full bg-[var(--color-petwise-yellow)] flex flex-col items-center justify-center p-3 sm:p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
+              <span className="text-3xl sm:text-4xl mb-1 sm:mb-2">💇</span>
+              <h3 className="font-black text-black text-xs sm:text-sm lg:text-base">Grooming</h3>
+              <p className="text-[9px] sm:text-[10px] lg:text-xs text-slate-600 mt-1 leading-tight hidden xs:block">Spa treatments</p>
             </div>
           </div>
 
@@ -276,10 +276,10 @@ export const PublicHome = () => {
             onClick={() => handleProtectedNavigate('/veterinary')}
             className="group cursor-pointer flex flex-col items-center text-center"
           >
-            <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[var(--color-petwise-green)] flex flex-col items-center justify-center p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
-              <span className="text-4xl mb-2">🩺</span>
-              <h3 className="font-black text-black text-sm sm:text-base">Vet Care</h3>
-              <p className="text-[10px] sm:text-xs text-slate-600 mt-1 leading-tight hidden sm:block">Routine & emergency care</p>
+            <div className="w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full bg-[var(--color-petwise-green)] flex flex-col items-center justify-center p-3 sm:p-4 transition-transform group-hover:-translate-y-2 group-hover:shadow-xl">
+              <span className="text-3xl sm:text-4xl mb-1 sm:mb-2">🩺</span>
+              <h3 className="font-black text-black text-xs sm:text-sm lg:text-base">Vet Care</h3>
+              <p className="text-[9px] sm:text-[10px] lg:text-xs text-slate-600 mt-1 leading-tight hidden xs:block">Routine care</p>
             </div>
           </div>
         </div>
@@ -324,7 +324,7 @@ export const PublicHome = () => {
               Every facility on our platform undergoes a rigorous 42-point physical inspection before listing. We connect India's most caring and verified pet service professionals directly with families who love their animals.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-6">
               {[
                 "100% Background Checked", 
                 "24/7 Emergency Support", 
@@ -333,9 +333,9 @@ export const PublicHome = () => {
                 "50,000+ Happy Pets",
                 "Top Tier Veterinary Clinics"
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="text-[var(--color-petwise-brown)] text-sm">🐾</span>
-                  <span className="text-sm font-bold text-slate-800">{item}</span>
+                <div key={i} className="flex items-center gap-2 bg-white/50 p-2 sm:p-0 rounded-lg sm:bg-transparent">
+                  <span className="text-[var(--color-petwise-brown)] text-sm shrink-0">🐾</span>
+                  <span className="text-sm font-bold text-slate-800 leading-tight">{item}</span>
                 </div>
               ))}
             </div>
@@ -427,10 +427,10 @@ export const PublicHome = () => {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between border-t border-slate-100 pt-4">
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-3 sm:pt-4">
                     <div className="flex items-baseline gap-1">
                       <span className="text-slate-900 font-bold text-xs">₹</span>
-                      <span className="text-xl font-black text-slate-900">{facility.priceFrom}</span>
+                      <span className="text-lg sm:text-xl font-black text-slate-900">{facility.priceFrom}</span>
                     </div>
                     <button className="w-10 h-10 rounded-full bg-slate-50 group-hover:bg-[var(--color-petwise-brown)] group-hover:text-white flex items-center justify-center transition-colors">
                       <ChevronRight size={18} />

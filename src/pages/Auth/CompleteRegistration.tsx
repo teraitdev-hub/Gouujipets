@@ -199,8 +199,8 @@ export const CompleteRegistration = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 py-8 sm:py-12 font-sans">
-      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+    <div className="min-h-[100dvh] bg-slate-50 flex flex-col p-4 py-8 sm:py-12 font-sans overflow-y-auto">
+      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden my-auto mx-auto">
         
         {/* Header */}
         <div className="bg-gradient-to-br from-purple-900 to-indigo-900 p-6 sm:p-8 text-white relative">

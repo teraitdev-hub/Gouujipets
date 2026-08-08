@@ -77,13 +77,14 @@ const PublicLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0] flex flex-col pb-16 md:pb-0 font-sans">
       <PublicNavbar />
       <ServiceQuickLinks />
       <main className="flex-1">
         {children}
       </main>
       <PublicFooter />
+      <BottomNav />
     </div>
   );
 };

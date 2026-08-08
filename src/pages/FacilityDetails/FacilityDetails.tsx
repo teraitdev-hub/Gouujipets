@@ -246,7 +246,7 @@ export const FacilityDetails = () => {
             <span className="text-xs font-bold text-purple-600">Physically Inspected Standards</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <motion.div 
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
               className="bg-white p-4 rounded-2xl border border-purple-200 shadow-2xs hover:shadow-md hover:border-purple-400 transition-all space-y-1"
@@ -514,7 +514,7 @@ export const FacilityDetails = () => {
       </div>
 
       {/* Amazon x VERIFIED Sticky Bottom Booking Bar in Light Purple Only */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-2xl border-t border-purple-200 p-3 sm:p-4 shadow-2xl z-50">
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-white/95 backdrop-blur-2xl border-t border-purple-200 p-3 sm:p-4 shadow-2xl z-40">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-1.5 mb-0.5">
@@ -537,7 +537,7 @@ export const FacilityDetails = () => {
           </div>
           <button 
             onClick={() => navigate(`/checkout/${facility.id}`, { state: { facility, selectedServices } })}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-black px-6 sm:px-8 py-3 rounded-xl transition-all shadow-md active:scale-95 text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer shrink-0"
+            className="bg-purple-600 hover:bg-purple-700 text-white font-black px-6 sm:px-8 py-3 rounded-xl transition-all shadow-md active:scale-95 text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer shrink-0 min-h-[44px]"
           >
             <span>Proceed to Checkout</span>
             <ChevronRight size={15} />

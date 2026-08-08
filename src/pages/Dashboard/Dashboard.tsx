@@ -166,17 +166,17 @@ export const Dashboard = () => {
         <div className="absolute top-10 -left-10 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
 
         <div className="relative max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl flex items-center justify-center text-2xl font-black text-white">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5 text-center sm:text-left">
+            <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl flex items-center justify-center text-2xl font-black text-white shrink-0">
               {primaryPet ? '🐾' : '👋'}
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">
                 Welcome back, {user?.name?.split(' ')[0] || "Pet Parent"}
               </h1>
-              <p className="text-purple-200 font-medium mt-1 flex items-center gap-2">
-                <Sparkles size={16} className="text-yellow-400" />
-                {primaryPet ? `Managing ${primaryPet.name} • ${petCompletion?.percentage}% Profile complete` : 'Manage your pets and upcoming stays'}
+              <p className="text-purple-200 font-medium mt-1 flex items-center justify-center sm:justify-start gap-2 text-sm sm:text-base">
+                <Sparkles size={16} className="text-yellow-400 shrink-0" />
+                <span>{primaryPet ? `Managing ${primaryPet.name} • ${petCompletion?.percentage}% Profile complete` : 'Manage your pets and upcoming stays'}</span>
               </p>
             </div>
           </div>
@@ -276,9 +276,9 @@ export const Dashboard = () => {
             <button className="text-xs font-bold text-purple-600 hover:text-purple-800">View History →</button>
           </div>
 
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 sm:p-6">
             {bookings.length > 0 ? (
-              <div className="relative border-l-2 border-slate-100 ml-4 space-y-8 pb-4">
+              <div className="relative border-l-2 border-slate-100 ml-2 sm:ml-4 space-y-6 sm:space-y-8 pb-2 sm:pb-4">
                 {bookings.map((booking: any, index: number) => {
                   const status = booking.status || 'pending';
                   const isLive = status === 'checked_in';
@@ -330,8 +330,8 @@ export const Dashboard = () => {
                           </div>
 
                           {/* Right: Actions */}
-                          <div className="flex flex-col items-start lg:items-end justify-between gap-4 border-t lg:border-t-0 pt-4 lg:pt-0 lg:pl-6 lg:border-l border-slate-100 min-w-[200px]">
-                            <div className="text-left lg:text-right w-full">
+                          <div className="flex flex-col items-start lg:items-end justify-between gap-4 border-t lg:border-t-0 pt-4 lg:pt-0 lg:pl-6 lg:border-l border-slate-100 min-w-[200px] w-full lg:w-auto">
+                            <div className="flex flex-row lg:flex-col justify-between items-center lg:items-end w-full">
                               <p className="text-[10px] uppercase font-bold text-slate-400">Total Amount</p>
                               <p className="text-xl font-black text-slate-900">₹{(Number(booking.total_amount) || 0) + (Number(booking.extra_expenses) || 0)}</p>
                             </div>

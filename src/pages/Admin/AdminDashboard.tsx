@@ -525,9 +525,9 @@ export const AdminDashboard = () => {
             ============================================================ */}
         {activeTab === 'users' && (
           <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white border border-purple-200 rounded-2xl p-5 shadow-sm space-y-4">
-            <div className="flex justify-between items-center border-b border-purple-100 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-purple-100 pb-3 w-full">
               <h2 className="text-sm font-black text-purple-950 uppercase">Registered Customer Pet Parents ({filteredUsers.length})</h2>
-              <div className="relative w-64">
+              <div className="relative w-full sm:w-64 shrink-0">
                 <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400" />
                 <input 
                   type="text" 
@@ -576,9 +576,9 @@ export const AdminDashboard = () => {
         {activeTab === 'businesses' && (
           <motion.div key="businesses" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
             <div className="bg-white border border-purple-200 rounded-2xl p-5 shadow-sm space-y-4">
-              <div className="flex justify-between items-center border-b border-purple-100 pb-3">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-purple-100 pb-3 w-full">
                 <h2 className="text-sm font-black text-purple-950 uppercase">Assured Resorts & Partners ({filteredBusinesses.length})</h2>
-                <div className="relative w-64">
+                <div className="relative w-full sm:w-64 shrink-0">
                   <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400" />
                   <input 
                     type="text" 
@@ -762,13 +762,13 @@ export const AdminDashboard = () => {
             ============================================================ */}
         {activeTab === 'finance' && (
           <motion.div key="finance" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white border border-purple-200 rounded-2xl p-5 shadow-sm space-y-4">
-            <div className="flex justify-between items-center border-b border-purple-100 pb-3">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-purple-100 pb-3 w-full">
               <div>
                 <h2 className="text-sm font-black text-purple-950 uppercase">Platform Consolidated Journal Logs</h2>
                 <p className="text-[10px] text-purple-500 font-bold uppercase mt-0.5">Audit Trail across all registered pet resorts</p>
               </div>
 
-              <div className="relative w-64">
+              <div className="relative w-full sm:w-64 shrink-0">
                 <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-400" />
                 <input 
                   type="text" 

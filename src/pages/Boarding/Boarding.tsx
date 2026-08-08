@@ -549,29 +549,31 @@ export const Boarding = () => {
                       <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <a
                           href={`tel:${facility.phone || '+919876543210'}`}
-                          className="px-1.5 py-1 rounded-sm bg-green-600 hover:bg-green-700 border border-green-600 text-white font-bold flex items-center gap-1 transition-colors text-[9px]"
+                          className="px-3 py-2 sm:px-2 sm:py-1 rounded-md sm:rounded-sm bg-green-600 hover:bg-green-700 border border-green-600 text-white font-bold flex items-center justify-center gap-1.5 transition-colors text-[11px] sm:text-[9px] min-h-[36px] sm:min-h-0"
                           title="Call"
                         >
-                          <Phone size={10} /><span className="hidden sm:inline">Call</span>
+                          <Phone size={14} className="sm:w-[10px] sm:h-[10px]" /><span className="hidden sm:inline">Call</span>
                         </a>
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             const cleanPhone = (facility.phone || '919876543210').replace(/[\s+-]/g, '');
                             const whatsappPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
                             const msg = `Hi ${facility.name}, I found you on GouujiPets and would like to inquire about booking/services!`;
                             window.open(`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(msg)}`, '_blank');
                           }}
-                          className="p-1 rounded-sm bg-slate-100 hover:bg-slate-200 border border-slate-200 text-emerald-700 transition-colors"
+                          className="p-2 sm:p-1 rounded-md sm:rounded-sm bg-slate-100 hover:bg-slate-200 border border-slate-200 text-emerald-700 transition-colors flex items-center justify-center min-h-[36px] sm:min-h-0 min-w-[36px] sm:min-w-0"
                           title="WhatsApp"
                         >
-                          <MessageCircle size={12} />
+                          <MessageCircle size={16} className="sm:w-[12px] sm:h-[12px]" />
                         </button>
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             if (!isAuthenticated) { openLoginModal(); }
                             else { navigate(`/checkout/${facility.id || facility._id}`, { state: { facility, selectedServices: selectedServicesFilter } }); }
                           }}
-                          className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-[9px] rounded-sm transition-all flex items-center justify-center gap-1 whitespace-nowrap"
+                          className="px-4 py-2 sm:px-2 sm:py-1 bg-blue-600 hover:bg-blue-700 text-white font-black text-[11px] sm:text-[9px] rounded-md sm:rounded-sm transition-all flex items-center justify-center gap-1 whitespace-nowrap min-h-[36px] sm:min-h-0"
                         >
                           <span>Enquire</span>
                         </button>
