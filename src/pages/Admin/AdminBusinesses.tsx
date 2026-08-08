@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Building2, Search, Filter, X } from "lucide-react";
+import { Building2, Search, Filter, X, MessageCircle, Copy } from "lucide-react";
 import { db } from "../../lib/firebase";
 import { collection, getDocs, getDoc, query, orderBy, doc, updateDoc, addDoc, onSnapshot } from "firebase/firestore";
 import emailjs from "@emailjs/browser";
@@ -11,6 +11,8 @@ export const AdminBusinesses = () => {
   const [financials, setFinancials] = useState<Record<string, { revenue: number, expenses: number, profit: number }>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<any>('all');
+  const [whatsappModal, setWhatsappModal] = useState<{show: boolean, link: string, phone: string, name: string}>({show: false, link: "", phone: "", name: ""});
   const [selectedBizForManage, setSelectedBizForManage] = useState<any | null>(null);
 
   useEffect(() => {
@@ -89,8 +91,14 @@ export const AdminBusinesses = () => {
         const response: any = await approveFn({ businessId, ownerEmail: recipient });
         
         const finalEmail = response.data?.targetEmail || recipient;
+        const activationLink = response.data?.activationLink;
+        const bizName = response.data?.businessName || biz?.businessName || "Partner";
+        const partnerPhone = biz?.phone || "";
+
+        // Trigger WhatsApp direct link modal unconditionally
+        setWhatsappModal({ show: true, link: activationLink, phone: partnerPhone, name: bizName });
         
-        // Dispatch EmailJS email if configured
+        // Suppress email js and native alerts since we rely on the modal now
         const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
         const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
         const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
@@ -103,15 +111,14 @@ export const AdminBusinesses = () => {
                 templateId,
                 {
                   to_email: finalEmail,
-                  to_name: response.data?.businessName || "Partner",
+                  to_name: bizName,
                   subject: `Action Required: Welcome to GOUUJI Pets!`,
-                  message: `Your partner application has been approved! Please activate your account using this link (expires in 24 hours): ${response.data?.activationLink}`
+                  message: `Your partner application has been approved! Please activate your account using this link (expires in 24 hours): ${activationLink}`
                 },
                 publicKey
               );
               console.log("Sent via EmailJS");
               sentViaEmailJs = true;
-              alert("Email sent successfully via EmailJS!");
            } catch (emailErr) {
              console.error("Failed to send activation email via EmailJS:", emailErr);
            }
@@ -122,10 +129,8 @@ export const AdminBusinesses = () => {
              const { sendPasswordResetEmail } = await import('firebase/auth');
              const { auth } = await import('../../lib/firebase');
              await sendPasswordResetEmail(auth, finalEmail);
-             alert(`Built-in Firebase email sent successfully to ${finalEmail}!`);
            } catch (firebaseErr: any) {
              console.error("Firebase native email failed:", firebaseErr);
-             prompt("Facility approved, and the email request was sent to Firebase! Since email delivery might be delayed or misconfigured without SMTP, you can also copy the activation link below and send it manually:", response.data?.activationLink);
            }
         }
 
@@ -199,6 +204,12 @@ export const AdminBusinesses = () => {
       const response: any = await approveFn({ businessId, ownerEmail: recipient });
       
       const finalEmail = response.data?.targetEmail || recipient;
+      const activationLink = response.data?.activationLink;
+      const bizName = response.data?.businessName || biz?.businessName || "Partner";
+      const partnerPhone = biz?.phone || "";
+
+      // Trigger WhatsApp direct link modal unconditionally
+      setWhatsappModal({ show: true, link: activationLink, phone: partnerPhone, name: bizName });
       
       const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
       const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
@@ -212,15 +223,14 @@ export const AdminBusinesses = () => {
               templateId,
               {
                 to_email: finalEmail,
-                to_name: response.data?.businessName || "Partner",
+                to_name: bizName,
                 subject: `Action Required: Welcome to GOUUJI Pets!`,
-                message: `Your partner application has been approved! Please activate your account using this link (expires in 24 hours): ${response.data?.activationLink}`
+                message: `Your partner application has been approved! Please activate your account using this link (expires in 24 hours): ${activationLink}`
               },
               publicKey
             );
             console.log("Sent via EmailJS");
             sentViaEmailJs = true;
-            alert("Email sent successfully via EmailJS!");
          } catch (emailErr) {
            console.error("Failed to send activation email via EmailJS:", emailErr);
          }
@@ -231,10 +241,8 @@ export const AdminBusinesses = () => {
            const { sendPasswordResetEmail } = await import('firebase/auth');
            const { auth } = await import('../../lib/firebase');
            await sendPasswordResetEmail(auth, finalEmail);
-           alert(`Built-in Firebase email sent successfully to ${finalEmail}!`);
          } catch (firebaseErr: any) {
            console.error("Firebase native email failed:", firebaseErr);
-           prompt("Email request sent to Firebase successfully! If the partner does not receive it due to a missing Firebase SMTP configuration, you can manually copy and send them this activation link:", response.data?.activationLink);
          }
       }
     } catch (err: any) {
@@ -564,6 +572,59 @@ export const AdminBusinesses = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* WhatsApp Activation Modal */}
+      {whatsappModal.show && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
+            <div className="p-6">
+              <div className="w-16 h-16 bg-[#25D366]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageCircle className="text-[#25D366]" size={32} />
+              </div>
+              <h2 className="text-xl font-bold text-slate-800 text-center mb-2">Send Activation Link</h2>
+              <p className="text-sm text-slate-600 text-center mb-6">
+                The partner ({whatsappModal.name}) has been approved! Send them their activation link via WhatsApp.
+              </p>
+              
+              <div className="bg-slate-50 p-4 rounded-xl mb-6">
+                <p className="text-xs text-slate-500 font-semibold mb-1 uppercase tracking-wider">Activation Link</p>
+                <div className="text-sm text-slate-800 font-medium break-all selection:bg-violet-200">
+                  {whatsappModal.link}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <a
+                  href={`https://wa.me/${whatsappModal.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${whatsappModal.name}!\n\nYour partner application has been approved by GouujiPets. Please click the secure link below to activate your account and set your password:\n\n${whatsappModal.link}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-sm rounded-2xl shadow-lg shadow-green-500/20 transition-all"
+                  onClick={() => setWhatsappModal({ show: false, link: "", phone: "", name: "" })}
+                >
+                  <MessageCircle size={20} />
+                  Send via WhatsApp
+                </a>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(whatsappModal.link);
+                    alert("Link copied to clipboard!");
+                  }}
+                  className="w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm rounded-2xl transition-all flex items-center justify-center gap-2"
+                >
+                  <Copy size={18} />
+                  Copy Link Only
+                </button>
+                <button
+                  onClick={() => setWhatsappModal({ show: false, link: "", phone: "", name: "" })}
+                  className="w-full py-3.5 bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-600 font-bold text-sm rounded-2xl transition-all"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
